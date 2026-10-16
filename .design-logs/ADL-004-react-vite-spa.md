@@ -1,0 +1,63 @@
+# ADL-004: Web como SPA en React + Vite
+
+**Fecha:** 2026-10-16
+**Estado:** Activo
+**Área:** Frontend
+**Autor:** Usuario + AI Session
+
+---
+
+## Contexto
+
+El usuario eligió React. La web tiene dos perfiles con vistas distintas, vive detrás de un ingreso y consume solo el contrato OpenAPI ([ADL-001](ADL-001-two-apps-openapi-contract.md)). La interfaz debe ser funcional y clara, con un look & feel inspirado en un droide astromecánico.
+
+---
+
+## Decisión
+
+Una SPA en React con TypeScript estricto y Vite, React Router para las rutas por rol, TanStack Query para el estado de servidor y openapi-fetch con tipos generados por openapi-typescript desde el contrato. Los estilos usan CSS Modules y tokens CSS propios, sin librería de componentes. En producción, nginx sirve el build ([ADL-006](ADL-006-docker-compose-same-origin.md)).
+
+---
+
+## Justificación
+
+Una app interna detrás de un ingreso no necesita SSR ni SEO: una SPA es lo más simple. TanStack Query elimina el código propio de caché y recarga (por ejemplo, refrescar la cola al tomar un ticket). Los tipos generados hacen que un cambio del contrato rompa la compilación, no la experiencia del usuario. Los tokens CSS bastan para el tema del droide.
+
+---
+
+## Consecuencias
+
+### ✅ Positivas
+- Build estático, servible por cualquier servidor web.
+- Tipos del contrato hasta cada componente.
+- Pocas dependencias, todas ampliamente usadas.
+
+### ⚠️ Trade-offs aceptados
+- Sin renderizado en servidor: la primera carga trae todo el bundle (aceptable para una app interna).
+- Los componentes de UI se escriben a mano: más trabajo inicial que una librería, pero sin dependencias que mantener.
+
+---
+
+## Alternativas Consideradas
+
+| Alternativa | Razón de descarte |
+|-------------|-------------------|
+| Next.js | SSR y servidor propio innecesarios; más complejidad de despliegue |
+| Tailwind + shadcn/ui | Más dependencias y configuración; el tema propio con tokens es suficiente |
+| fetch manual con estado local | Reimplementa caché, recarga e invalidación que TanStack Query ya resuelve |
+
+---
+
+## Decisiones Relacionadas
+- [ADL-001](ADL-001-two-apps-openapi-contract.md): la web solo depende del contrato.
+- [ADL-005](ADL-005-simulated-auth-signed-token.md): guardas de ruta por rol.
+- [ADL-006](ADL-006-docker-compose-same-origin.md): la SPA llama a `/api` en el mismo origen.
+
+---
+
+## Notas para el AI (Memoria Técnica)
+- No implementes reglas de negocio en la web: las acciones visibles de un ticket salen de lo que la API indica como permitido.
+- Usa siempre el cliente tipado generado desde `contracts/openapi.json`; no escribas tipos de la API a mano.
+- La URL base de la API es relativa (`/api`): en desarrollo la resuelve el proxy de Vite y en Docker, nginx.
+- Muestra descripciones y comentarios como texto plano; nunca uses `dangerouslySetInnerHTML`.
+- Respeta los tokens de `tech-stack.md` (Visual Identity) y no uses arte ni logos oficiales de terceros.

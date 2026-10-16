@@ -110,3 +110,149 @@ El bloque *Bootstrap IA* está terminado y verificado. Espero tu aprobación par
 > 1. Si
 > 2. si, de acuerdo, puede confundir
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 1m 51s
+- **Herramientas:** Bash ×5 · Edit ×3 · Write ×1 · Read ×1
+- **Archivos modificados:** `REQUIREMENTS.md`, `CLAUDE.md`, `AI-USAGE.md`, `DEV-LOG.md`
+- **Git:** `e849226` chore: agrega enunciado, prompt de arranque y .gitignore · `6d8e011` docs: agrega CLAUDE.md, AI-USAGE, DECISIONS y DEV-LOG
+- **Tokens:** entrada 12 · cache leída 1.9M · cache escrita 11.2k · salida 9.4k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Los commits y el push están hechos, y el remoto coincide con lo local.
+
+**En `main`:**
+- `e849226` chore: agrega enunciado, prompt de arranque y .gitignore. Ya incluye `REQUIREMENTS.md`, con las mismas 291 palabras del original y formato Markdown.
+
+**En `phase/01-setup-constitution`:**
+- `3a29ca8` chore(ai): agrega skills del proyecto y agente deckard
+- `7015e4c` chore(ai): instala el mod prompt-cache-control
+- `06f9c2e` feat(ai): registra cada interacción en DEV-LOG con un hook del repo
+- `6d8e011` docs: agrega CLAUDE.md, AI-USAGE, DECISIONS y DEV-LOG
+
+Actualicé las referencias al nuevo nombre en `CLAUDE.md`, `AI-USAGE.md` y la entrada #1 de DEV-LOG. `prompt_inicial.txt` sigue diciendo `requirements.txt`, porque es tu prompt original tal como lo escribiste. El PR de la fase lo abro cuando cerremos el bloque de constitución.
+
+**Ahora te toca reiniciar** para que cargue prompt-cache-control:
+1. `/exit`
+2. En `~/Apps/droidesk`, ejecuta `claude --continue`.
+3. Si aparece el aviso de confianza del workspace, acéptalo. Vas a ver el medidor del caché sobre el prompt, y `/cache` abre su panel.
+
+Cuando vuelvas, escríbeme "continúa". Verifico que el mod y las herramientas MCP de graft estén cargados y arranco el bloque de constitución: `specs/mission.md`, `specs/tech-stack.md`, `specs/roadmap.md` y los primeros ADL (monorepo con 2 apps, stack, SQLite y auth simulada).
+
+</details>
+
+*Sesión finalizada (prompt_input_exit)*
+
+## 🛰️ Sesión `2680e3d9` · resume
+
+- **Cache:** probablemente vigente · inactivo 15s · contexto 319.3k tokens · re-escritura estimada US$2.55
+
+### #5 · 🧑 Usuario
+> Continua
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 18s
+- **Herramientas:** Bash ×1
+- **Tokens:** entrada 2 · cache leída 318.6k · cache escrita 4.1k · salida 534 · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El reinicio funcionó:
+- **Hook de DEV-LOG:** registró la reanudación de la sesión con el estado del caché ("probablemente vigente, contexto de 319k tokens") y tu "Continua" quedó como #5.
+- **graft:** sus herramientas MCP ya aparecen en esta sesión.
+- **prompt-cache-control:** desde acá no puedo comprobar que cargó; si ves el medidor del caché sobre el prompt, está activo.
+
+Antes de arrancar la constitución hay que subir el esfuerzo. El "max" de Opus 5.5 que pusiste con `/model` valía solo para la sesión anterior, y al reiniciar volvió al valor por defecto. Las etapas de planificación las acordamos en Opus 5.5 Max: ejecuta `/model`, elige Opus 5.5 con esfuerzo **max** (o usa `/effort max`) y escríbeme "continúa".
+
+Con eso armo el bloque de constitución: `specs/mission.md`, `specs/tech-stack.md`, `specs/roadmap.md` y los primeros ADL (monorepo con 2 apps, stack, SQLite y auth simulada).
+
+</details>
+
+### #6 · 🧑 Usuario
+> continua
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 10m 0s
+- **Herramientas:** Bash ×9 · Write ×9 · Edit ×5 · Read ×2
+- **Archivos modificados:** `specs/mission.md`, `specs/tech-stack.md`, `specs/roadmap.md`, `.design-logs/ADL-001-two-apps-openapi-contract.md`, `.design-logs/ADL-002-fastapi-sqlmodel-backend.md`, `.design-logs/ADL-003-sqlite-mvp-postgres-path.md`, `.design-logs/ADL-004-react-vite-spa.md`, `.design-logs/ADL-005-simulated-auth-signed-token.md`, `.design-logs/ADL-006-docker-compose-same-origin.md`, `DECISIONS.md`, `AI-USAGE.md`
+- **Tokens:** entrada 28 · cache leída 5.1M · cache escrita 63.4k · salida 53.4k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El bloque **Constitución** está terminado. Espero tu aprobación para hacer commit, push y abrir el PR de la Fase 1.
+
+**Qué incluye**
+- **`specs/mission.md`:** el problema, los dos actores, el flujo principal y una propuesta de ciclo de vida con 5 estados: Abierto, En progreso, En espera, Resuelto y Cerrado. Incluye también el alcance del MVP frente a lo diferido y 6 métricas de éxito.
+- **`specs/tech-stack.md`:** arquitectura de las 2 apps, el stack con su porqué, el modelo de datos resumido, los 12 endpoints, los flujos de procesamiento, la paleta y los tokens del droide astromecánico, la estrategia de testing y las reglas de seguridad.
+- **`specs/roadmap.md`:** 10 fases, cada una con su rama y su PR. La 2 es la especificación y el plan, de la 3 a la 8 va la implementación (una fase por user story), la 9 es el empaquetamiento y la 10 la escalabilidad.
+- **6 ADL en `.design-logs/`:**
+  - dos apps unidas por el contrato OpenAPI;
+  - FastAPI con SQLModel;
+  - SQLite con camino a PostgreSQL;
+  - una SPA en React y Vite;
+  - ingreso simulado con token firmado;
+  - Docker Compose con nginx de proxy.
+- **`DECISIONS.md`:** nuevas secciones de arquitectura (enlazada a los ADL) y de deuda técnica asumida.
+- **`AI-USAGE.md`:** registra este bloque y el uso de context7.
+
+**Checkpoint**
+- No hay código, así que el lint, los tests y deckard no aplican en este bloque.
+- Los ADL quedaron creados.
+- Los 5 diagramas Mermaid renderizan sin errores (los validé con mermaid-cli y revisé visualmente los dos más densos).
+- Ningún enlace entre documentos quedó roto.
+
+**Decisiones que tomé yo y conviene que revises**
+- **Versiones:** Python 3.14, la vigente con soporte amplio.
+- **Web:** TanStack Query para refrescar datos y CSS Modules con tokens propios, en vez de Tailwind.
+- **Cobertura mínima:** 90 % en la API y 70 % en la web. La API concentra las reglas de negocio y la web solo refleja lo que la API permite.
+- **Acciones de cada ticket:** la API entrega las acciones permitidas para quien lo consulta, así la web no duplica la máquina de estados.
+- **SLA:** su estado (en plazo, por vencer o vencido) se calcula al leer el ticket, no se guarda.
+
+Tres puntos quedan abiertos para la etapa Clarify de la especificación: quién define la prioridad, si "En espera" pausa el SLA, y cómo funcionan el cierre y la reapertura.
+
+**Commits que propongo en `phase/01-setup-constitution`**
+1. `docs(constitution): agrega misión, stack y roadmap`
+2. `docs(adl): registra ADL-001 a ADL-006`
+3. `docs: actualiza DECISIONS, AI-USAGE y DEV-LOG`
+
+Después el push y el **PR "Fase 1: setup y constitución"** hacia `main`, creado con la cuenta `sebastianms`. ¿Apruebas?
+
+</details>
+
+### #7 · 🧑 Usuario
+> baja la cobertura a 80%, apliquemos ley de pareto...80/20, con 80% total pero con 90% de coverage en el flujo critico de la app.
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 1m 25s
+- **Herramientas:** Edit ×6 · Write ×1 · Bash ×1
+- **Archivos modificados:** `specs/tech-stack.md`, `CLAUDE.md`, `.design-logs/ADL-007-pareto-coverage-gates.md`, `specs/roadmap.md`, `DECISIONS.md`, `AI-USAGE.md`
+- **Tokens:** entrada 8 · cache leída 1.6M · cache escrita 9.6k · salida 8.9k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Listo: la cobertura queda en **80 % total y 90 % en el flujo crítico**.
+
+**Cómo quedó**
+- **`specs/tech-stack.md`:** la tabla de gates de cobertura dice qué se mide y dónde.
+
+  | Alcance | Meta | Medición |
+  |---|---|---|
+  | Total de cada app | ≥ 80 % | pytest-cov con `--cov-fail-under=80`; umbral global en Vitest |
+  | Flujo crítico de la API: `tickets/`, `sla/`, `audit/` y la autorización de `identity/` | ≥ 90 % | Segundo reporte limitado a esas rutas |
+  | Flujo crítico de la web: `src/features/` | ≥ 90 % | Umbral por glob en Vitest |
+
+- **`CLAUDE.md`:** el checkpoint de cada bloque exige ambos umbrales, así que los subagentes de coding no pueden cerrar un bloque por debajo.
+- **ADL-007:** registra la decisión de Pareto, las alternativas descartadas (90 % parejo, y el 90/70 que propuse antes) y la regla de no escribir tests solo para subir el número.
+- **`DECISIONS.md`:** nueva sección "Estrategia de calidad", que alimenta el entregable 4 del enunciado.
+- **`AI-USAGE.md`:** tu cambio quedó como intervención del usuario.
+
+Revisé que no quedara ninguna mención al 90/70 anterior fuera del registro histórico de DEV-LOG, y que todos los enlaces sigan funcionando.
+
+**Commits que propongo en `phase/01-setup-constitution`:**
+1. `docs(constitution): agrega misión, stack y roadmap`
+2. `docs(adl): registra ADL-001 a ADL-007`
+3. `docs: actualiza CLAUDE.md, DECISIONS, AI-USAGE y DEV-LOG`
+
+Después hago el push y abro el **PR "Fase 1: setup y constitución"** hacia `main`. ¿Apruebas?
+
+</details>
+
+### #8 · 🧑 Usuario
+> aprobado
+

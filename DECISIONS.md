@@ -2,6 +2,19 @@
 
 Decisiones de producto y arquitectura del MVP, en versión breve. El detalle técnico vive en los ADL de [`.design-logs/`](.design-logs/) y en los artefactos SDD de [`specs/`](specs/). La conversación que originó cada decisión está en [DEV-LOG.md](DEV-LOG.md).
 
+## Arquitectura y stack
+
+| Decisión | Resumen | ADL |
+|---|---|---|
+| Dos apps independientes | `apps/api` y `apps/web`, unidas solo por `contracts/openapi.json` | [ADL-001](.design-logs/ADL-001-two-apps-openapi-contract.md) |
+| API | Python 3.14, FastAPI, SQLModel y Alembic; el dominio en funciones puras | [ADL-002](.design-logs/ADL-002-fastapi-sqlmodel-backend.md) |
+| Base de datos | SQLite en el MVP, con código portable para pasar a PostgreSQL | [ADL-003](.design-logs/ADL-003-sqlite-mvp-postgres-path.md) |
+| Web | SPA en React, Vite y TypeScript, con tipos generados del contrato | [ADL-004](.design-logs/ADL-004-react-vite-spa.md) |
+| Ingreso | Simulado: se elige un usuario precargado y la API emite un token firmado; el rol se lee de la base de datos | [ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md) |
+| Despliegue | Docker Compose, nginx como proxy de mismo origen y `./setup.sh` como único comando | [ADL-006](.design-logs/ADL-006-docker-compose-same-origin.md) |
+
+La visión del sistema completo está en [`specs/tech-stack.md`](specs/tech-stack.md).
+
 ## Alcance opcional
 
 El enunciado permite elegir a lo más dos funcionalidades opcionales. El criterio de selección, en orden de peso:
@@ -29,3 +42,15 @@ El alcance mínimo ya responde "¿quién la tiene?" (un agente toma el ticket) y
 | Dashboard de métricas | La cola ya muestra cuántos tickets hay abiertos, quién los tiene y su estado de SLA. Un dashboard agregado gana valor con volumen y con varias áreas. |
 | Búsqueda y filtros | Con el volumen del MVP basta la cola ordenada por vencimiento. Se vuelve necesaria a escala. |
 | Categorización automática | Depende de un servicio externo (un LLM con API key), suma costo y vuelve no deterministas los tests. El solicitante elige la categoría al crear el ticket. |
+
+## Estrategia de calidad
+
+Pareto 80/20: cada app debe tener al menos 80 % de cobertura total y el flujo crítico al menos 90 %. El flujo crítico es el ciclo de vida del ticket (crear → tomar → cambiar estado → historial), con sus reglas de SLA y la autorización por rol. El esfuerzo va donde un error rompe la promesa central de DroiDesk; la configuración, el arranque y los componentes visuales quedan cubiertos por el piso del 80 % ([ADL-007](.design-logs/ADL-007-pareto-coverage-gates.md), [detalle](specs/tech-stack.md#quality-strategy)). El balance de qué se probó y qué no se completa en la fase de empaquetamiento.
+
+## Deuda técnica asumida
+
+| Deuda | Por qué se acepta en el MVP | Cuándo se paga |
+|---|---|---|
+| Ingreso simulado: cualquiera puede entrar como cualquier usuario | El enunciado lo permite y la frontera de autorización ya es real ([ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md)) | Al integrar el proveedor de identidad de la organización |
+| SQLite admite un solo escritor a la vez | Basta para el volumen del MVP ([ADL-003](.design-logs/ADL-003-sqlite-mvp-postgres-path.md)) | Al migrar a PostgreSQL (plan de escalabilidad) |
+| Las migraciones corren al iniciar la API | Hay una sola instancia ([ADL-006](.design-logs/ADL-006-docker-compose-same-origin.md)) | Al tener más de una réplica |

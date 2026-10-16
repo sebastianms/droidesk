@@ -17,7 +17,7 @@ Este archivo manda sobre las skills genéricas cuando se contradicen. Los overri
 
 ## Flujo por bloque
 1. **(override)** Se ejecutan **todas** las tareas de un bloque (Setup, Foundational, cada User Story, Polish) sin pedir validación por sub-tarea.
-2. Checkpoint del bloque: lint sin warnings → tests verdes con cobertura → deckard → ADL check.
+2. Checkpoint del bloque: lint sin warnings → tests verdes con cobertura (≥ 80 % total por app y ≥ 90 % en el flujo crítico; ver Quality Strategy en `specs/tech-stack.md`) → deckard → ADL check.
 3. Resumen al usuario y **esperar su aprobación explícita** antes de hacer commit y push.
 4. Commits pequeños por responsabilidad y push a la rama de la fase.
 

@@ -23,6 +23,7 @@ Este archivo manda sobre las skills genéricas cuando se contradicen. Los overri
 
 ## Git (trunk-based)
 - `main` es el tronco. **(override)** Una rama por fase del roadmap (`phase/NN-slug`, p. ej. `phase/01-setup-constitution`) y un PR por fase hacia `main`. Después del commit inicial no se hace push directo a `main`.
+- El usuario integra cada PR con **squash and merge**: un commit por fase en `main`. Por eso cada fase nueva parte de `origin/main` actualizado, nunca de la rama de la fase anterior.
 - `gh` tiene activa otra cuenta por defecto: los PR se crean con `GH_TOKEN=$(gh auth token --user sebastianms) gh pr create ...`, sin cambiar la cuenta activa.
 
 ## Modelos

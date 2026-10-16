@@ -53,6 +53,8 @@ flowchart LR
 | Preguntas iniciales | Rechazó el cuestionario para aclarar dudas antes de responder | Se reformularon las preguntas con más contexto ([DEV-LOG #1](DEV-LOG.md)) |
 | Alcance opcional | Propuso SLA + Adjuntos y pidió una segunda opinión | Tras la recomendación eligió SLA + Comentarios ([DEV-LOG #2](DEV-LOG.md), [criterio](DECISIONS.md#alcance-opcional)) |
 | Constitución | Cambió la meta de cobertura propuesta (90 % en la API y 70 % en la web) por Pareto 80/20: 80 % total y 90 % en el flujo crítico | Nuevo [ADL-007](.design-logs/ADL-007-pareto-coverage-gates.md) y gates en `CLAUDE.md` y `tech-stack.md` |
+| Clarify de la feature 001 | Respondió las 5 preguntas: prioridad sugerida por el solicitante y ajustable por el agente, pausa del SLA en espera, reactivación al comentar, cancelación solo desde Abierto y plazos por prioridad | Spec sin ambigüedades y [ADL-008](.design-logs/ADL-008-ticket-lifecycle-six-states.md) con el ciclo de vida |
+| Revisión del SLA | Cambió de opinión sobre los plazos aceptados (4, 8, 24 y 72 h corridas): tiempo hábil de lunes a viernes, de 09:00 a 18:00, para un equipo chico. Lo urgente sigue corto (Crítica 4 h y Alta 1 día hábil) y Media y Baja se alargan a 3 y 5 días hábiles | Se reabrió la respuesta 5 de Clarify; spec, constitución y deuda técnica (feriados) actualizadas |
 
 ## 5. Qué salidas del agente se rechazaron
 

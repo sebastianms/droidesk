@@ -4,16 +4,16 @@ Cada fase es una rama `phase/NN-slug` y un PR hacia `main` (trunk-based). Dentro
 
 Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs definitivos quedan en `specs/001-ticketing-mvp/spec.md`.
 
-## Phase 1: Setup & Constitution — `phase/01-setup-constitution` [EN CURSO]
+## Phase 1: Setup & Constitution — `phase/01-setup-constitution` [DONE · PR #1]
 
 - [x] Bootstrap IA: skills en el repo, hook de DEV-LOG, prompt-cache-control y `CLAUDE.md`.
 - [x] Constitución: `mission.md`, `tech-stack.md` y `roadmap.md`.
 - [x] ADLs fundacionales: ADL-001 a ADL-007.
 
-## Phase 2: MVP Specification & Plan — `phase/02-mvp-spec`
+## Phase 2: MVP Specification & Plan — `phase/02-mvp-spec` [EN CURSO]
 
-- [ ] Specify: `specs/001-ticketing-mvp/spec.md` y su checklist de calidad.
-- [ ] Clarify (máximo 5 preguntas): quién define la prioridad, efecto de "En espera" sobre el SLA, reglas de cierre y reapertura.
+- [x] Specify: `specs/001-ticketing-mvp/spec.md` y su checklist de calidad.
+- [x] Clarify (5 preguntas): prioridad, pausa del SLA, respuesta del solicitante en espera, cancelación y plazos por prioridad.
 - [ ] Plan: `plan.md`, `research.md` (versiones verificadas con context7), `data-model.md`, `contracts/` y `quickstart.md`.
 - [ ] Tasks: `tasks.md`, organizado por user story.
 
@@ -43,7 +43,7 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 
 ## Phase 8: SLA por prioridad — `phase/08-sla`
 
-- [ ] Prioridad con plazo comprometido, vencimiento visible, luces de estado del SLA y cola ordenada por urgencia.
+- [ ] Prioridad con plazo comprometido en tiempo hábil (lunes a viernes, jornada laboral), vencimiento visible, luces de estado del SLA y cola ordenada por urgencia.
 
 ## Phase 9: Packaging & Initial Setup — `phase/09-packaging`
 
@@ -56,4 +56,4 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 
 - [ ] `SCALABILITY.md`: tres estrategias para 50.000 tickets al mes y 5 áreas de soporte, con pros, contras, riesgos y mitigaciones. Todas contemplan PostgreSQL.
 - [ ] Fase de decisión con el usuario. La estrategia elegida alimenta la sección "qué romperías o rediseñarías" de `DECISIONS.md`.
-- [ ] Destino de lo diferido en la misión: autenticación real, varias áreas, horario hábil en el SLA y cierre automático.
+- [ ] Destino de lo diferido en la misión: autenticación real, varias áreas, feriados en el calendario del SLA y cierre automático.

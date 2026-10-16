@@ -256,3 +256,125 @@ Después hago el push y abro el **PR "Fase 1: setup y constitución"** hacia `ma
 ### #8 · 🧑 Usuario
 > aprobado
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 42s
+- **Herramientas:** Bash ×2 · Write ×1
+- **Archivos modificados:** `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/pr-phase-01.md`
+- **Git:** `7f7b17b` docs: actualiza CLAUDE.md, DECISIONS, AI-USAGE y DEV-LOG · PR https://github.com/sebastianms/droidesk/pull/1
+- **Tokens:** entrada 8 · cache leída 1.6M · cache escrita 3.8k · salida 3k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #1 desde la cuenta `sebastianms`: https://github.com/sebastianms/droidesk/pull/1
+
+Contiene los 7 commits de la fase, 4 del bloque *Bootstrap IA* y 3 de la constitución:
+- `67d7409` docs(constitution): agrega misión, stack y roadmap
+- `2b0fe54` docs(adl): registra ADL-001 a ADL-007
+- `7f7b17b` docs: actualiza CLAUDE.md, DECISIONS, AI-USAGE y DEV-LOG
+
+La Fase 2 conviene partirla de `main` con el PR #1 ya integrado. ¿Cómo prefieres hacerlo?
+1. **Lo mergeo yo con rebase:** `main` queda lineal y conserva los commits chicos, que es lo que encaja con trunk-based.
+2. **Lo revisas y lo mergeas tú en GitHub.** Me avisas y sigo.
+
+Con eso arranco la **Fase 2** en `phase/02-mvp-spec`: la especificación de la feature `001-ticketing-mvp`, las preguntas de Clarify (como máximo 5, de a una), el plan con su research en context7 y la lista de tareas.
+
+</details>
+
+### #9 · 🧑 Usuario
+> mezclado con squash and merge
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 10m 24s
+- **Herramientas:** Edit ×41 · Bash ×7 · AskUserQuestion ×5 · Write ×3 · Read ×1
+- **Archivos modificados:** `CLAUDE.md`, `specs/roadmap.md`, `specs/001-ticketing-mvp/spec.md`, `specs/001-ticketing-mvp/checklists/requirements.md`, `specs/mission.md`, `specs/tech-stack.md`, `.design-logs/ADL-008-ticket-lifecycle-six-states.md`, `DECISIONS.md`, `AI-USAGE.md`
+- **Tokens:** entrada 46 · cache leída 9.9M · cache escrita 53.2k · salida 46.6k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Terminé el bloque **Especificación** (Specify + Clarify) de la Fase 2. Espero tu aprobación para hacer commit y push.
+
+**Qué incluye**
+- **`specs/001-ticketing-mvp/spec.md`**:
+  - 5 user stories (crear y seguir tickets, cola del agente, historial, comentarios y SLA);
+  - 25 requisitos funcionales, con la tabla de transiciones por rol;
+  - 13 edge cases, 7 criterios de éxito medibles y los supuestos.
+
+  No menciona ninguna tecnología y no le quedan marcadores `[NEEDS CLARIFICATION]`.
+- **`checklists/requirements.md`**: el checklist de calidad pasa completo y cada obligatorio del enunciado queda trazado a sus user stories y requisitos.
+- **ADL-008**: el ciclo de vida con 6 estados y quién puede mover cada transición.
+- **`DECISIONS.md`**: nueva sección "Máquina de estados", con el diagrama y por qué existe cada estado. Cubre ese entregable del enunciado.
+- **Ajustes de coherencia**:
+  - `mission.md`: el diagrama de estados ahora incluye Cancelado;
+  - `tech-stack.md`: los flujos de procesamiento reflejan lo que decidiste;
+  - `roadmap.md`: Specify y Clarify marcados como hechos;
+  - `CLAUDE.md`: estrategia de squash and merge;
+  - `AI-USAGE.md`: tus 5 respuestas de Clarify quedan registradas como decisión tuya.
+
+**Resultado de Clarify**: 5 preguntas, las 5 con la opción recomendada.
+
+| Pregunta | Decisión | Dónde quedó |
+|---|---|---|
+| Prioridad | La sugiere el solicitante (Media preseleccionada) y un agente puede ajustarla; el vencimiento se recalcula | FR-019, US5 |
+| Pausa del SLA | Mientras el ticket está En espera, el plazo se pausa y se muestra "En pausa"; si el ticket ya estaba vencido, la espera no lo devuelve a "En plazo" | FR-021, FR-023 |
+| Respuesta en espera | Si el solicitante comenta, el ticket vuelve solo a En progreso | FR-018, FR-011 |
+| Cancelación | Solo desde Abierto; no cuenta para el SLA | FR-011, US1 |
+| Plazos | 4, 8, 24 y 72 h corridas, con "Por vencer" al 25 % | FR-020, FR-023 |
+
+**Verificación**: los diagramas Mermaid renderizan, no hay enlaces rotos y la spec no contiene términos técnicos.
+
+**Commits que propongo en `phase/02-mvp-spec`:**
+1. `docs(001-mvp/spec): especifica el MVP de tickets y resuelve Clarify`
+2. `docs(adl): registra ADL-008 del ciclo de vida del ticket`
+3. `docs: alinea constitución, CLAUDE.md, DECISIONS, AI-USAGE y DEV-LOG`
+
+Después el push de la rama. El PR lo abro al cerrar la fase, tras los bloques de **Plan** (plan, research con context7, modelo de datos, contrato y quickstart) y **Tasks**. ¿Apruebas?
+
+</details>
+
+### #10 · 🧑 Usuario
+> cambie de opinion con respecto a los plazos del SLA, deben ser dias habiles (de lunes a viernes), alargar los plazos de ser necesario y para las de baja prioridad en lugar de 72 hrs deben ser 5 dias habiles.
+
+### #11 · 🧑 Usuario
+> cambie de opinion con respecto a los plazos del SLA, deben ser dias habiles (de lunes a viernes), alargar los plazos de ser necesario y para las de media prioridad 3 dias, baja prioridad en lugar de 72 hrs deben ser 5 dias habiles, considerando que es un equipo chico, pero que las de alta prioridad deben resolverse lo antes posible, es lo que mas afecta al cliente
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 4m 38s
+- **Herramientas:** Edit ×20 · Read ×5 · Bash ×4 · AskUserQuestion ×1
+- **Archivos modificados:** `specs/001-ticketing-mvp/spec.md`, `specs/mission.md`, `specs/roadmap.md`, `specs/tech-stack.md`, `DECISIONS.md`, `AI-USAGE.md`, `specs/001-ticketing-mvp/checklists/requirements.md`
+- **Tokens:** entrada 24 · cache leída 5.7M · cache escrita 34.3k · salida 25.7k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Ya integré el nuevo SLA en tiempo hábil. Solo queda la mención intencional de los plazos viejos en la fila de AI-USAGE que registra tu cambio. La spec no tiene marcadores pendientes ni términos técnicos.
+
+**Qué cambió con la revisión**
+
+| Prioridad | Antes (horas corridas) | Ahora (tiempo hábil, lunes a viernes de 09:00 a 18:00) |
+|---|---|---|
+| Crítica | 4 h | 4 horas hábiles |
+| Alta | 8 h | 1 día hábil (9 h) |
+| Media | 24 h | 3 días hábiles |
+| Baja | 72 h | 5 días hábiles |
+
+- **Spec:**
+  - FR-020, FR-021 y FR-023 ahora cuentan en tiempo hábil.
+  - US5 suma ejemplos concretos. Un Alta creado el lunes a las 10:00 vence el martes a las 10:00; uno creado el viernes a las 20:00 vence el lunes a las 18:00.
+  - Hay edge cases nuevos: tickets creados fuera de la jornada y feriados.
+  - Aparece una entidad nueva, el **calendario hábil**.
+  - La pausa En espera quedó expresada como "retoma el plazo hábil que le quedaba".
+- **Configuración:** `tech-stack.md` suma `DROIDESK_TIMEZONE` (por defecto `America/Santiago`) y `DROIDESK_BUSINESS_HOURS` (por defecto `09:00-18:00`). Las pedirá `setup.sh`.
+- **`DECISIONS.md`:** la justificación del SLA explica el tiempo hábil para un equipo chico. Los feriados quedan como deuda técnica asumida: en el MVP, un feriado entre semana cuenta como hábil.
+- **Misión y roadmap:** el horario hábil dejó de figurar como algo diferido; lo que queda diferido son los feriados.
+- **`AI-USAGE.md`:** tu cambio de opinión quedó registrado como intervención.
+
+El cálculo en tiempo hábil (sumar el plazo saltando noches y fines de semana, y la pausa) lo diseño en el bloque **Plan**, con su propio ADL-009.
+
+**Commits que propongo en `phase/02-mvp-spec`:**
+1. `docs(001-mvp/spec): especifica el MVP de tickets y resuelve Clarify`
+2. `docs(adl): registra ADL-008 del ciclo de vida del ticket`
+3. `docs: alinea constitución, CLAUDE.md, DECISIONS, AI-USAGE y DEV-LOG`
+
+Después hago el push de la rama. ¿Apruebas?
+
+</details>
+
+### #12 · 🧑 Usuario
+> Si
+

@@ -89,6 +89,8 @@ droidesk/
 | `DROIDESK_JWT_SECRET` | api | — | Lo genera automáticamente |
 | `DROIDESK_DATABASE_URL` | api | `sqlite:////data/droidesk.db` | No lo pide |
 | `DROIDESK_SEED_DEMO_DATA` | api | `true` | Pregunta si cargar datos de demo |
+| `DROIDESK_TIMEZONE` | api | `America/Santiago` | Pregunta la zona horaria de la organización, que define el calendario del SLA |
+| `DROIDESK_BUSINESS_HOURS` | api | `09:00-18:00` | Pregunta la jornada hábil, de lunes a viernes |
 | `DROIDESK_WEB_PORT` | compose | `8080` | Pregunta el puerto |
 
 ## Data Layer (Schema) & API Reference
@@ -111,7 +113,7 @@ erDiagram
 |---|---|---|
 | `User` | Persona que usa DroiDesk | nombre, email, rol (`requester` o `agent`) |
 | `Category` | Clasificación que elige el solicitante | nombre |
-| `SlaPolicy` | Plazo de resolución por prioridad | prioridad, horas objetivo |
+| `SlaPolicy` | Plazo de resolución por prioridad, en tiempo hábil | prioridad, minutos hábiles objetivo |
 | `Ticket` | Estado actual de una solicitud | título, descripción, categoría, prioridad, estado, solicitante, agente asignado, vencimiento y fechas del ciclo |
 | `TicketEvent` | Historial append-only: qué pasó, quién y cuándo | ticket, actor, tipo, valor anterior, valor nuevo y fecha |
 | `Comment` | Mensaje en la conversación del ticket | ticket, autor, texto y fecha |
@@ -137,11 +139,11 @@ El solicitante solo ve y comenta sus propios tickets. El contrato completo vive 
 
 ## Processing Pipelines / Workflows
 
-1. **Crear ticket**: validar, asignar prioridad, calcular el vencimiento con la política de SLA y guardar el ticket junto con el evento `CREATED`, en una transacción.
-2. **Tomar ticket**: solo si está `OPEN` y sin asignar. Asigna al agente, lo pasa a `IN_PROGRESS` y registra los eventos. Si otro agente lo tomó antes, responde conflicto: la asignación es una actualización condicional y atómica.
+1. **Crear ticket**: validar, asignar prioridad, calcular el vencimiento en tiempo hábil (política de SLA más calendario de lunes a viernes en la jornada configurada) y guardar el ticket junto con el evento `CREATED`, en una transacción.
+2. **Tomar ticket**: solo si está `OPEN` y sin asignar. Asigna al agente, lo pasa a `IN_PROGRESS` y registra los eventos. Si otro agente lo tomó antes o el solicitante lo canceló, responde conflicto: la asignación es una actualización condicional y atómica.
 3. **Cambiar estado**: la máquina de estados del dominio decide si la transición es válida para ese rol. La API devuelve en cada ticket las acciones permitidas, para que la web no duplique la regla.
-4. **Comentar**: guarda el comentario y su evento. Cómo afecta un comentario a un ticket en espera se define en Clarify.
-5. **Estado del SLA**: en plazo, por vencer o vencido. Se calcula al leer, a partir del vencimiento y del tiempo en espera; no se guarda, para que nunca quede desactualizado.
+4. **Comentar**: guarda el comentario y su evento. Si comenta el solicitante de un ticket En espera, el ticket vuelve a En progreso en la misma transacción y el plazo se reanuda.
+5. **Estado del SLA**: en plazo, por vencer, vencido o en pausa, y cumplido o incumplido una vez resuelto. Se calcula al leer, a partir del vencimiento y del tiempo en espera; no se guarda, para que nunca quede desactualizado.
 
 ## Visual Identity
 

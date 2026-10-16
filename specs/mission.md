@@ -39,7 +39,7 @@ sequenceDiagram
 
 ### Ciclo de vida del ticket
 
-Propuesta inicial; quién mueve cada transición y cómo afecta al SLA se confirma en Clarify de la feature 001.
+Confirmado en Clarify de la feature 001; quién mueve cada transición y cómo afecta al SLA está en su [spec](001-ticketing-mvp/spec.md#clarifications).
 
 ```mermaid
 stateDiagram-v2
@@ -48,7 +48,9 @@ stateDiagram-v2
   state "En espera" as ON_HOLD
   state "Resuelto" as RESOLVED
   state "Cerrado" as CLOSED
+  state "Cancelado" as CANCELLED
   [*] --> OPEN: el solicitante lo crea
+  OPEN --> CANCELLED: el solicitante lo cancela
   OPEN --> IN_PROGRESS: un agente lo toma
   IN_PROGRESS --> ON_HOLD: el agente pide información
   ON_HOLD --> IN_PROGRESS: el solicitante responde
@@ -56,6 +58,7 @@ stateDiagram-v2
   RESOLVED --> CLOSED: el solicitante confirma
   RESOLVED --> IN_PROGRESS: el solicitante lo reabre
   CLOSED --> [*]
+  CANCELLED --> [*]
 ```
 
 ## Scope (MVP vs. Deferred)
@@ -78,7 +81,7 @@ stateDiagram-v2
 | Capacidad | Destino |
 |---|---|
 | Adjuntos, notificaciones, reasignación, dashboard de métricas, búsqueda y filtros, categorización automática | Descartadas del alcance opcional ([criterio](../DECISIONS.md#alcance-opcional)) |
-| Autenticación real, varias áreas de soporte, horario hábil en el SLA, cierre automático de tickets resueltos | Plan de escalabilidad ([roadmap](roadmap.md), fase 10) |
+| Autenticación real, varias áreas de soporte, feriados en el calendario del SLA, cierre automático de tickets resueltos | Plan de escalabilidad ([roadmap](roadmap.md), fase 10) |
 
 ## Success Metrics
 

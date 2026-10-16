@@ -1,0 +1,22 @@
+Dado lo descrito en requirements.txt, usando spec-driven-development, design-logs y la revision de deckard, creemos la aplicacion requerida.
+Consideraciones generales:
+- Debe ser un MVP, al final proponme 3 estrategias para escalar la aplicacion, trae pros y contras, riesgos y mitigaciones, anotalas en un documento de escalabilidad, tendremos una fase para poder decidir cual es la mejor.
+- La idea es documentar el proceso tanto en DECISIONS.md como en AI-USAGE.md, seamos concisos y registremos lo que solicita el documento de requirements para ello.
+- Adjuntemos las skills que usamos (spec-driven-development, design-logs, decard, clean-code, ) en este repo, haciendo referencia a ellas en AI-USAGE.md
+- Cada interaccion que tengamos guardala en el archivo DEV-LOG.md, crea un hook solo aplicable en este repo para documentar lo que mas podamos.
+- AI-USAGE.md y DECISIONS.md deben conversar con los documentos que generamos por spec-driven-development, design-logs y ademas representar de manera simple y concisa nuestras interacciones y decisiones (escritas en DEV-LOG.md).
+- Al final del desarrollo debe ir una fase de "empaquetamiento y setup inicial", en donde generamos README.md con diagramas mermaid para explicar el flujo de la aplicacion y la arquitectura. El setup debe ser un comando que levante todo lo necesario (Usando Docker) y le pida al usuario lo que la aplicacion requiera (alguna config, key, etc.)
+- La aplicacion se llama DroiDesk y esta inspirada visualmente en un droide de Star Wars, usa esta referencia para seleccionar el look & feel.
+- Dentro de AI-USAGE.md incorpora el uso de graft, rtk , prompt-cache-control y context7
+- Para spec-driven-development, realiza todas las tareas de un bloque (UserStory), dame un resumen al final de ese bloque y espera mi aprobacion para hacer commit y push.
+- Para las etapas de planificacion usa Opus 5.5 Max
+- Para las etapas de coding usa Sonnet 5.5 xHigh
+- Sobre lo descrito anteriormente ,hazme las preguntas que estimes convenientes, las 5 mas importantes.
+
+
+Consideraciones Técnicas previas al research de spec-driven:
+- Haremos una rama por fase y un PR, usaremos trunk-based-development con main como rama principal.
+- Usa context7 para escribir codigo con la documentacion actualizada y las mejores practicas de la comunidad.
+- Debe ser un repo que contenga front y back, pero no debe ser un monolito, debe ser tratado como aplicaciones diferentes/modulares o federadas.
+- Usa BD, pequeña como SQLite para este MVP. (En el plan de escalamiento debe contemplarse PostgreSQL)
+- Less is More, el codigo generado debe ser simple de leer, siguiendo los lineamientos de clean code y SOLID

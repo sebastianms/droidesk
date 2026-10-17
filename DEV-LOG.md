@@ -1194,3 +1194,398 @@ Con el PR integrado arranca la **Fase 3 (Fundaciones)**, la primera de coding. C
 ### #14 · 🧑 Usuario
 > crea el PR
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 41s
+- **Herramientas:** Bash ×2 · Write ×1
+- **Archivos modificados:** `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/pr-phase-02.md`
+- **Git:** `c371c8b` docs(001-mvp/tasks): desglosa el MVP en 63 tareas por user story · PR https://github.com/sebastianms/droidesk/pull/2
+- **Tokens:** entrada 6 · cache leída 1.9M · cache escrita 2.5k · salida 2.3k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #2 desde la cuenta `sebastianms`, con los 7 commits de la fase: https://github.com/sebastianms/droidesk/pull/2
+
+Antes, hice el commit del bloque Tasks (`c371c8b docs(001-mvp/tasks): desglosa el MVP en 63 tareas por user story`) y el push.
+
+Cuando lo integres con squash and merge, avísame. La **Fase 3 (Fundaciones)** parte de `origin/main` actualizado, en la rama `phase/03-foundation`, en dos bloques:
+1. **Setup (T001–T009)**: las dos apps creadas, con tooling, Docker, CI y el contrato inicial.
+2. **Foundational (T010–T028)**: esquema completo, dominio en TDD, ingreso simulado, guardas por rol y design system del droide.
+
+Es la primera fase de coding, así que la implementan subagentes Sonnet 5.5 xHigh. Al cerrar cada bloque yo reviso su trabajo, corro el checkpoint (lint, tests con cobertura, deckard y ADL) y te paso el resumen antes del commit.
+
+</details>
+
+*Sesión finalizada (prompt_input_exit)*
+
+## 🛰️ Sesión `2680e3d9` · resume
+
+- **Cache:** probablemente expirado · inactivo 1m 51s · contexto 15.2k tokens · re-escritura estimada US$0.12
+
+*Sesión finalizada (prompt_input_exit)*
+
+## 🛰️ Sesión `2680e3d9` · resume
+
+- **Cache:** probablemente expirado · inactivo 20h 25m · contexto 15.2k tokens · re-escritura estimada US$0.12
+
+### #15 · 🧑 Usuario
+> mezclado
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 36s
+- **Herramientas:** Bash ×5 · Agent ×2 · Read ×1
+- **Tokens:** entrada 12 · cache leída 388.7k · cache escrita 53.3k · salida 7.8k · hit 88%
+
+<details><summary>Respuesta</summary>
+
+Los dos subagentes del bloque Setup están trabajando en paralelo:
+- **API** (T001, T002, T004, T007 y la parte de API de T009): `pyproject.toml` con `uv.lock`, `/api/health` con su test, Dockerfile, CI y la exportación del contrato OpenAPI.
+- **Web** (T003, T005, T008 y la parte web de T009): la app base con Vite, Biome y Vitest, Dockerfile con nginx, CI y el script `gen:api`.
+
+Cuando terminen, sigue la integración: `docker-compose.yml` (T006), la generación de `schema.d.ts` y la prueba de `/api/health` a través de nginx. Después corro el checkpoint del bloque y te paso el resumen para que lo apruebes.
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 7m 41s
+- **Herramientas:** Bash ×82 · Read ×3 · Write ×3 · StructuredOutput ×1 · Monitor ×1 · SubagentHandback ×1
+- **Archivos modificados:** `apps/web/package.json`, `apps/web/biome.json`, `apps/web/index.html`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 7m 41s · 4.4M tokens
+- **Tokens:** entrada 2 · cache leída 79.9k · cache escrita 6.9k · salida 267 · hit 92%
+
+<details><summary>Respuesta</summary>
+
+El subagente web terminó con todo en verde. Biome, tsc, Vitest, el build y la imagen Docker funcionan, y `schema.d.ts` ya está generado desde el contrato. Sigo esperando el reporte del subagente de la API.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting scaffolded Vite files
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Looking up FastAPI docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading uv multistage.Dockerfile example
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading Biome biome.json docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Looking up Alembic pyproject docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking nginx port conventions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading Alembic post_write_hooks docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Fetching setup-node cache docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Planning apps/api/pyproject.toml layout
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing web index.html
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Searching specs for create_app
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running Biome CI on tsconfig.json
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying features coverage threshold in vite.config.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Probing nginx in container
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking CSP in headless Chrome
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Locking dependencies in pyproject.toml
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Pinning action SHAs for web.yml
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading rest-api.md health contract
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking effective dependency versions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Smoke-testing vite.config.ts proxy
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Syncing locked API dependencies
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Awaiting contracts/openapi.json
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking local Docker base images
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying generated schema.d.ts
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 3m 9s
+- **Herramientas:** Bash ×22 · StructuredOutput ×1 · SubagentHandback ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 10m 4s · 3.7M tokens
+- **Tokens:** entrada 14 · cache leída 689.9k · cache escrita 20.7k · salida 4.1k · hit 97%
+
+<details><summary>Respuesta</summary>
+
+Hice la primera revisión del código de la API y de la web y está en orden. Espero a que termine la integración con Docker Compose.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying the Dockerfile container
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting droidesk-api container healthcheck
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Cleaning up droidesk-api test resources
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting api.yml with actionlint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking untracked files in git status
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2m 5s
+- **Herramientas:** Bash ×14 · Write ×2 · StructuredOutput ×1 · SubagentHandback ×1 · Agent ×1 · Read ×1
+- **Archivos modificados:** `docker-compose.yml`, `.env.example`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 1m 54s · 610.8k tokens
+- **Tokens:** entrada 14 · cache leída 670.2k · cache escrita 8.3k · salida 3.1k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Agregué la extensión a ADL-006. Ahora espero la revisión de deckard.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Resolving Compose docs in context7
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing docker-compose.yml and .env.example
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Probing nginx proxy endpoints
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2m 37s
+- **Herramientas:** Bash ×11 · StructuredOutput ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 2m 30s · 427.9k tokens
+- **Tokens:** entrada 8 · cache leída 353.3k · cache escrita 5.4k · salida 1.1k · hit 98%
+
+<details><summary>Respuesta</summary>
+
+Terminé el **bloque Setup de la Fase 3 (T001–T009)** y el checkpoint pasó completo. Falta tu aprobación para el commit y el push.
+
+### Qué quedó listo
+- **API** (`apps/api`):
+  - FastAPI con `GET /api/health`.
+  - Versiones exactas de research, con `uv.lock` generado con uv 0.13.1 sin tocar tu uv global.
+  - Configuración de ruff, mypy estricto, pytest y Alembic dentro de `pyproject.toml`.
+  - Imagen multi-stage que corre como usuario no root, con healthcheck.
+  - El entrypoint correrá las migraciones en cuanto exista Alembic (eso llega en el bloque Foundational).
+- **Web** (`apps/web`):
+  - Vite 8, React 19.3 y TypeScript 6 estricto, con Biome, Vitest 5 y un smoke test.
+  - Se quitaron Oxlint y los assets de ejemplo.
+  - La imagen sirve la web con nginx, que hace de proxy de `/api` y agrega los headers de seguridad (CSP, `nosniff`, `DENY`).
+  - Se probó en Chrome headless y la CSP no bloquea nada.
+- **Contrato**: `contracts/openapi.json` se genera desde la API y `src/api/schema.d.ts` desde ese contrato.
+- **`docker-compose.yml`**:
+  - La API no publica puertos.
+  - La web publica el puerto `${DROIDESK_WEB_PORT:-8080}` y espera a que la API esté healthy.
+  - `.env.example` trae el secreto vacío; lo generará `setup.sh` en la Fase 9.
+- **CI**: un workflow por app, con filtro de rutas y acciones fijadas por SHA real.
+  - El gate de cobertura del flujo crítico (90 %) y `alembic check` se saltan hasta que existan esos módulos. Se activan solos cuando aparezcan.
+
+### Checkpoint
+| Paso | Resultado |
+|---|---|
+| Lint | ruff, Biome con warnings como error y actionlint: limpios |
+| Tipos | mypy estricto y `tsc -b`: sin errores |
+| Tests | API: 2 tests, 100 % de cobertura. Web: 1 test, 100 %. El build pasa |
+| Integración | `docker compose up`: `/api/health` responde a través de nginx, `/` y `/agent` sirven la web. Después se borraron solo los recursos `droidesk-*`, sin ningún prune |
+| deckard | Nada de criticidad ≥ 8. Apliqué 3 observaciones menores: `.dockerignore` recursivo, timeout en el CI web y una constante `REPO_ROOT` |
+| ADL | Extensión de ADL-006 con los detalles de esta implementación |
+
+### Qué no queda resuelto
+- Los workflows todavía no corrieron en GitHub; la primera corrida será con el push.
+- En nginx, el proceso maestro corre como root y los workers como `nginx`, que es lo estándar de la imagen oficial. Correr todo como no root obliga a cambiar el puerto interno a 8080; lo dejé anotado como mejora en el ADL.
+- `/docs` de FastAPI todavía no queda expuesto a través de nginx. Moverlo a `/api/docs` se decide en el bloque Foundational.
+
+### Commits propuestos (rama `phase/03-foundation`)
+1. `build(api): crea la app API con health, tooling y Dockerfile`
+2. `build(web): crea la app web con Vite, Biome, Vitest y nginx`
+3. `feat(contracts): genera el contrato OpenAPI inicial y los tipos de la web`
+4. `ci: agrega un workflow por app con gates de calidad`
+5. `build: agrega docker-compose y .env.example`
+6. `docs: extiende ADL-006, marca T001–T009 y actualiza DEV-LOG`
+
+¿Apruebas el commit y el push?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading ADLs for scaffolding review
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading tech-stack.md and research.md
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Comparing openapi.json with generated schema
+
+</details>
+
+### #16 · 🧑 Usuario
+> si, de acuerdo
+

@@ -14,24 +14,24 @@
 
 **Objetivo**: las dos apps creadas, con tooling, Docker y CI funcionando, sin funcionalidades.
 
-- [ ] T001 Crear `apps/api/pyproject.toml` con las versiones fijadas de research (API) y la configuración de pytest, coverage, ruff, mypy y Alembic; generar `apps/api/uv.lock` con uv 0.13.1.
-- [ ] T002 Crear `apps/api/src/droidesk_api/main.py` con la app y `GET /api/health`, y su test `apps/api/tests/api/test_health.py`.
-- [ ] T003 [P] Scaffold de `apps/web` con `npm create vite@9.2.1 apps/web -- --template react-ts --no-interactive`:
+- [x] T001 Crear `apps/api/pyproject.toml` con las versiones fijadas de research (API) y la configuración de pytest, coverage, ruff, mypy y Alembic; generar `apps/api/uv.lock` con uv 0.13.1.
+- [x] T002 Crear `apps/api/src/droidesk_api/main.py` con la app y `GET /api/health`, y su test `apps/api/tests/api/test_health.py`.
+- [x] T003 [P] Scaffold de `apps/web` con `npm create vite@9.2.1 apps/web -- --template react-ts --no-interactive`:
   - quitar Oxlint y los assets de ejemplo;
   - fijar en `apps/web/package.json` las versiones de research (Web), con `overrides` para openapi-typescript;
   - agregar `apps/web/biome.json` y TypeScript estricto en `apps/web/tsconfig.app.json`;
   - configurar el proxy y Vitest con los umbrales en `apps/web/vite.config.ts`;
   - crear `apps/web/src/test/setup.ts` y un smoke test en `apps/web/src/app/App.test.tsx`.
-- [ ] T004 [P] Crear `apps/api/Dockerfile` (multi-stage con uv y usuario no root), `apps/api/.dockerignore` y `apps/api/docker-entrypoint.sh` (corre `alembic upgrade head` y después `exec uvicorn`).
-- [ ] T005 [P] Crear `apps/web/Dockerfile` (`node:24-alpine` → `nginx:1.30-alpine`), `apps/web/.dockerignore` y `apps/web/nginx.conf`, con el proxy de `/api` y los headers de seguridad.
-- [ ] T006 Crear `docker-compose.yml`:
+- [x] T004 [P] Crear `apps/api/Dockerfile` (multi-stage con uv y usuario no root), `apps/api/.dockerignore` y `apps/api/docker-entrypoint.sh` (corre `alembic upgrade head` y después `exec uvicorn`).
+- [x] T005 [P] Crear `apps/web/Dockerfile` (`node:24-alpine` → `nginx:1.30-alpine`), `apps/web/.dockerignore` y `apps/web/nginx.conf`, con el proxy de `/api` y los headers de seguridad.
+- [x] T006 Crear `docker-compose.yml`:
   - servicios `api` y `web`;
   - volumen nombrado para SQLite;
   - `web` depende de `api` con `condition: service_healthy`;
   - variables leídas desde `.env`.
-- [ ] T007 [P] Crear `.github/workflows/api.yml`: filtro de rutas `apps/api/**` y `contracts/**`; pasos ruff, mypy, pytest con los dos gates, `alembic check` y el diff del contrato; acciones fijadas por SHA.
-- [ ] T008 [P] Crear `.github/workflows/web.yml`: filtro de rutas `apps/web/**` y `contracts/**`; pasos: diff de `schema.d.ts`, `biome ci`, `tsc -b`, coverage con umbrales y build.
-- [ ] T009 Contrato inicial:
+- [x] T007 [P] Crear `.github/workflows/api.yml`: filtro de rutas `apps/api/**` y `contracts/**`; pasos ruff, mypy, pytest con los dos gates, `alembic check` y el diff del contrato; acciones fijadas por SHA.
+- [x] T008 [P] Crear `.github/workflows/web.yml`: filtro de rutas `apps/web/**` y `contracts/**`; pasos: diff de `schema.d.ts`, `biome ci`, `tsc -b`, coverage con umbrales y build.
+- [x] T009 Contrato inicial:
   - crear `apps/api/scripts/export_openapi.py` y generar `contracts/openapi.json`;
   - agregar el script `gen:api` en `apps/web/package.json`;
   - generar `apps/web/src/api/schema.d.ts`.

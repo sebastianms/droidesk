@@ -58,6 +58,18 @@ Una app interna detrás de un ingreso no necesita SSR ni SEO: una SPA es lo más
 ## Notas para el AI (Memoria Técnica)
 - No implementes reglas de negocio en la web: las acciones visibles de un ticket salen de lo que la API indica como permitido.
 - Usa siempre el cliente tipado generado desde `contracts/openapi.json`; no escribas tipos de la API a mano.
-- La URL base de la API es relativa (`/api`): en desarrollo la resuelve el proxy de Vite y en Docker, nginx.
+- Las llamadas van al mismo origen bajo `/api`: en desarrollo las resuelve el proxy de Vite y en Docker, nginx. El cliente usa el origen como `baseUrl`, porque las rutas del contrato ya incluyen `/api`.
 - Muestra descripciones y comentarios como texto plano; nunca uses `dangerouslySetInnerHTML`.
 - Respeta los tokens de `tech-stack.md` (Visual Identity) y no uses arte ni logos oficiales de terceros.
+
+---
+
+## Extensión 2026-10-16 · Plan de la feature 001
+
+Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
+- **TypeScript 6** (`~6.0.3`), no 7. TypeScript 7, el port nativo, todavía rompe `openapi-typescript` y `typescript-eslint`. Cuando las herramientas lo soporten, migrar será cambiar la versión.
+- **Biome 2.5** para lint y formato, en lugar de ESLint y Prettier (unos 140 paquetes) o del Oxlint que trae el template. Su regla `noDangerouslySetInnerHtml` hace cumplir la nota de texto plano.
+- **React Router 8 en modo data**, sin `react-router-dom` (v8 lo eliminó). Las guardas por rol son middleware de ruta.
+- **`openapi-react-query`** integra el cliente tipado con TanStack Query.
+- **Cliente HTTP**: `baseUrl` es el origen, porque las rutas del contrato ya incluyen `/api`.
+- **Sesión**: vive en `sessionStorage`. Al cerrar sesión, también se limpia la caché de consultas.

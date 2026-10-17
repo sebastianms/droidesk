@@ -58,6 +58,6 @@ El navegador ve un único origen, así que no hay que configurar CORS ni exponer
 
 ## Notas para el AI (Memoria Técnica)
 - No habilites CORS abierto en la API: el mismo origen lo hace innecesario.
-- En desarrollo, el proxy de Vite reemplaza a nginx; la URL base sigue siendo `/api`.
+- En desarrollo, el proxy de Vite reemplaza a nginx; las llamadas siguen yendo a `/api` en el mismo origen.
 - El único comando de arranque documentado es `./setup.sh`; no agregues pasos manuales al README.
 - Con más de una réplica de la API, saca las migraciones del arranque.

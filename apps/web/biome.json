@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": { "includes": ["**", "!src/api/schema.d.ts", "!!dist", "!!coverage"] },
+  "formatter": { "indentStyle": "space", "lineWidth": 120 },
+  "linter": { "rules": { "preset": "recommended", "style": { "useComponentExportOnlyModules": "error" } } },
+  "javascript": { "formatter": { "quoteStyle": "single", "semicolons": "asNeeded" } },
+  "css": { "parser": { "cssModules": true } },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
+}

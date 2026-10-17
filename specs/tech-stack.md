@@ -72,13 +72,13 @@ droidesk/
 | Ingreso simulado | Token firmado (JWT) que se emite al elegir un usuario precargado | Perfiles reales en cada request sin gestionar contraseñas; reemplazable por SSO ([ADL-005](../.design-logs/ADL-005-simulated-auth-signed-token.md)) |
 | Dependencias de la API | uv (`pyproject.toml` + `uv.lock`) | Instalación reproducible y rápida |
 | Calidad de la API | ruff (lint y formato), mypy, pytest con cobertura | Gates del checkpoint de bloque |
-| Lenguaje de la web | TypeScript estricto | Tipos del contrato hasta la interfaz |
+| Lenguaje de la web | TypeScript 6 estricto | Tipos del contrato hasta la interfaz; TypeScript 7 todavía no lo soportan las herramientas de generación de tipos |
 | Interfaz | React + Vite, como SPA | Una app interna detrás de un ingreso no necesita SSR ([ADL-004](../.design-logs/ADL-004-react-vite-spa.md)) |
-| Ruteo | React Router | Rutas y guardas por rol |
+| Ruteo | React Router 8 (modo data) | Rutas por rol, con las guardas como middleware |
 | Estado de servidor | TanStack Query | Caché, recarga e invalidación tras tomar o cambiar un ticket, sin código propio |
-| Cliente HTTP | openapi-typescript + openapi-fetch | Tipos generados desde `contracts/openapi.json`: si el contrato cambia, la web no compila |
+| Cliente HTTP | openapi-typescript + openapi-fetch + openapi-react-query | Tipos y hooks generados desde `contracts/openapi.json`: si el contrato cambia, la web no compila |
 | Estilos | CSS Modules + tokens CSS | Tema del droide sin librerías de componentes |
-| Calidad de la web | Linter, chequeo de tipos, Vitest + Testing Library | Gates del checkpoint de bloque; las herramientas exactas se fijan en `research.md` |
+| Calidad de la web | Biome (lint y formato), `tsc -b`, Vitest + Testing Library | Gates del checkpoint de bloque; versiones exactas en el [research de la feature 001](001-ticketing-mvp/research.md) |
 | Contenedores | Docker Compose: `api` (uvicorn) y `web` (nginx con la SPA y proxy de `/api`) | Mismo origen en el navegador, sin CORS ([ADL-006](../.design-logs/ADL-006-docker-compose-same-origin.md)) |
 | CI | GitHub Actions: un workflow por app, con filtro de rutas, más un chequeo del contrato | Las apps también son independientes en CI |
 
@@ -131,8 +131,8 @@ erDiagram
 | POST | `/api/v1/tickets` | solicitante | Crear un ticket |
 | GET | `/api/v1/tickets` | ambos | Solicitante: sus tickets. Agente: la cola, con vistas fijas (cola completa y asignados a mí) |
 | GET | `/api/v1/tickets/{id}` | ambos | Detalle con historial, comentarios y acciones permitidas para quien consulta |
-| POST | `/api/v1/tickets/{id}/take` | agente | Tomar el ticket |
-| POST | `/api/v1/tickets/{id}/transitions` | según la transición | Cambiar el estado; la API valida la transición y el rol |
+| PATCH | `/api/v1/tickets/{id}` | agente | Ajustar la prioridad |
+| POST | `/api/v1/tickets/{id}/transitions` | según la acción | Tomar, cancelar, dejar en espera, retomar, resolver, cerrar o reabrir; la API valida el estado, el rol y la relación con el ticket |
 | POST | `/api/v1/tickets/{id}/comments` | ambos | Comentar |
 
 El solicitante solo ve y comenta sus propios tickets. El contrato completo vive en `contracts/openapi.json`.
@@ -187,7 +187,7 @@ El esfuerzo de testing sigue la ley de Pareto: el 20 % del código que concentra
 | Alcance | Meta (líneas) | Cómo se mide |
 |---|---|---|
 | Total de cada app (`apps/api`, `apps/web`) | ≥ 80 % | pytest-cov con `--cov-fail-under=80`; Vitest con un umbral global de 80 |
-| Flujo crítico de la API: `tickets/`, `sla/`, `audit/` y la autorización de `identity/` | ≥ 90 % | Un segundo reporte de coverage limitado a esas rutas, con `--fail-under=90` |
+| Flujo crítico de la API: `tickets/`, `sla/`, `audit/` e `identity/authorization.py` | ≥ 90 % | Un segundo reporte de coverage limitado a esas rutas, con `--fail-under=90` |
 | Flujo crítico de la web: `src/features/` | ≥ 90 % | Umbral por glob en la configuración de coverage de Vitest |
 
 Las rutas exactas se ajustan en el `plan.md` de la feature 001 si la estructura cambia; el criterio no. Fuera del foco quedan los estilos, los componentes puramente visuales, la configuración y el arranque, y el comportamiento interno de librerías de terceros: los cubre el 80 % total.

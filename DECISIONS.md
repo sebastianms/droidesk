@@ -12,8 +12,23 @@ Decisiones de producto y arquitectura del MVP, en versión breve. El detalle té
 | Web | SPA en React, Vite y TypeScript, con tipos generados del contrato | [ADL-004](.design-logs/ADL-004-react-vite-spa.md) |
 | Ingreso | Simulado: se elige un usuario precargado y la API emite un token firmado; el rol se lee de la base de datos | [ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md) |
 | Despliegue | Docker Compose, nginx como proxy de mismo origen y `./setup.sh` como único comando | [ADL-006](.design-logs/ADL-006-docker-compose-same-origin.md) |
+| SLA en tiempo hábil | Calendario propio de funciones puras: el vencimiento se guarda para ordenar la cola y el estado se deriva al leer | [ADL-009](.design-logs/ADL-009-sla-business-time.md) |
 
 La visión del sistema completo está en [`specs/tech-stack.md`](specs/tech-stack.md).
+
+## Modelo de datos
+
+Seis tablas: `users`, `categories`, `sla_policies`, `tickets`, `ticket_events` y `comments` ([detalle](specs/001-ticketing-mvp/data-model.md)).
+
+| Decisión | Por qué |
+|---|---|
+| `tickets` guarda el estado actual y `ticket_events` la historia, append-only | La cola se consulta rápido sobre una sola tabla indexada, y la trazabilidad no depende de reconstruir estados: cada hecho queda escrito una vez y nunca cambia |
+| Cada cambio y su evento se escriben en la misma transacción | El historial no puede quedar desalineado con el ticket |
+| Comentarios en su propia tabla, enlazados desde su evento `commented` | La conversación se lee directo, y el historial la muestra en su lugar cronológico |
+| El ticket guarda `sla_due_at` y `sla_paused_minutes`; el estado del SLA no se guarda | El vencimiento ordena la cola en la base; el estado derivado al leer nunca queda desactualizado |
+| La política de SLA guarda el plazo en la unidad del negocio (`hours` o `days`) | "1 día hábil" sigue siendo una jornada aunque cambie el horario |
+| Enums como texto, fechas en UTC y SQL portable | El mismo esquema y las mismas migraciones sirven para PostgreSQL ([ADL-003](.design-logs/ADL-003-sqlite-mvp-postgres-path.md)) |
+| Tomar y cancelar como actualizaciones condicionales | Dos agentes nunca quedan asignados al mismo ticket, sin locks explícitos |
 
 ## Máquina de estados del ticket
 
@@ -87,4 +102,6 @@ Pareto 80/20: cada app debe tener al menos 80 % de cobertura total y el flujo cr
 | Ingreso simulado: cualquiera puede entrar como cualquier usuario | El enunciado lo permite y la frontera de autorización ya es real ([ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md)) | Al integrar el proveedor de identidad de la organización |
 | SQLite admite un solo escritor a la vez | Basta para el volumen del MVP ([ADL-003](.design-logs/ADL-003-sqlite-mvp-postgres-path.md)) | Al migrar a PostgreSQL (plan de escalabilidad) |
 | Las migraciones corren al iniciar la API | Hay una sola instancia ([ADL-006](.design-logs/ADL-006-docker-compose-same-origin.md)) | Al tener más de una réplica |
+| Los listados no se paginan | El volumen del MVP lo permite ([contrato](specs/001-ticketing-mvp/contracts/rest-api.md)) | Antes de crecer en volumen o en áreas (plan de escalabilidad) |
+| Los mensajes del 422 de validación vienen en inglés, con el formato estándar de FastAPI | La web valida en español antes de enviar; el 422 es solo una red de seguridad y viene tipado sin código extra | Si se abre la API a otros clientes |
 | El calendario del SLA no considera feriados | Un feriado entre semana cuenta como día hábil: el error es acotado y evita mantener un calendario de feriados en el MVP | Al cargar el calendario de feriados de la organización (plan de escalabilidad) |

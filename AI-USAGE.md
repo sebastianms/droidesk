@@ -35,6 +35,7 @@ flowchart LR
 - **Skills versionadas en el repo** (`.claude/skills/`): quien clone el repo trabaja con las mismas reglas. La copia de deckard se adaptó para leer los ADL de `.design-logs/` y las skills clean-code del repo. Su agente delega en la skill para no duplicar las reglas.
 - **Hooks**: el del repo escribe [DEV-LOG.md](DEV-LOG.md). Los globales del usuario ejecutan deckard al terminar cada turno con cambios de código, rtk en cada comando de shell y graft.
 - **Memoria**: las correcciones del usuario sobre la forma de trabajar se guardan como memoria de feedback del agente.
+- **Seguridad operativa**: durante la investigación del plan, un subagente borró la caché global de build de Docker de la máquina. Desde entonces, `CLAUDE.md` prohíbe los comandos que afectan recursos globales (`docker * prune`), y todo prompt de subagente que use Docker incluye esa regla.
 - **Reparto de modelos**: la sesión principal nunca cambia de modelo, porque cambiarlo invalida el prompt cache. El coding va en subagentes Sonnet, cada uno con su propio contexto. El esfuerzo max se fija por sesión con `/model`: después de reiniciar hay que volver a fijarlo.
 
 ## 3. Qué se delegó por completo al agente
@@ -45,6 +46,9 @@ flowchart LR
 | 1 · Bootstrap IA | Revisión Clean Code del hook y corrección de sus 2 hallazgos de criticidad 8 | Sonnet 5.5 xHigh (deckard) |
 | 1 · Bootstrap IA | Copia y adaptación de skills, instalación de prompt-cache-control, `CLAUDE.md` y `.gitignore` | Opus 5.5 Max |
 | 1 · Constitución | `specs/mission.md`, `tech-stack.md`, `roadmap.md` y ADL-001 a ADL-007, a partir de las 5 respuestas del usuario | Opus 5.5 Max |
+| 2 · Especificación | `spec.md` y su checklist, con Clarify en 5 preguntas, y ADL-008 | Opus 5.5 Max |
+| 2 · Plan | Investigación del stack con 2 subagentes en paralelo (backend y frontend), que usaron context7 y prototipos descartables | Opus 5.5 Max (subagentes) |
+| 2 · Plan | `plan.md`, `research.md`, `data-model.md`, el contrato REST, `quickstart.md`, ADL-009 y las extensiones de ADL-002 a ADL-004 | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 
@@ -67,4 +71,8 @@ flowchart LR
 - **graft**: indexa el repo y responde "dónde está X / quién llama a Y" con el código inline, sin leer archivos enteros. En el bootstrap no había código de la app que indexar y sus herramientas MCP no quedaron expuestas en la sesión, así que se usa por CLI y por sus hooks globales; entra de lleno desde la Fase 2.
 - **rtk**: activo desde el primer comando del proyecto vía hook global; el ahorro acumulado se mide con `rtk gain`.
 - **prompt-cache-control**: instalado en la Fase 1 con `npx claude-code-templates@latest --mod observability/prompt-cache-control`. Las métricas de cache de cada turno (leída, escrita, hit rate) quedan también en DEV-LOG.
-- **context7**: obligatorio antes de escribir código contra FastAPI, SQLModel, Alembic, React o Vite; las consultas quedan registradas en DEV-LOG como comandos `ctx7`. En la constitución se usó, junto con los registros de npm y PyPI, para confirmar las versiones vigentes antes de fijar el stack (Vite 8, TypeScript 7, SQLAlchemy 2.1).
+- **context7**: obligatorio antes de escribir código contra FastAPI, SQLModel, Alembic, React o Vite; las consultas quedan registradas en DEV-LOG como comandos `ctx7`. En la constitución se usó, junto con los registros de npm y PyPI, para confirmar las versiones vigentes antes de fijar el stack (Vite 8, TypeScript 7, SQLAlchemy 2.1). En el plan, los subagentes de investigación lo combinaron con prototipos descartables y encontraron incompatibilidades que la memoria del modelo no traía:
+  - TypeScript 7 todavía rompe la generación de tipos, así que se fija TypeScript 6;
+  - React Router 8 eliminó `react-router-dom`;
+  - el `TestClient` de FastAPI ahora usa `httpx2`;
+  - SQLModel exige fechas con zona horaria ([research.md](specs/001-ticketing-mvp/research.md)).

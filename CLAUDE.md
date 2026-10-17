@@ -30,10 +30,15 @@ Este archivo manda sobre las skills genéricas cuando se contradicen. Los overri
 - **Planificación** (constitution, specify, clarify, plan, tasks, replanning, ADLs, documentación): sesión principal con **Opus 5.5, esfuerzo max**.
 - **Coding** (implement, scripts, Docker, tests): **subagentes Sonnet 5.5 con esfuerzo xHigh** (`model: sonnet`, `effort: xhigh`). Cada subagente recibe un prompt autocontenido con tareas, rutas, contratos y las reglas de este archivo.
 
+## Seguridad operativa (agentes y subagentes)
+- No ejecutes comandos que afecten recursos globales de la máquina: `docker builder prune`, `docker system prune`, `docker image prune` o `docker volume prune`, ni borres imágenes, contenedores o volúmenes que no creaste.
+- Las imágenes y los contenedores de prueba llevan un tag propio (`droidesk-*`) y se borran solo por ese tag.
+- Todo prompt de subagente que pueda usar Docker incluye estas reglas.
+
 ## Herramientas
 - **context7** ([skill](.claude/skills/context7/SKILL.md), `npx ctx7@latest`): consultar la documentación vigente antes de usar la API de una librería (FastAPI, SQLModel, Alembic, React, Vite, etc.).
 - **graft**: navegar el código antes de usar grep o leer archivos completos, vía MCP (`graft_find_code`, `graft_trace_calls`, `graft_file_api`) o CLI (`graft ask`, `graft skeleton`, `graft callers`). Reindexar con `graft build` tras cambios grandes.
-- **rtk**: proxy de shell que comprime la salida de los comandos; actúa solo, vía hook global.
+- **rtk**: proxy de shell que comprime la salida de los comandos; actúa solo, vía hook global. Cuando se necesita la salida cruda (por ejemplo, `npm run lint` con Biome, que rtk confunde con ESLint), se usa `rtk proxy <comando>`.
 - **prompt-cache-control** ([mod](.claude/skills/prompt-cache-control/README.md)): vigilar el prompt cache. No cambiar de modelo en la sesión principal y usar `/compact` antes de retomar un contexto grande con el cache expirado.
 
 ## Arquitectura

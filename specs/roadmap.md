@@ -14,7 +14,7 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 
 - [x] Specify: `specs/001-ticketing-mvp/spec.md` y su checklist de calidad.
 - [x] Clarify (5 preguntas): prioridad, pausa del SLA, respuesta del solicitante en espera, cancelación y plazos por prioridad.
-- [ ] Plan: `plan.md`, `research.md` (versiones verificadas con context7), `data-model.md`, `contracts/` y `quickstart.md`.
+- [x] Plan: `plan.md`, `research.md` (versiones verificadas con context7), `data-model.md`, `contracts/` y `quickstart.md`.
 - [ ] Tasks: `tasks.md`, organizado por user story.
 
 ## Phase 3: Foundational Elements — `phase/03-foundation`

@@ -15,7 +15,7 @@ El enunciado no espera cobertura completa: pide explicar qué se probó, qué no
 
 ## Decisión
 
-Cada app (`apps/api` y `apps/web`) debe tener al menos 80 % de cobertura de líneas en total, y el **flujo crítico** al menos 90 %. El flujo crítico es el ciclo de vida del ticket (crear → tomar → cambiar estado → historial), con sus reglas de SLA y la autorización por rol. En la API corresponde a `tickets/`, `sla/`, `audit/` y la autorización de `identity/`; en la web, a `src/features/`. Ambos umbrales son gates del checkpoint de cada bloque.
+Cada app (`apps/api` y `apps/web`) debe tener al menos 80 % de cobertura de líneas en total, y el **flujo crítico** al menos 90 %. El flujo crítico es el ciclo de vida del ticket (crear → tomar → cambiar estado → historial), con sus reglas de SLA y la autorización por rol. En la API corresponde a `tickets/`, `sla/`, `audit/` e `identity/authorization.py`; en la web, a `src/features/`. Ambos umbrales son gates del checkpoint de cada bloque.
 
 ---
 

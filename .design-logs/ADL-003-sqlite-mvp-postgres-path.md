@@ -58,3 +58,13 @@ Cero infraestructura adicional para el MVP y transacciones reales para escribir 
 - Guarda y compara fechas siempre en UTC; conviértelas a hora local solo en la web.
 - Todo cambio de esquema va en una migración de Alembic, nunca con `create_all` en producción.
 - Las operaciones que modifican un ticket y su historial van en una sola transacción.
+
+---
+
+## Extensión 2026-10-16 · Plan de la feature 001
+
+Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
+- **Claves foráneas**: `PRAGMA foreign_keys=ON` y `journal_mode=WAL` se activan con un listener **solo en el engine de la app**. Activadas, hacen fallar las migraciones batch de Alembic, por eso el engine de `env.py` no las lleva.
+- **Fechas**: SQLModel ≥ 0.0.45 mapea `datetime` a `UTCDateTime`, que exige fechas con zona y devuelve UTC; esto cumple esta decisión por diseño.
+- **Esquema**: `SQLModel.metadata` lleva una naming convention (ix, uq, ck, fk, pk), para que las migraciones sean deterministas en SQLite y en PostgreSQL. Los enums se guardan como texto, sin tipos nativos.
+- **Camino a PostgreSQL**: con SQLAlchemy 2.1, `postgresql://` usa psycopg 3 por defecto. Hay que considerarlo en el plan de escalamiento.

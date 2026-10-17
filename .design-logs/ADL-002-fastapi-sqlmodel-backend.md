@@ -62,3 +62,17 @@ FastAPI entrega validación por tipos, inyección de dependencias (útil para au
 - Usa dependencias con `Annotated` para la sesión y el usuario actual.
 - Consulta context7 antes de usar APIs de FastAPI, SQLModel o Alembic: las versiones cambian rápido.
 - No cambies a async ni agregues un repository pattern genérico sin un ADL que lo justifique.
+
+---
+
+## Extensión 2026-10-16 · Plan de la feature 001
+
+Verificado en [research.md](../specs/001-ticketing-mvp/research.md); la decisión de fondo no cambia.
+- **Versiones**: fastapi 0.143.3 (sin `[standard]`), sqlmodel 0.0.48 (tope `<0.0.49`), sqlalchemy 2.1.5 (respaldo 2.0.55), pydantic 2.14.1, alembic 1.20.0, uvicorn 0.54.0 y pyjwt 2.15.1, todo sobre `python:3.14.8-slim-trixie` y uv 0.13.1.
+- **Librerías nuevas**:
+  - `pydantic-settings` para la configuración con prefijo `DROIDESK_`;
+  - `tzdata` para tener las mismas reglas de zona horaria en todos los entornos;
+  - `httpx2` como cliente del `TestClient` en desarrollo, porque Starlette 1.8 lo prefiere.
+- **Errores**: una jerarquía `DomainError` con un solo handler que responde `{code, message}`. Las rutas declaran sus respuestas 4xx para que el OpenAPI las tipifique. El 422 de validación conserva el formato estándar de FastAPI.
+- **Enums**: `StrEnum` con valores en minúscula, guardados como texto (`native_enum=False`).
+- **Contrato**: `scripts/export_openapi.py` lo regenera; importar la app no debe exigir secretos ni tocar la base.

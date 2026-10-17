@@ -1152,3 +1152,45 @@ Midiendo caché BuildKit del laboratorio
 ### #13 · 🧑 Usuario
 > si, aprobado
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo max · ⏱ 3m 34s
+- **Herramientas:** Bash ×3 · Edit ×3 · Write ×1
+- **Archivos modificados:** `specs/001-ticketing-mvp/tasks.md`, `specs/roadmap.md`, `AI-USAGE.md`
+- **Git:** `f58357a` docs: alinea tech-stack, roadmap, CLAUDE.md, DECISIONS, AI-USAGE y DEV-LOG
+- **Tokens:** entrada 8 · cache leída 2.4M · cache escrita 23.1k · salida 22.3k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Terminé el bloque **Tasks**, el último de la Fase 2. Espero tu aprobación para el commit, el push y abrir el PR #2.
+
+**`specs/001-ticketing-mvp/tasks.md`**: 63 tareas con el formato de la skill y numeración correlativa validada.
+
+| Bloque | Fase | Tareas | Entregable |
+|---|---|---|---|
+| Setup | 3 | T001–T009 | Las dos apps creadas, con lint, tests, Docker, CI por app y el contrato inicial |
+| Foundational | 3 | T010–T028 | Esquema completo, dominio en TDD (ciclo de vida, calendario hábil, estado del SLA), ingreso simulado, guardas por rol y design system del droide |
+| US1 | 4 | T029–T036 | Crear, listar, ver y cancelar mis tickets |
+| US2 | 5 | T037–T042 | Cola, tomar sin que dos agentes ganen el mismo ticket, y transiciones |
+| US3 | 6 | T043–T045 | Historial inmutable |
+| US4 | 7 | T046–T051 | Comentarios y vuelta automática desde En espera |
+| US5 | 8 | T052–T057 | Prioridad, luces de SLA y cola ordenada por urgencia |
+| Polish | 9 | T058–T063 | Datos de demo, `setup.sh`, smoke test end-to-end, README, documentación final y el chequeo de consistencia final de la skill |
+
+**Cómo está armado**
+- **Tests**: obligatorios por el ADL-007. El dominio va en TDD, con los bordes del SLA (incluidos los cambios de horario de verano de `America/Santiago`) y la carrera al tomar un ticket.
+- **Checkpoint por bloque**: cada uno indica qué escenarios del quickstart deben quedar en verde.
+- **Trazabilidad**: una tabla al final relaciona los 25 requisitos funcionales, los edge cases y la métrica de puesta en marcha con sus tareas. Ninguna tarea queda sin requisito.
+- **Dependencias**: un diagrama las muestra. Setup → Foundational → US1 → US2 va en orden estricto. US3, US4 y US5 dependen solo de US2, pero siguen el orden del roadmap para tener un PR por fase.
+
+**Verificación**: el diagrama renderiza, no hay enlaces rotos, el roadmap marca la Fase 2 como terminada y `AI-USAGE.md` registra el bloque.
+
+**Lo que propongo:**
+1. El commit `docs(001-mvp/tasks): desglosa el MVP en 63 tareas por user story` y el push.
+2. El **PR "Fase 2: especificación y plan del MVP"** hacia `main`. Junta los 7 commits de la fase: spec con Clarify, ADL-008, plan con research, ADL-009 y tasks.
+
+Con el PR integrado arranca la **Fase 3 (Fundaciones)**, la primera de coding. Como acordamos, la implementan subagentes Sonnet 5.5 xHigh, bloque por bloque, con checkpoint y tu aprobación antes de cada commit. ¿Apruebas?
+
+</details>
+
+### #14 · 🧑 Usuario
+> crea el PR
+

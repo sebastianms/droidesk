@@ -49,6 +49,7 @@ flowchart LR
 | 2 · Especificación | `spec.md` y su checklist, con Clarify en 5 preguntas, y ADL-008 | Opus 5.5 Max |
 | 2 · Plan | Investigación del stack con 2 subagentes en paralelo (backend y frontend), que usaron context7 y prototipos descartables | Opus 5.5 Max (subagentes) |
 | 2 · Plan | `plan.md`, `research.md`, `data-model.md`, el contrato REST, `quickstart.md`, ADL-009 y las extensiones de ADL-002 a ADL-004 | Opus 5.5 Max |
+| 2 · Tasks | `tasks.md`: 63 tareas en bloques (Setup, Foundational, US1 a US5 y Polish), con trazabilidad de cada FR a sus tareas | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 

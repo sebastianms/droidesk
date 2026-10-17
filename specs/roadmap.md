@@ -10,12 +10,12 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 - [x] Constitución: `mission.md`, `tech-stack.md` y `roadmap.md`.
 - [x] ADLs fundacionales: ADL-001 a ADL-007.
 
-## Phase 2: MVP Specification & Plan — `phase/02-mvp-spec` [EN CURSO]
+## Phase 2: MVP Specification & Plan — `phase/02-mvp-spec` [DONE · PR #2]
 
 - [x] Specify: `specs/001-ticketing-mvp/spec.md` y su checklist de calidad.
 - [x] Clarify (5 preguntas): prioridad, pausa del SLA, respuesta del solicitante en espera, cancelación y plazos por prioridad.
 - [x] Plan: `plan.md`, `research.md` (versiones verificadas con context7), `data-model.md`, `contracts/` y `quickstart.md`.
-- [ ] Tasks: `tasks.md`, organizado por user story.
+- [x] Tasks: `tasks.md`, organizado por user story (63 tareas, con trazabilidad a los FR).
 
 ## Phase 3: Foundational Elements — `phase/03-foundation`
 

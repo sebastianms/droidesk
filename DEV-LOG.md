@@ -5452,3 +5452,505 @@ Checking id params in router.py
 ### #36 · 🧑 Usuario
 > aprobado, abre el PR
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 3m 19s
+- **Herramientas:** Bash ×6 · StructuredOutput ×1
+- **Git:** `fc7b185` docs: agrega FR-017a y FR-017b, extiende ADL-002, ADL-003, ADL-004 y ADL-008 y actualiza SDD, DECISIONS y AI-USAGE · PR https://github.com/sebastianms/droidesk/pull/7
+- **Tokens:** entrada 10 · cache leída 1.9M · cache escrita 5.9k · salida 5.2k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #7 de la Fase 7: https://github.com/sebastianms/droidesk/pull/7
+
+- Antes de commitear marqué T046–T051 como hechas en `tasks.md` y la Fase 7 como `[DONE · PR #7]` en el roadmap.
+- Hice los 6 commits y el push a `phase/07-comments`; el árbol quedó limpio.
+- El fix de los ids quedó como commit propio. Para no partir archivos a mano, el commit de comentarios lleva `router.py` y `schemas.py` con `int`, y el del fix los cambia al tipo `Id`.
+- El CI de GitHub pasó en `api` y `web`. El job `api` tardó más que de costumbre, porque ahora corre 953 tests.
+
+Cuando hagas el squash and merge, creo `phase/08-sla-priority` desde `main` actualizado y arranco la US5. En esa fase el agente ajusta la prioridad, el vencimiento se recalcula y el SLA se ve con luces en todas las vistas.
+
+</details>
+
+### #37 · 🧑 Usuario
+> mezclado
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 30m 9s
+- **Herramientas:** Bash ×108 · Read ×7 · Agent ×4 · SubagentHandback ×4 · Write ×2 · Edit ×1
+- **Archivos modificados:** `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/e2e/us5.mjs`, `apps/api/tests/api/test_us5_sla.py`, `apps/web/src/features/tickets/TicketDetailPage.test.tsx`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 16m 27s · 11.8M tokens
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 1m 11s · 491.9k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 3m 15s · 1.2M tokens
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 59s · 291.2k tokens
+- **Tokens:** entrada 28 · cache leída 5.6M · cache escrita 34.7k · salida 16.6k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Terminé la US5 de la Fase 8, rama `phase/08-sla`, sin commitear. El agente ya ajusta la prioridad, el vencimiento se recalcula y la cola se reordena por urgencia. Falta tu aprobación para el commit y el push.
+
+**Qué faltaba:** varias tareas de esta fase ya estaban hechas desde fases anteriores: el selector de prioridad al crear, las luces del SLA en todas las vistas, el orden de la cola y la pausa. En esta fase se agregó:
+- **Ajuste de prioridad** (`PATCH /tickets/{id}`):
+  - Solo los agentes pueden ajustarla, y solo mientras el ticket no esté Resuelto ni sea final.
+  - El vencimiento se recalcula desde la creación, sumando las esperas ya acumuladas, y el historial registra "cambió la prioridad de Media a Crítica".
+  - Pedir la misma prioridad no cambia nada.
+  - Si alguien modificó el ticket mientras tanto, responde 409 "El ticket cambió mientras ajustabas su prioridad".
+- **En el detalle**, el agente ve un selector con cada prioridad y su plazo ("Crítica · 4 horas hábiles") y el botón "Cambiar prioridad". La solicitante no lo ve.
+- **Tests de los 8 bordes del SLA** del quickstart, a través de la API.
+
+**Pruebas**
+- **En el navegador**, contra un stack aislado que ya borré:
+  - **Escenario 5:** la cola sale ordenada por vencimiento, con los En espera al final.
+  - **Escenario 13:** pasar un ticket de Media a Crítica movió su vencimiento del 21 oct 18:00 al 19 oct 13:00 y lo subió al primer lugar de la cola.
+  - Repetí la prueba de la US2 como regresión y sigue pasando.
+- Las dos fallas que aparecieron fueron de mis scripts, que leían la cola antes de que cargara, no de la app.
+- **API:** 1086 tests, 99,91 % de cobertura total y 100 % en el flujo crítico.
+- **Web:** 492 tests y 100 % de líneas. Lint, typecheck y build pasan, y el contrato está al día.
+- **deckard:** sin hallazgos de criticidad ≥ 8. Corregí un 7: si cambiar la prioridad fallaba porque el ticket justo se resolvía, el aviso y a veces el panel entero desaparecían sin explicación.
+
+**Un caso borde para que lo conozcas.** Si se sube la prioridad de un ticket En espera y el nuevo vencimiento cae antes del inicio de la espera, el SLA pasa de "En pausa" a "Vencido". Al retomar, esa espera no suma tiempo. Es consecuencia de la regla que ya acordamos: una espera que empieza con el ticket vencido no corre el plazo. Lo dejé documentado en ADL-009. Si prefieres otro comportamiento, lo cambio.
+
+**Documentos:** T052–T057 en curso en `tasks.md` (T055 y T056 marcadas como verificadas) y la Fase 8 aparece EN CURSO en el roadmap. Extendí ADL-009 y actualicé el contrato REST y AI-USAGE. Además renombré la rama a `phase/08-sla` para que coincida con el roadmap.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión.
+
+Commits propuestos:
+1. `feat(api): permite al agente ajustar la prioridad y prueba los bordes del SLA`
+2. `feat(contracts): publica el ajuste de prioridad en el contrato`
+3. `feat(web): agrega el ajuste de prioridad del agente y extrae SlaLight`
+4. `docs: extiende ADL-009 y actualiza SDD, contrato REST y AI-USAGE`
+
+¿Apruebas el commit y el push? Si apruebas, también abro el PR #8.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading US5 spec requirements
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_us2_agent_queue.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading authorization.py and http_errors.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading TicketActions.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Locating QueuePage.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding update_ticket endpoint to router.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing change_priority service diff
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding patch_ticket fixture to conftest.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Comparing event_trail helpers across tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing test_us5_sla.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_ticket_service.py races
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing regenerated openapi.json diff
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking mutation callbacks in CommentBox.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Extracting SlaLight.tsx from StatusLight.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking StatusLight.tsx state
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding policyLabel to labels.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running web tests after PriorityControl
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading TicketDetailPage.test.tsx actions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running TicketActions.test.tsx suite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Fixing in-flight test in TicketActions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running the full vitest suite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying NewTicketForm priority tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Building web bundle with vite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating test_app.py operation IDs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking critical-flow coverage gate
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding wait-priority test to test_us5_sla.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Tightening 422 test assertions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running final API checkpoint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing PriorityControl.tsx and SlaLight.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Scanning test_us5_sla.py helpers and fixtures
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading TicketActions.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading TicketDetailPage.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Extracting `_forbidden_message` in lifecycle.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Locating the biome binary
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Building the web app bundle
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking lint config and authorize_transition
+
+</details>
+
+### #38 · 🧑 Usuario
+> agreguemos un filtro y un ordenamiento por SLA y prioridad
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 19m 48s
+- **Herramientas:** Bash ×61 · Read ×9 · Agent ×4 · SubagentHandback ×4 · Write ×2
+- **Archivos modificados:** `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/e2e/filters.mjs`, `apps/web/src/features/tickets/listFilters.ts`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 9m 37s · 3.6M tokens
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 51s · 235.1k tokens
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 1m 28s · 629.8k tokens
+  - `deckard` · `claude-opus-5-5` · ⏱ 28s · 136.7k tokens
+- **Tokens:** entrada 30 · cache leída 6.5M · cache escrita 32.2k · salida 17.3k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Agregué los filtros y el orden a la Fase 8 y quedaron funcionando en el navegador. La fase sigue sin commitear y falta tu aprobación para el commit y el push.
+
+**Cómo funciona**
+- Sobre los tres listados (Mis tickets, Cola y Asignados a mí) hay tres controles:
+  - **Prioridad:** Todas, Crítica, Alta, Media o Baja.
+  - **SLA:** Todos, Vencido, Por vencer, En plazo, En pausa, Cumplido o Incumplido.
+  - **Ordenar por:** Predeterminado, Vencimiento, Prioridad o Más recientes. "Predeterminado" respeta el orden de cada vista: los más recientes en Mis tickets y la urgencia en la cola. "Prioridad" va de Crítica a Baja y, a igual prioridad, por vencimiento.
+- Con un filtro activo aparece "Mostrando N de M tickets" y el botón "Limpiar filtros". Si no queda nada, la lista dice "Bip-bup: ningún ticket coincide con los filtros".
+- Los filtros viven en la URL (por ejemplo `/agent?priority=critical&sort=due`): sobreviven a recargar y se pueden compartir.
+- Una decisión que tomé yo: **al cambiar de pestaña entre Cola y Asignados a mí, los filtros se conservan.** El subagente los reiniciaba; si prefieres eso, es un cambio de una línea.
+- Todo ocurre en la web, sin tocar la API. Quedó como deuda en DECISIONS moverlo a la API cuando se agregue paginación.
+
+**Pruebas**
+- **En el navegador**, contra un stack aislado que ya borré:
+  - Pasan el orden por defecto y por prioridad, el filtro por prioridad y por SLA, recargar con filtros, el vacío y "Limpiar filtros".
+  - También pasan los filtros combinados con la pestaña, el cambio de pestaña y la vista móvil, sin errores de consola ni de CSP.
+  - Repetí la prueba de la US5. Falló por mi script: React Router mantiene la cola en pantalla un instante tras el clic, y el script eligió "Crítica" en el filtro de la cola en vez del control del ticket. Lo corregí y pasa.
+- **Web:** 589 tests y 100 % de líneas. Lint, typecheck y build pasan.
+- **API:** 1086 tests, sin cambios.
+- **deckard:** sin hallazgos de criticidad ≥ 8, ni en la revisión ni en la confirmación final.
+
+**Documentos:** spec con FR-024a y la clarificación, ADL-004, DECISIONS (la deuda de mover los filtros a la API), `tasks.md` y AI-USAGE, donde registré tu pedido.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión.
+
+Commits propuestos para toda la Fase 8:
+1. `feat(api): permite al agente ajustar la prioridad y prueba los bordes del SLA`
+2. `feat(contracts): publica el ajuste de prioridad en el contrato`
+3. `feat(web): agrega el ajuste de prioridad del agente y extrae SlaLight`
+4. `feat(web): agrega filtros y orden por SLA y prioridad en los listados`
+5. `docs: agrega FR-024a, extiende ADL-004 y ADL-009 y actualiza SDD, contrato REST, DECISIONS y AI-USAGE`
+
+¿Apruebas el commit y el push? Si apruebas, también abro el PR #8.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading QueuePage.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading queue_sort_key in status.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading Panel.tsx and Facts.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading labels.test.ts patterns
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Typechecking TicketList.tsx wiring
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running vitest after ListControls.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Extending labels.test.ts cases
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Covering shownCountLabel singular case
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Diagnosing Biome error in TicketList.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading QueuePage.test.tsx endings
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running feature tests for filters
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking coverage of listFilters.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding null-due sort tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking contracts/openapi.json untouched
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Rerunning TicketList.tsx checks
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Revisando PriorityControl.tsx y QueuePage.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking tsconfig and QueuePage tabs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running lint and typecheck
+
+</details>
+
+### #39 · 🧑 Usuario
+> si, aprobado
+

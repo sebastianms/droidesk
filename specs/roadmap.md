@@ -41,9 +41,9 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 
 - [x] Solicitante y agente conversan dentro del ticket; cada comentario queda en el historial.
 
-## Phase 8: SLA por prioridad — `phase/08-sla`
+## Phase 8: SLA por prioridad — `phase/08-sla` [DONE · PR #8]
 
-- [ ] Prioridad con plazo comprometido en tiempo hábil (lunes a viernes, jornada laboral), vencimiento visible, luces de estado del SLA y cola ordenada por urgencia.
+- [x] Prioridad con plazo comprometido en tiempo hábil (lunes a viernes, jornada laboral), vencimiento visible, luces de estado del SLA y cola ordenada por urgencia.
 
 ## Phase 9: Packaging & Initial Setup — `phase/09-packaging`
 

@@ -26,6 +26,7 @@ Las user stories US1 a US5 se implementan en las fases 4 a 8 del [roadmap](../ro
 
 - Q: ¿Cómo se sabe que un ticket tiene conversación sin abrirlo? → A: Los listados (Mis tickets, Cola y Asignados a mí) muestran cuántos comentarios tiene cada ticket, y el panel de comentarios del detalle muestra el total (FR-017a).
 - Q: ¿Se puede responder a un comentario puntual? → A: Sí. Un comentario puede citar a otro del mismo ticket como respuesta: se muestra con el autor y un extracto del original, enlazado a él. La cita es de un solo nivel (FR-017b).
+- Q: ¿Se pueden filtrar y ordenar los listados? → A: Sí. Mis tickets, Cola y Asignados a mí se filtran por prioridad y por estado del SLA, y se ordenan por vencimiento, por prioridad o por los más recientes. Cada vista conserva su orden por defecto, y los filtros quedan en la URL. En el MVP se aplican en la web sobre el listado completo (FR-024a).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -190,6 +191,7 @@ Como agente, quiero saber cuánto plazo le queda a cada ticket según su priorid
 - **FR-022**: Si la prioridad cambia, el vencimiento MUST recalcularse desde la creación y el cambio quedar en el historial.
 - **FR-023**: El sistema MUST mostrar el estado del SLA de cada ticket: En plazo, Por vencer (queda menos del 25 % del plazo hábil) o Vencido mientras no esté resuelto; En pausa mientras está En espera dentro de plazo; y Cumplido o Incumplido una vez resuelto. Los tickets Cancelados no tienen estado de SLA ni cuentan para el cumplimiento.
 - **FR-024**: La cola del agente MUST ordenarse por vencimiento, del más urgente al menos urgente; a igual vencimiento, por antigüedad.
+- **FR-024a**: Los listados de tickets MUST permitir filtrar por prioridad y por estado del SLA, y ordenar por vencimiento, por prioridad (de Crítica a Baja y, a igual prioridad, por vencimiento) o por los más recientes; sin filtros, cada vista conserva su orden por defecto (FR-024).
 - **FR-025**: El estado del ticket y del SLA MUST comunicarse con texto, no solo con color.
 
 ### Key Entities

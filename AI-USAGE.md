@@ -67,6 +67,9 @@ flowchart LR
 | 7 · Correcciones | Un test de inmutabilidad de la US3 que pasaba sin comprobar nada (FastAPI 0.143 ya no expone las rutas en `app.routes`) y el mensaje del 409 al comentar durante una carrera | Sonnet 5.5 xHigh |
 | 7 · Revisión del usuario | Contador de comentarios (FR-017a) y respuesta citada (FR-017b, migración 0003), cada uno con su revisión de deckard sin hallazgos ≥ 8 | Sonnet 5.5 xHigh |
 | 7 · Orquestación | Prueba en navegador de los escenarios 8 y 9, del contador y de la respuesta citada contra un stack aislado, migración de la base local con datos (0001 → 0003), y extensiones de ADL-002, ADL-003, ADL-004 y ADL-008 | Opus 5.5 Max |
+| 8 · US5 | Ajuste de prioridad del agente (API, contrato y control en la web), tests de los bordes del SLA a través de la API y extracción de `SlaLight` | Sonnet 5.5 xHigh |
+| 8 · Checkpoint | deckard sin hallazgos de criticidad ≥ 8; se corrigió un aviso de error que desaparecía al refrescar el detalle (criticidad 7) | Sonnet 5.5 xHigh (deckard) |
+| 8 · Orquestación | Prueba en navegador de los escenarios 5 y 13 contra un stack aislado y extensión de ADL-009 | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 
@@ -84,6 +87,7 @@ flowchart LR
 | Fase 7 · Revisión de comentarios | Pidió un contador de comentarios o un indicador de que el ticket tiene comentarios | FR-017a nuevo: los listados muestran cuántos comentarios tiene cada ticket (`TicketSummary.comment_count`, calculado sin N+1) y el detalle muestra el total |
 | Fase 7 · Revisión de comentarios | Pidió poder citar un comentario como respuesta a otro | FR-017b nuevo: `Comment.reply_to_id` (migración 0003), botón "Responder" y la cita con autor y extracto enlazada al original |
 | Fase 7 · Revisión de comentarios | Pidió una explicación del 500 con ids mayores que 2^63 y decidió corregirlo en esta fase, en vez de dejarlo para el empaquetamiento | Tipo de id acotado y compartido en la API: un id fuera de rango responde 422, y el contrato publica el mínimo y el máximo |
+| Fase 8 · Revisión del SLA | Pidió filtrar y ordenar por SLA y por prioridad | FR-024a nuevo: filtros por prioridad y estado del SLA y orden por vencimiento, prioridad o más recientes en los tres listados, aplicados en la web y guardados en la URL; queda como deuda moverlos a la API junto con la paginación |
 
 ## 5. Qué salidas del agente se rechazaron
 

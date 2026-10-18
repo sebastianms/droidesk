@@ -3468,3 +3468,553 @@ Checking CSS against CSP
 ### #24 · 🧑 Usuario
 > haz el PR
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 45s
+- **Herramientas:** Bash ×10
+- **Git:** `e2944c1` docs: revisa el ingreso (FR-001, ADL-005), extiende ADLs, actualiza SDD, DECISIONS, AI-USAGE y DEV-LOG · PR https://github.com/sebastianms/droidesk/pull/3
+- **Tokens:** entrada 22 · cache leída 772.5k · cache escrita 52.8k · salida 5.5k · hit 94%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #3: https://github.com/sebastianms/droidesk/pull/3
+
+- **Commits:** antes de commitear marqué T010–T028 como `[x]` en `tasks.md` y puse la Fase 3 del roadmap en `[DONE · PR #3]`. Después hice los 8 commits que propuse y el push a `phase/03-foundation`. No se versionó ningún `.env` ni secreto.
+- **CI:** los jobs `api` y `web` pasaron en GitHub. Además, el gate de cobertura del flujo crítico (90 %) y el chequeo de que las migraciones coinciden con los modelos ya corren de verdad; antes se saltaban porque faltaban sus archivos.
+- **Ambiente local:** no lo toqué; sigue corriendo en http://localhost:8080.
+
+Cuando hagas el squash and merge, creo `phase/04-requester-tickets` desde `origin/main` actualizado y arranco la US1, en la que el solicitante crea un ticket y sigue el estado de los suyos. Si quieres, también borro las ramas viejas `phase/01-setup-constitution` y `phase/02-mvp-spec`.
+
+</details>
+
+### #25 · 🧑 Usuario
+> mezclado
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 38s
+- **Herramientas:** Bash ×13 · Agent ×1
+- **Tokens:** entrada 22 · cache leída 995.9k · cache escrita 29k · salida 7.3k · hit 97%
+
+<details><summary>Respuesta</summary>
+
+Ya tengo lo necesario para la web. Lanzo su subagente cuando la API termine y regenere el contrato.
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 13m 6s
+- **Herramientas:** Bash ×52 · Agent ×2 · StructuredOutput ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 11m 55s · 4.6M tokens
+  - `subagente`
+- **Tokens:** entrada 18 · cache leída 942k · cache escrita 16.1k · salida 8.2k · hit 98%
+
+<details><summary>Respuesta</summary>
+
+Siguen trabajando dos agentes en paralelo: el que implementa la web de la US1 (T034–T036) y deckard, que revisa la API. Cuando terminen, sigo con el checkpoint.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading seed.py and ADL-008
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Querying context7 for SQLModel update
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_app.py OpenAPI tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Prototyping pydantic constraints in proto.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing tickets/schemas.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Typechecking tickets/service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Annotating RowStatement alias in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting existing test_app error handlers
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running test_us1_requester_tickets.py tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Refactoring ticket id helpers in tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking critical-path coverage report
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Mutation-testing `_move` in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Typechecking web against schema.d.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying openapi.json export determinism
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Locating spec sections and ADLs
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2m 3s
+- **Herramientas:** Bash ×16 · Read ×1 · StructuredOutput ×1 · SubagentHandback ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 1m 50s · 460.4k tokens
+- **Tokens:** entrada 6 · cache leída 252.8k · cache escrita 5.7k · salida 2.3k · hit 98%
+
+<details><summary>Respuesta</summary>
+
+Hay dos agentes trabajando: uno en la web de la US1 y otro aplicando los ajustes menores en la API. Espero sus reportes.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+continua
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking jsdom dialog support
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Leyendo ADL-002 y ADL-008
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Revisando models.py y ensure_can_view
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading openapi-react-query index.mjs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Localizando StateAction en schemas.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking jsdom dialog support
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 2m 36s
+- **Herramientas:** Bash ×22 · StructuredOutput ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 2m 49s · 770.3k tokens
+
+<details><summary>Respuesta</summary>
+
+Los ajustes en la API quedaron aplicados: siguen pasando los 584 tests, el gate crítico está en 100 % y el contrato no cambió. Falta el subagente de la web.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Hay dos agentes trabajando: uno en la web de la US1 y otro aplicando los ajustes menores en la API. Espero sus reportes.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test factories and service
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Tracing 422 field errors
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Moving ensure_can_view to access.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking seed.py policy labels
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking listing usages in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Probing jsdom dialog support
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Unquoting TicketService annotation in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying openapi.json export unchanged
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing Intl.DateTimeFormat es-CL output
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 44s
+- **Herramientas:** Bash ×6 · Read ×2 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 10 · cache leída 396.8k · cache escrita 3.4k · salida 873 · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando al subagente de la web. Después vienen el checkpoint completo y la pasada de deckard sobre todo el diff.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+continua
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Extending errors.ts with validationIssues
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2s
+- **Herramientas:** Bash ×2 · Read ×1 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 134.5k · cache escrita 150 · salida 80 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Todavía trabajan el subagente de la web y el temporizador. Hago la pasada de deckard sobre el diff completo en cuanto termine la web; antes no tiene sentido, porque los archivos de la web siguen cambiando.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+continua
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Creating StatusLight.tsx
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 25s
+- **Herramientas:** Bash ×7 · StructuredOutput ×1 · ToolSearch ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 14 · cache leída 825.3k · cache escrita 5.5k · salida 1.4k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El subagente de la web sigue trabajando. Cuando termine, corro el checkpoint completo y la pasada de deckard sobre todo el diff.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing MyTicketsPage.tsx
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2s
+- **Herramientas:** Bash ×3 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 4 · cache leída 140.3k · cache escrita 169 · salida 95 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Todavía falta lo que el hook exige: la pasada final de deckard sobre todo el diff. Corre después del checkpoint, y el checkpoint depende de que termine el subagente de la web, que sigue activo. El vigía de inactividad me avisará cuando eso pase.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+continua
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 14m 2s
+- **Herramientas:** Bash ×51 · Read ×5 · SubagentHandback ×2 · StructuredOutput ×1 · Agent ×1 · Write ×1
+- **Archivos modificados:** `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/e2e/us1.mjs`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 14m 15s · 7.2M tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 2m 12s · 1M tokens
+- **Tokens:** entrada 26 · cache leída 1.8M · cache escrita 31.1k · salida 11k · hit 98%
+
+<details><summary>Respuesta</summary>
+
+Terminé la US1 de la Fase 4, rama `phase/04-requester-tickets`, sin commitear. El solicitante ya puede crear tickets, ver "Mis tickets", abrir el detalle y cancelar con confirmación. Falta tu aprobación para el commit y el push.
+
+**Pruebas**
+- **En el navegador**, contra un stack Docker aparte (`droidesk-test`, que ya borré):
+  - Pasan los escenarios 1 (crear), 2 (validar), 4 (un ticket ajeno muestra "No encontrado") y 12 (cancelar).
+  - En móvil no hay scroll horizontal, y no hubo errores de consola ni de CSP.
+  - El vencimiento es correcto: un ticket Alta creado el domingo vence el lunes a las 18:00.
+- **API:** 584 tests, 99,88 % de cobertura total y 100 % en el flujo crítico. ruff y mypy limpios, y el contrato coincide con lo que genera la API.
+- **Web:** 309 tests y 100 % de líneas, también en `features/**`. Lint, typecheck y build pasan.
+- **deckard:** revisó la API y después el diff completo. No encontró nada de criticidad ≥ 8. De sus observaciones menores apliqué 4 refactors en la API; las demás no las apliqué, igual que en los bloques anteriores. La más notable es que `NewTicketForm` concentra mucho.
+
+**Cómo quedó**
+- **Toda transición es condicional:** si dos personas actúan a la vez sobre un ticket, gana una y la otra recibe un 409 con un mensaje claro.
+- **Una categoría inexistente responde 422** en el campo, con el mismo formato que la validación de FastAPI.
+- **Pendiente hasta la US2:** en el detalle, un agente ve "Tomar" pero recibe un 409. Tomar y retomar llegan en la US2, que es la fase siguiente.
+- **Sin tickets de demo:** la base parte sin tickets; los de demo llegan en la Fase 9 (T058).
+
+**Documentos**
+- Tareas T029–T036 en curso en `tasks.md`; la Fase 4 aparece EN CURSO en el roadmap.
+- Corregí el escenario 14 del quickstart. Pedía que un agente cerrara un ticket y esperaba 409, pero el dominio responde 403 a un perfil que nunca puede cerrar. El 409 aplica cuando el dueño cierra un ticket que no está Resuelto.
+- Extendí ADL-002, ADL-004 y ADL-008. También actualicé el contrato REST, DECISIONS y AI-USAGE.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión; la base está como la dejaste.
+
+Commits propuestos:
+1. `feat(api): permite al solicitante crear, listar, ver y cancelar sus tickets`
+2. `feat(contracts): publica los endpoints de tickets en el contrato y los tipos de la web`
+3. `feat(web): agrega campos de formulario, enlace-botón y diálogo de confirmación al design system`
+4. `feat(web): permite crear tickets, ver Mis tickets y el detalle con sus acciones`
+5. `docs: corrige el quickstart, extiende ADL-002, ADL-004 y ADL-008 y actualiza SDD, DECISIONS y AI-USAGE`
+
+¿Apruebas el commit y el push? Si apruebas, también abro el PR #4.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+continua
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running lint on web files
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Refactoring NewTicketForm loading logic
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Typechecking NewTicketForm.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing ConfirmDialog.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Fixing class assertions in Field tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing MyTicketsPage tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Debugging NewTicketForm list-refresh test
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restoring refetchType in queries.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running TicketActions tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Debugging TicketDetailPage.test.tsx failures
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading guards.test.tsx routes
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running vite build for web
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running web coverage and lint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing MyTicketsPage.tsx and TextField.tsx diffs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking refreshTicketLists query key matching
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking InvalidFieldError in errors.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking color tokens in module.css files
+
+</details>
+
+### #26 · 🧑 Usuario
+> si
+

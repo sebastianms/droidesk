@@ -7,7 +7,7 @@ import { serverMessage } from '../../api/errors'
 import { Button } from '../../ui/Button'
 import { DroidLogo } from '../../ui/DroidLogo'
 import { IconButton } from '../../ui/IconButton'
-import { Light } from '../../ui/Light'
+import { ErrorNotice } from '../../ui/Notice'
 import { Panel } from '../../ui/Panel'
 import { TextField } from '../../ui/TextField'
 import { useEscapeKey } from '../../ui/useEscapeKey'
@@ -124,11 +124,7 @@ export function LoginPage() {
                 dismissError('password')
               }}
             />
-            {login.isError && (
-              <div role="alert">
-                <Light variant="alert" label={serverMessage(login.error) ?? GENERIC_FAILURE} />
-              </div>
-            )}
+            {login.isError && <ErrorNotice message={serverMessage(login.error) ?? GENERIC_FAILURE} />}
             <Button type="submit" disabled={login.isPending}>
               {login.isPending ? 'Ingresando...' : 'Ingresar'}
             </Button>

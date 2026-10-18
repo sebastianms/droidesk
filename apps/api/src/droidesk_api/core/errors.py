@@ -51,3 +51,12 @@ class ActionNotAllowedError(DomainError):
     status_code = 409
     code = ErrorCode.ACTION_NOT_ALLOWED
     default_message = "Esta acción no está permitida en este momento."
+
+
+class InvalidFieldError(Exception):
+    """Un campo bien formado que incumple una regla que solo la base puede verificar; responde 422."""
+
+    def __init__(self, field: str, message: str) -> None:
+        self.field = field
+        self.message = message
+        super().__init__(message)

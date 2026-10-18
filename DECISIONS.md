@@ -61,7 +61,7 @@ stateDiagram-v2
 | Cerrado | El solicitante confirma: el ciclo termina con la voz de quien pidió ayuda |
 | Cancelado | El solicitante retira un pedido que nadie tomó, sin ensuciar la cola ni el cumplimiento del SLA |
 
-Solo el agente asignado mueve un ticket tomado, porque no hay reasignación. Si el solicitante comenta un ticket En espera, este vuelve solo a En progreso. Reabrir un ticket no reinicia su plazo. El detalle y las alternativas descartadas están en [ADL-008](.design-logs/ADL-008-ticket-lifecycle-six-states.md) y en la [spec](specs/001-ticketing-mvp/spec.md#clarifications).
+Solo el agente asignado mueve un ticket tomado, porque no hay reasignación. Si el solicitante comenta un ticket En espera, este vuelve solo a En progreso. Reabrir un ticket no reinicia su plazo. Cada transición es una actualización condicional sobre el estado de origen: si dos personas actúan a la vez, solo una gana y la otra recibe un 409 con un mensaje claro. El detalle y las alternativas descartadas están en [ADL-008](.design-logs/ADL-008-ticket-lifecycle-six-states.md) y en la [spec](specs/001-ticketing-mvp/spec.md#clarifications).
 
 ## Alcance opcional
 

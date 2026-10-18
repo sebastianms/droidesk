@@ -82,3 +82,12 @@ Una tabla declarativa en un solo lugar evita reglas dispersas en routers o en la
 - No agregues estados ni transiciones sin actualizar este ADL, la spec (FR-011) y los tests de la tabla.
 - Reabrir no reinicia el plazo, y una espera que empieza con el ticket vencido no corre el vencimiento.
 - Toda transición, incluida la automática por comentario, escribe su evento en el historial dentro de la misma transacción.
+
+---
+
+## Extensión 2026-10-18 · Transiciones condicionales (Fase 4)
+
+La decisión de fondo no cambia. Al implementar `apply_transition` se fijó:
+- **Toda transición es condicional**, no solo `take` y `cancel`: `UPDATE tickets … WHERE id = ? AND status = <origen>`. Si no cambia filas, otro ganó la carrera y se responde 409. Un test intercala un `take` ajeno entre la lectura y la escritura para probarlo.
+- **403 o 409**: un rol que nunca puede hacer la acción recibe 403 `forbidden`; el rol correcto en un estado o relación que no corresponde recibe 409 `action_not_allowed`. El escenario 14 del quickstart se corrigió para reflejarlo.
+- Los efectos de fechas de cada acción (`cancelled_at`, `on_hold_since`, `resolved_at`, `closed_at` y vaciar `resolved_at` al reabrir) viven junto a la transición en el servicio; `take` y `resume`, que asignan y recalculan el SLA, llegan con US2.

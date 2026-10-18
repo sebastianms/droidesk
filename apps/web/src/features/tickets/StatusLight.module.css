@@ -1,0 +1,9 @@
+.sla {
+  display: flex;
+  flex-direction: column;
+}
+
+.due,
+.muted {
+  color: var(--color-ink-muted);
+}

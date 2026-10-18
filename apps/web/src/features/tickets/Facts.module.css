@@ -1,0 +1,15 @@
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin: 0;
+}
+
+.term {
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+}
+
+.value {
+  margin: 0;
+}

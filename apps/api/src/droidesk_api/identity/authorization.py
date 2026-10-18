@@ -4,15 +4,10 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from droidesk_api.core.db import SessionDep
-from droidesk_api.core.errors import (
-    ForbiddenError,
-    NotAuthenticatedError,
-    NotFoundError,
-)
+from droidesk_api.core.errors import ForbiddenError, NotAuthenticatedError
 from droidesk_api.core.security import TokenServiceDep
 from droidesk_api.identity.enums import Role
 from droidesk_api.identity.models import User
-from droidesk_api.tickets.models import Ticket
 
 bearer_scheme = HTTPBearer(
     auto_error=False, description="Token emitido por `POST /api/v1/auth/login`."
@@ -49,9 +44,3 @@ def require_agent(user: CurrentUser) -> User:
 
 RequesterUser = Annotated[User, Depends(require_requester)]
 AgentUser = Annotated[User, Depends(require_agent)]
-
-
-def ensure_can_view(user: User, ticket: Ticket) -> None:
-    """Un solicitante solo ve sus tickets; uno ajeno responde como si no existiera."""
-    if user.role == Role.REQUESTER and ticket.requester_id != user.id:
-        raise NotFoundError("El ticket no existe.")

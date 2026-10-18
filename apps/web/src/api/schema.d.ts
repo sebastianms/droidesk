@@ -114,6 +114,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Tickets */
+        get: operations["list_tickets"];
+        put?: never;
+        /** Create Ticket */
+        post: operations["create_ticket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets/{ticket_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Ticket */
+        get: operations["read_ticket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets/{ticket_id}/transitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transition Ticket */
+        post: operations["transition_ticket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -200,6 +252,15 @@ export interface components {
          * @enum {string}
          */
         Role: "requester" | "agent";
+        /**
+         * Sla
+         * @description Estado del SLA; `due_at` es nulo mientras está en pausa y en los tickets cancelados.
+         */
+        Sla: {
+            /** Due At */
+            due_at: string | null;
+            state: components["schemas"]["SlaState"] | null;
+        };
         /** SlaPolicy */
         SlaPolicy: {
             /** Description */
@@ -214,10 +275,95 @@ export interface components {
             target_unit: components["schemas"]["TargetUnit"];
         };
         /**
+         * SlaState
+         * @enum {string}
+         */
+        SlaState: "on_track" | "at_risk" | "breached" | "paused" | "met" | "missed";
+        /**
          * TargetUnit
          * @enum {string}
          */
         TargetUnit: "hours" | "days";
+        /**
+         * TicketAction
+         * @enum {string}
+         */
+        TicketAction: "take" | "cancel" | "hold" | "resume" | "resolve" | "close" | "reopen" | "comment" | "change_priority";
+        /** TicketCreate */
+        TicketCreate: {
+            /** Category Id */
+            category_id: number;
+            /** Description */
+            description: string;
+            /** @default medium */
+            priority: components["schemas"]["Priority"];
+            /** Title */
+            title: string;
+        };
+        /** TicketDetail */
+        TicketDetail: {
+            /** Allowed Actions */
+            allowed_actions: components["schemas"]["TicketAction"][];
+            assignee: components["schemas"]["UserRef"] | null;
+            /** Cancelled At */
+            cancelled_at: string | null;
+            category: components["schemas"]["Category"];
+            /** Closed At */
+            closed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string;
+            /** Id */
+            id: number;
+            priority: components["schemas"]["Priority"];
+            requester: components["schemas"]["UserRef"];
+            /** Resolved At */
+            resolved_at: string | null;
+            sla: components["schemas"]["Sla"];
+            status: components["schemas"]["TicketStatus"];
+            /** Title */
+            title: string;
+        };
+        /**
+         * TicketStatus
+         * @enum {string}
+         */
+        TicketStatus: "open" | "in_progress" | "on_hold" | "resolved" | "closed" | "cancelled";
+        /** TicketSummary */
+        TicketSummary: {
+            assignee: components["schemas"]["UserRef"] | null;
+            category: components["schemas"]["Category"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            priority: components["schemas"]["Priority"];
+            requester: components["schemas"]["UserRef"];
+            sla: components["schemas"]["Sla"];
+            status: components["schemas"]["TicketStatus"];
+            /** Title */
+            title: string;
+        };
+        /**
+         * TicketView
+         * @enum {string}
+         */
+        TicketView: "mine" | "queue" | "assigned";
+        /** TransitionRequest */
+        TransitionRequest: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "take" | "cancel" | "hold" | "resume" | "resolve" | "close" | "reopen";
+        };
         /** User */
         User: {
             /** Email */
@@ -229,6 +375,13 @@ export interface components {
             role: components["schemas"]["Role"];
             /** Username */
             username: string;
+        };
+        /** UserRef */
+        UserRef: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -417,6 +570,226 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    list_tickets: {
+        parameters: {
+            query?: {
+                view?: components["schemas"]["TicketView"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketSummary"][];
+                };
+            };
+            /** @description No autenticado: falta el token, es inválido o expiró. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description El perfil del usuario no permite la operación. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_ticket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TicketCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetail"];
+                };
+            };
+            /** @description No autenticado: falta el token, es inválido o expiró. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description El perfil del usuario no permite la operación. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_ticket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetail"];
+                };
+            };
+            /** @description No autenticado: falta el token, es inválido o expiró. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description No encontrado. Un ticket ajeno se informa igual que uno inexistente. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transition_ticket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetail"];
+                };
+            };
+            /** @description No autenticado: falta el token, es inválido o expiró. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description El perfil del usuario no permite la operación. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description No encontrado. Un ticket ajeno se informa igual que uno inexistente. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Conflicto: otro agente tomó el ticket, o la acción no está permitida en el estado actual. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

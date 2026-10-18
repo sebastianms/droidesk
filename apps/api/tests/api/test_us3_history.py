@@ -5,7 +5,6 @@ from typing import Any
 
 import pytest
 from fastapi import FastAPI
-from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 from httpx2 import Response
 from sqlalchemy import Engine, event
@@ -23,6 +22,7 @@ from tests.api.helpers import (
     add_ticket_id,
     add_ticket_in_id,
     post_ticket,
+    published_operations,
 )
 from tests.factories import (
     AGENT_ID,
@@ -256,18 +256,18 @@ class TestCost:
 
 
 class TestImmutability:
+    def test_the_contract_lists_the_ticket_routes(self, app: FastAPI) -> None:
+        # Sin esta guarda, las pruebas siguientes pasarían también con un contrato vacío.
+        paths = published_operations(app).keys()
+        assert {"/api/v1/tickets", "/api/v1/tickets/{ticket_id}"} <= paths
+
     def test_no_route_is_about_events_or_the_history(self, app: FastAPI) -> None:
-        paths = [route.path for route in app.routes if isinstance(route, APIRoute)]
+        paths = published_operations(app).keys()
         assert [p for p in paths if "event" in p or "history" in p] == []
 
     def test_nothing_can_be_replaced_or_deleted(self, app: FastAPI) -> None:
-        methods = {
-            method
-            for route in app.routes
-            if isinstance(route, APIRoute)
-            for method in route.methods or ()
-        }
-        assert methods & {"PUT", "DELETE"} == set()
+        methods = set().union(*published_operations(app).values())
+        assert methods & {"put", "delete"} == set()
 
     def test_no_request_body_takes_an_event(self, app: FastAPI) -> None:
         operations = [

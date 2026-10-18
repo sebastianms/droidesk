@@ -638,6 +638,18 @@
         "title": "TicketSummary",
         "type": "object"
       },
+      "TicketUpdate": {
+        "properties": {
+          "priority": {
+            "$ref": "#/components/schemas/Priority"
+          }
+        },
+        "required": [
+          "priority"
+        ],
+        "title": "TicketUpdate",
+        "type": "object"
+      },
       "TicketView": {
         "enum": [
           "mine",
@@ -1193,6 +1205,104 @@
           }
         ],
         "summary": "Read Ticket",
+        "tags": [
+          "tickets"
+        ]
+      },
+      "patch": {
+        "description": "Ajusta la prioridad de un ticket y devuelve su detalle actualizado.\n\nSolo un agente, y con el ticket sin resolver ni finalizado. El vencimiento se recalcula desde\nla creación con el plazo de la nueva prioridad y el cambio queda en el historial; pedir la\nprioridad que el ticket ya tiene responde 200 sin cambios. 403 si el perfil no puede ajustarla\ny 409 `action_not_allowed` si el ticket está Resuelto, Cerrado o Cancelado, o cambió mientras\ntanto; un ticket ajeno responde 404.",
+        "operationId": "update_ticket",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ticket_id",
+            "required": true,
+            "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "title": "Ticket Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "No autenticado: falta el token, es inválido o expiró."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "El perfil del usuario no permite la operación."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "No encontrado. Un ticket ajeno se informa igual que uno inexistente."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Conflicto: otro agente tomó el ticket, o la acción no está permitida en el estado actual."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Ticket",
         "tags": [
           "tickets"
         ]

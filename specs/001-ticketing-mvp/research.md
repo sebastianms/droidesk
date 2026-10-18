@@ -46,7 +46,7 @@
 | D-B3 | Enums `StrEnum` con miembros en mayúscula y valores en minúscula (`OPEN = "open"`), guardados como texto (`native_enum=False`, `values_callable`) | La API y la base hablan el mismo código del contrato; sin enums nativos que compliquen PostgreSQL | Guardar el nombre del miembro, que es el default de SQLAlchemy |
 | D-B4 | Tomar y cancelar con un `UPDATE ... WHERE status = 'open' AND assignee_id IS NULL`, verificando `rowcount == 1` | Atómico sin locks explícitos. En una carrera de 16 hilos, repetida 5 veces, hubo exactamente un ganador | Leer y luego escribir, con riesgo de doble asignación |
 | D-B5 | Jerarquía `DomainError` (código, mensaje y status) con un solo exception handler que responde `{code, message}`. Las rutas declaran `responses={4xx: {"model": ErrorBody}}` para que el OpenAPI tipifique los errores. 401 uniforme con `HTTPBearer(auto_error=False)` | Un solo formato de error, tipado hasta la web | El `HTTPException` suelto de FastAPI, que responde `{detail}` |
-| D-B6 | El 422 de validación mantiene el formato estándar de FastAPI (`detail[]`) | Viene documentado y tipado en el OpenAPI sin código extra. La web valida antes de enviar y el 422 queda como red de seguridad | Un handler propio de 422, que dejaría el OpenAPI desalineado |
+| D-B6 | El 422 de validación mantiene el formato estándar de FastAPI (`detail[]`) | Viene documentado y tipado en el OpenAPI sin código extra. La web valida antes de enviar y el 422 queda como red de seguridad | Un handler propio de 422, que dejaría el OpenAPI desalineado. *Fase 3*: se agregó un handler que conserva el esquema y solo quita `input`, que es opcional, para no devolver la contraseña ([ADL-002](../../.design-logs/ADL-002-fastapi-sqlmodel-backend.md)) |
 | D-B7 | JWT con `sub` (string), `iat` y `exp` de 8 h; `algorithms=["HS256"]` y `require` explícitos; se captura `InvalidTokenError`. Secreto de al menos 32 bytes (`openssl rand -hex 32` en `setup.sh`) | Cierra `alg=none` y los claims faltantes; una clave corta emite warning | Sesiones en el servidor |
 | D-B8 | Alembic con la plantilla `pyproject`, `render_as_batch=True`, naming convention en `SQLModel.metadata`, `import sqlmodel.sql.sqltypes` en la plantilla de migraciones y ruff como post-write hook. El entrypoint del contenedor corre `alembic upgrade head` y después `exec uvicorn`. En CI corren `alembic upgrade head` y `alembic check` | Migraciones reproducibles; `alembic check` detecta que el modelo diverge de las migraciones | `create_all` |
 | D-B9 | Tiempo hábil con funciones puras propias sobre `zoneinfo` ([ADL-009](../../.design-logs/ADL-009-sla-business-time.md)) | Sin dependencias, con bordes exhaustivos en los tests | `businesstimedelta` (abandonada, usa pytz), `workalendar` (trabaja por días), pandas (pesado) |
@@ -106,9 +106,9 @@
 - **Tests de la web**: un `QueryClient` nuevo por test con `retry: false`; el router de prueba es `createMemoryRouter`.
 - **Riesgos del ecosistema**: SQLAlchemy 2.1 y su soporte en SQLModel tienen pocos días (respaldo: 2.0.55). `openapi-react-query` está en 0.x.
 - **Pendiente de verificar al implementar**:
-  - la CSP en un navegador real;
-  - el workflow ejecutado en GitHub;
-  - validar la sesión contra `/me` dentro del middleware.
+  - ~~la CSP en un navegador real~~: verificada en el Setup, con Chrome headless sobre la imagen de nginx y sin violaciones;
+  - ~~el workflow ejecutado en GitHub~~: `api.yml` y `web.yml` en verde en la primera corrida (setup-uv resuelve uv 0.13.1);
+  - ~~validar la sesión contra `/me` dentro del middleware~~: descartado en Foundational. La sesión se valida por `expires_at` y el 401 del cliente HTTP la cierra ([ADL-005](../../.design-logs/ADL-005-simulated-auth-signed-token.md)).
 
 ## Anexo: configuraciones de referencia
 

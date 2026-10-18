@@ -1,0 +1,42 @@
+.light {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.dot {
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--light-color);
+  outline: 1px solid var(--color-ink-muted);
+  outline-offset: 1px;
+  box-shadow: 0 0 6px var(--light-color);
+}
+
+.ok {
+  --light-color: var(--light-ok);
+}
+
+.warn {
+  --light-color: var(--light-warn);
+}
+
+.alert {
+  --light-color: var(--light-alert);
+}
+
+.holo {
+  --light-color: var(--light-holo);
+}
+
+.off {
+  --light-color: var(--color-silver);
+}
+
+.off .dot {
+  box-shadow: none;
+}

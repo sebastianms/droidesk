@@ -1,0 +1,25 @@
+name: droidesk
+
+services:
+  api:
+    build: apps/api
+    image: droidesk-api:local
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - data:/data
+    restart: unless-stopped
+
+  web:
+    build: apps/web
+    image: droidesk-web:local
+    ports:
+      - "${DROIDESK_WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  data:

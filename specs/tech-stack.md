@@ -69,7 +69,7 @@ droidesk/
 | ORM y modelos | SQLModel (SQLAlchemy + Pydantic) | Un solo modelo para la tabla y la validación: menos código |
 | Migraciones | Alembic | Esquema versionado y el mismo camino para SQLite y PostgreSQL |
 | Base de datos | SQLite en un volumen Docker | Pedido para el MVP, sin infraestructura extra; PostgreSQL en el plan de escalamiento ([ADL-003](../.design-logs/ADL-003-sqlite-mvp-postgres-path.md)) |
-| Ingreso simulado | Token firmado (JWT) que se emite al elegir un usuario precargado | Perfiles reales en cada request sin gestionar contraseñas; reemplazable por SSO ([ADL-005](../.design-logs/ADL-005-simulated-auth-signed-token.md)) |
+| Ingreso simulado | Token firmado (JWT) que se emite tras un login de usuarios precreados que acepta cualquier contraseña | Perfiles reales en cada request sin gestionar contraseñas; reemplazable por SSO ([ADL-005](../.design-logs/ADL-005-simulated-auth-signed-token.md)) |
 | Dependencias de la API | uv (`pyproject.toml` + `uv.lock`) | Instalación reproducible y rápida |
 | Calidad de la API | ruff (lint y formato), mypy, pytest con cobertura | Gates del checkpoint de bloque |
 | Lenguaje de la web | TypeScript 6 estricto | Tipos del contrato hasta la interfaz; TypeScript 7 todavía no lo soportan las herramientas de generación de tipos |
@@ -123,8 +123,8 @@ erDiagram
 | Método | Ruta | Rol | Propósito |
 |---|---|---|---|
 | GET | `/api/health` | público | Salud del servicio |
-| GET | `/api/v1/auth/users` | público | Usuarios precargados para el ingreso simulado |
-| POST | `/api/v1/auth/login` | público | Emite el token del usuario elegido |
+| GET | `/api/v1/auth/users` | público | Usuarios de demo (username, nombre y perfil) para la ayuda del login |
+| POST | `/api/v1/auth/login` | público | Ingreso simulado: acepta cualquier contraseña de un usuario existente y emite el token |
 | GET | `/api/v1/me` | ambos | Perfil del usuario actual |
 | GET | `/api/v1/categories` | ambos | Categorías |
 | GET | `/api/v1/sla-policies` | ambos | Prioridades y sus plazos |
@@ -198,4 +198,4 @@ Las rutas exactas se ajustan en el `plan.md` de la feature 001 si la estructura 
 - Toda entrada se valida con largos máximos.
 - Descripciones y comentarios se muestran como texto plano, nunca como HTML.
 - El secreto del token lo genera `setup.sh` en un `.env` que no se versiona.
-- El ingreso simulado permite entrar como cualquier usuario: es aceptable solo en el MVP y queda como deuda técnica explícita ([ADL-005](../.design-logs/ADL-005-simulated-auth-signed-token.md)).
+- El ingreso simulado acepta cualquier contraseña de un usuario precreado, y la contraseña nunca se guarda ni se registra: es aceptable solo en el MVP y queda como deuda técnica explícita ([ADL-005](../.design-logs/ADL-005-simulated-auth-signed-token.md)).

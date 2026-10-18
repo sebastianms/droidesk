@@ -1,0 +1,33 @@
+:root {
+  /* Paleta del droide (specs/tech-stack.md, Visual Identity) */
+  --color-hull: #f4f6fa;
+  --color-panel: #ffffff;
+  --color-astro-blue: #1d4e9e;
+  --color-astro-blue-soft: #e3ecfa;
+  --color-silver: #c7cfdb;
+  --color-ink: #0f1b2d;
+  --color-ink-muted: #5b6b82;
+
+  /* Luces de estado: siempre acompañadas de texto */
+  --light-ok: #2f9e6a;
+  --light-warn: #e0a100;
+  --light-alert: #d64545;
+  --light-holo: #4cc3e8;
+
+  /* Espaciado */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Formas */
+  --radius-panel: 0.75rem;
+  --radius-control: 0.5rem;
+  --border-plate: 1px solid var(--color-silver);
+
+  /* Tipografía: pila del sistema */
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --letter-spacing-title: 0.12em;
+}

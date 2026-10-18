@@ -61,3 +61,26 @@ El navegador ve un único origen, así que no hay que configurar CORS ni exponer
 - En desarrollo, el proxy de Vite reemplaza a nginx; las llamadas siguen yendo a `/api` en el mismo origen.
 - El único comando de arranque documentado es `./setup.sh`; no agregues pasos manuales al README.
 - Con más de una réplica de la API, saca las migraciones del arranque.
+
+---
+
+## Extensión 2026-10-17 · Implementación del Setup (Fase 3)
+
+La decisión de fondo no cambia. Se fijaron estos detalles al implementarla:
+- **Compose**: el proyecto se llama `droidesk` y las imágenes, `droidesk-api:local` y `droidesk-web:local`, para cumplir la regla de tags de `CLAUDE.md`.
+  - `api` no publica puertos: solo lo alcanza nginx.
+  - `web` publica `${DROIDESK_WEB_PORT:-8080}:80` y espera a que `api` esté `healthy`, porque nginx resuelve `api` al arrancar.
+  - `.env` es opcional (`env_file` con `required: false`); `.env.example` documenta las variables y el secreto queda vacío hasta que `setup.sh` lo genere.
+- **API**:
+  - imagen multi-stage con uv y usuario no root (uid 999), dueño de `/data`;
+  - `HEALTHCHECK` en Python, sin curl;
+  - uvicorn arranca con `--factory` sobre `create_app()`;
+  - el entrypoint corre `alembic upgrade head` solo si existe `migrations/env.py`;
+  - Alembic se configura en `pyproject.toml`, sin `alembic.ini`.
+- **Web**:
+  - nginx agrega CSP, `nosniff`, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy` a nivel de `server`, nunca dentro de un `location`;
+  - `/assets/` lleva caché larga e `index.html`, `no-cache`;
+  - el proceso maestro de nginx corre como root y los workers como `nginx`, que es la imagen oficial sin cambios. Correr todo como no root exige cambiar el puerto interno a 8080 y queda como mejora.
+- **CI**:
+  - un workflow por app con filtro de rutas, runner `ubuntu-24.04` y acciones fijadas por SHA;
+  - el gate del flujo crítico y `alembic check` se saltan (`if: hashFiles(...)`) mientras no existan sus archivos, y se activan solos cuando aparecen.

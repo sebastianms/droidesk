@@ -1,0 +1,72 @@
+[project]
+name = "droidesk-api"
+version = "0.1.0"
+description = "DroiDesk support ticketing API"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "alembic==1.20.0",
+    "fastapi==0.143.3",
+    "pydantic==2.14.1",
+    "pydantic-settings==2.16.0",
+    "pyjwt==2.15.1",
+    "sqlalchemy==2.1.5",
+    "sqlmodel==0.0.48",
+    "tzdata==2026.5",
+    "uvicorn==0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2==2.13.1",
+    "mypy==2.4.0",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.pytest]
+minversion = "9.0"
+strict = true
+testpaths = ["tests"]
+addopts = ["--cov", "--cov-report=term-missing:skip-covered", "--cov-fail-under=80"]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source_pkgs = ["droidesk_api"]
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:"]
+
+[tool.ruff.lint]
+extend-select = ["FAST", "DTZ", "N", "ERA", "PLR2004", "C90", "ARG", "T20", "S", "PT", "B", "I", "UP"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "PLR2004", "ARG"]
+
+[tool.mypy]
+files = ["src", "scripts", "tests"]
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[tool.alembic]
+script_location = "%(here)s/migrations"
+
+[[tool.alembic.post_write_hooks]]
+name = "ruff-check"
+type = "module"
+module = "ruff"
+options = "check --fix REVISION_SCRIPT_FILENAME"
+
+[[tool.alembic.post_write_hooks]]
+name = "ruff-format"
+type = "module"
+module = "ruff"
+options = "format REVISION_SCRIPT_FILENAME"

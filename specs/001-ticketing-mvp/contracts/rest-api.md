@@ -15,7 +15,7 @@ Diseño del contrato. El archivo versionado `contracts/openapi.json`, en la raí
   { "code": "action_not_allowed", "message": "El ticket ya está resuelto." }
   ```
 
-  La excepción es el 422 de validación, que conserva el formato estándar de FastAPI (`{"detail": [{"loc", "msg", "type"}]}`), documentado y tipado en el OpenAPI sin código extra. La web valida antes de enviar, así que el 422 es solo una red de seguridad.
+  La excepción es el 422 de validación, que conserva el formato estándar de FastAPI (`{"detail": [{"loc", "msg", "type"}]}`), documentado y tipado en el OpenAPI sin código extra. Un handler global le quita la clave `input`, para que nunca se devuelva lo que envió el cliente, como una contraseña. La web valida antes de enviar, así que el 422 es solo una red de seguridad.
 
 | `code` | HTTP | Cuándo |
 |---|---|---|
@@ -30,9 +30,10 @@ Diseño del contrato. El archivo versionado `contracts/openapi.json`, en la raí
 
 | Esquema | Campos |
 |---|---|
-| `User` | `id`, `name`, `email`, `role` (`requester` o `agent`) |
+| `User` | `id`, `username`, `name`, `email`, `role` (`requester` o `agent`) |
 | `UserRef` | `id`, `name` |
-| `LoginRequest` | `user_id` |
+| `DemoUser` | `username`, `name`, `role` |
+| `LoginRequest` | `username` (se recorta y pasa a minúsculas; 1 a 50 caracteres entre `a-z`, `0-9`, `.`, `_` y `-`) y `password` (1 a 128; se ignora y nunca se guarda) |
 | `LoginResponse` | `access_token`, `token_type` (`"bearer"`), `expires_at`, `user: User` |
 | `Category` | `id`, `name` |
 | `SlaPolicy` | `priority`, `rank`, `label`, `description`, `target_amount`, `target_unit` (`hours` o `days`) |
@@ -53,8 +54,8 @@ Los largos se validan después de recortar los espacios.
 | Método y ruta | Rol | Entrada | Respuesta | Errores |
 |---|---|---|---|---|
 | `GET /api/health` | público | — | `200 {"status": "ok"}` | — |
-| `GET /api/v1/auth/users` | público | — | `200 User[]` | — |
-| `POST /api/v1/auth/login` | público | `LoginRequest` | `200 LoginResponse` | 404, 422 |
+| `GET /api/v1/auth/users` | público | — | `200 DemoUser[]`, solicitantes primero y luego por nombre | — |
+| `POST /api/v1/auth/login` | público | `LoginRequest` | `200 LoginResponse` si el usuario existe, con cualquier contraseña. Nunca crea usuarios | 401 (el usuario no existe), 422 |
 | `GET /api/v1/me` | ambos | — | `200 User` | 401 |
 | `GET /api/v1/categories` | ambos | — | `200 Category[]` | 401 |
 | `GET /api/v1/sla-policies` | ambos | — | `200 SlaPolicy[]`, ordenadas por `rank` | 401 |

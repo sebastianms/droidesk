@@ -1,0 +1,17 @@
+.hull {
+  fill: var(--color-panel);
+  stroke: var(--color-silver);
+  stroke-width: 1.5;
+}
+
+.accent {
+  fill: var(--color-astro-blue);
+}
+
+.lens {
+  fill: var(--color-ink);
+}
+
+.holo {
+  fill: var(--light-holo);
+}

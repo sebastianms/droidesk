@@ -73,7 +73,7 @@ stateDiagram-v2
 | 4 | Dos perfiles con vistas distintas: solicitante y agente | Obligatorio 4 |
 | 5 | SLA por prioridad: plazo comprometido, vencimiento visible y cola ordenada por urgencia | Opcional elegido |
 | 6 | Comentarios en el ticket | Opcional elegido |
-| 7 | Ingreso simulado con usuarios precargados | Definición propia |
+| 7 | Ingreso simulado: login con usuarios precreados por perfil y cualquier contraseña, con una ayuda que los lista | Definición propia, revisada por el usuario |
 | 8 | Levantar todo con un solo comando | Definición propia |
 
 ### Deferred

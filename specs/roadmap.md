@@ -37,9 +37,9 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 
 - [x] Solicitante y agente ven qué pasó con un ticket, quién lo hizo y cuándo.
 
-## Phase 7: Comentarios — `phase/07-comments`
+## Phase 7: Comentarios — `phase/07-comments` [DONE · PR #7]
 
-- [ ] Solicitante y agente conversan dentro del ticket; cada comentario queda en el historial.
+- [x] Solicitante y agente conversan dentro del ticket; cada comentario queda en el historial.
 
 ## Phase 8: SLA por prioridad — `phase/08-sla`
 

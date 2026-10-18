@@ -3,6 +3,7 @@ from sqlmodel import col, select
 
 from droidesk_api.core.db import SessionDep
 from droidesk_api.core.http_errors import error_responses
+from droidesk_api.core.ids import Id
 from droidesk_api.identity.authorization import (
     CurrentUser,
     RequesterUser,
@@ -53,7 +54,7 @@ def list_tickets(
 
 @router.get("/tickets/{ticket_id}", responses=error_responses(401, 404))
 def read_ticket(
-    ticket_id: int, user: CurrentUser, service: TicketServiceDep
+    ticket_id: Id, user: CurrentUser, service: TicketServiceDep
 ) -> schemas.TicketDetail:
     return service.get_ticket_for(user, ticket_id)
 
@@ -62,7 +63,7 @@ def read_ticket(
     "/tickets/{ticket_id}/transitions", responses=error_responses(401, 403, 404, 409)
 )
 def transition_ticket(
-    ticket_id: int,
+    ticket_id: Id,
     body: schemas.TransitionRequest,
     user: CurrentUser,
     service: TicketServiceDep,
@@ -74,3 +75,23 @@ def transition_ticket(
     no la permiten.
     """
     return service.apply_transition(user, ticket_id, body.action)
+
+
+@router.post(
+    "/tickets/{ticket_id}/comments",
+    status_code=status.HTTP_201_CREATED,
+    responses=error_responses(401, 404, 409),
+)
+def add_comment(
+    ticket_id: Id,
+    body: schemas.CommentCreate,
+    user: CurrentUser,
+    service: TicketServiceDep,
+) -> schemas.TicketDetail:
+    """Comenta un ticket que no está en un estado final y devuelve su detalle actualizado.
+
+    Si el solicitante comenta un ticket En espera, este vuelve a En progreso y su plazo se
+    reanuda. Un comentario del agente no cambia el estado. 409 `action_not_allowed` si el
+    ticket está Cerrado o Cancelado; un ticket ajeno responde 404.
+    """
+    return service.add_comment(user, ticket_id, body)

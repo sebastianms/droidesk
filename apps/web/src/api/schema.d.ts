@@ -158,6 +158,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tickets/{ticket_id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Comment
+         * @description Comenta un ticket que no está en un estado final y devuelve su detalle actualizado.
+         *
+         *     Si el solicitante comenta un ticket En espera, este vuelve a En progreso y su plazo se
+         *     reanuda. Un comentario del agente no cambia el estado. 409 `action_not_allowed` si el
+         *     ticket está Cerrado o Cancelado; un ticket ajeno responde 404.
+         */
+        post: operations["add_comment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tickets/{ticket_id}/transitions": {
         parameters: {
             query?: never;
@@ -192,6 +216,31 @@ export interface components {
             id: number;
             /** Name */
             name: string;
+        };
+        /**
+         * Comment
+         * @description Texto plano: quien lo muestre no debe interpretarlo como HTML.
+         */
+        Comment: {
+            author: components["schemas"]["UserRef"];
+            /** Body */
+            body: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Reply To Id */
+            reply_to_id: number | null;
+        };
+        /** CommentCreate */
+        CommentCreate: {
+            /** Body */
+            body: string;
+            /** Reply To Id */
+            reply_to_id?: number | null;
         };
         /**
          * DemoUser
@@ -350,6 +399,10 @@ export interface components {
             category: components["schemas"]["Category"];
             /** Closed At */
             closed_at: string | null;
+            /** Comment Count */
+            comment_count: number;
+            /** Comments */
+            comments: components["schemas"]["Comment"][];
             /**
              * Created At
              * Format: date-time
@@ -379,6 +432,8 @@ export interface components {
         TicketSummary: {
             assignee: components["schemas"]["UserRef"] | null;
             category: components["schemas"]["Category"];
+            /** Comment Count */
+            comment_count: number;
             /**
              * Created At
              * Format: date-time
@@ -747,6 +802,68 @@ export interface operations {
             };
             /** @description No encontrado. Un ticket ajeno se informa igual que uno inexistente. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_comment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetail"];
+                };
+            };
+            /** @description No autenticado: falta el token, es inválido o expiró. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description No encontrado. Un ticket ajeno se informa igual que uno inexistente. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Conflicto: otro agente tomó el ticket, o la acción no está permitida en el estado actual. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

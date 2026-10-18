@@ -194,22 +194,25 @@
 **Objetivo**: solicitante y agente conversan en el ticket; la respuesta del solicitante reactiva un ticket En espera.
 **Test independiente**: escenarios 8 y 9 del quickstart.
 
-- [ ] T046 [US4] Agregar `Comment` en `apps/api/src/droidesk_api/tickets/models.py` y crear `apps/api/migrations/versions/0002_comments.py` (la tabla `comments` y `ticket_events.comment_id`, en modo batch).
-- [ ] T047 [US4] Agregar `add_comment` en `apps/api/src/droidesk_api/tickets/service.py`:
+- [x] T046 [US4] Agregar `Comment` en `apps/api/src/droidesk_api/tickets/models.py` y crear `apps/api/migrations/versions/0002_comments.py` (la tabla `comments` y `ticket_events.comment_id`, en modo batch).
+  - *Implementado*: `Comment` vive en `tickets/models.py`, con el índice `(ticket_id, created_at)`.
+- [x] T047 [US4] Agregar `add_comment` en `apps/api/src/droidesk_api/tickets/service.py`:
   - si el ticket está en un estado final, responde 409;
   - pueden comentar el solicitante dueño o cualquier agente;
   - registra el evento `commented`;
   - si comenta el solicitante sobre un ticket `on_hold`, aplica `resume` en la misma transacción.
-- [ ] T048 [US4] Agregar `POST /api/v1/tickets/{id}/comments` en `apps/api/src/droidesk_api/tickets/router.py` y los comentarios en el `TicketDetail`.
-- [ ] T049 [US4] Crear `apps/api/tests/api/test_us4_comments.py`:
+- [x] T048 [US4] Agregar `POST /api/v1/tickets/{id}/comments` en `apps/api/src/droidesk_api/tickets/router.py` y los comentarios en el `TicketDetail`.
+- [x] T049 [US4] Crear `apps/api/tests/api/test_us4_comments.py`:
   - comentan ambos perfiles;
   - bordes de largo (vacío, 2.000 y 2.001);
   - en tickets cerrados o cancelados responde 409; en un ticket ajeno, 404;
   - si comenta el solicitante en `on_hold`, el ticket pasa a `in_progress` y se registran los eventos;
   - si comenta el agente, el ticket sigue `on_hold`.
-- [ ] T050 [US4] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
-- [ ] T051 [US4] Crear `apps/web/src/features/tickets/CommentBox.tsx` y la lista de comentarios en texto plano en `TicketDetailPage.tsx`; mostrar los eventos `commented` en `Timeline.tsx`; con sus tests.
+- [x] T050 [US4] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
+- [x] T051 [US4] Crear `apps/web/src/features/tickets/CommentBox.tsx` y la lista de comentarios en texto plano en `TicketDetailPage.tsx`; mostrar los eventos `commented` en `Timeline.tsx`; con sus tests.
 
+  - *Revisión del usuario*: los listados muestran cuántos comentarios tiene cada ticket y el detalle el total (FR-017a, `TicketSummary.comment_count`). Un comentario puede citar a otro del mismo ticket como respuesta (FR-017b, `Comment.reply_to_id`, migración 0003).
+  - *Corrección pedida por el usuario*: los ids enteros de la ruta y del cuerpo se acotan a `1..2^63-1` con un tipo compartido, así que un id fuera de rango responde 422 y no 500 por desbordamiento de SQLite.
 **Checkpoint**: escenarios 8 y 9 en verde; gates de cobertura.
 
 ---
@@ -291,7 +294,7 @@ Cada requisito funcional tiene al menos una tarea, y ninguna tarea queda sin req
 | FR-005 a FR-007 (tickets) | T029 a T032, T034, T035 |
 | FR-008 a FR-012 (cola y ciclo de vida) | T015, T030, T036, T037 a T039, T041, T042 |
 | FR-013 a FR-015 (historial) | T020, T030, T037, T043 a T045 |
-| FR-016 a FR-018 (comentarios) | T046 a T049, T051 |
+| FR-016 a FR-018, FR-017a y FR-017b (comentarios, contador y respuestas) | T046 a T049, T051 |
 | FR-019 a FR-025 (SLA) | T016, T017, T022, T024, T037, T052, T053, T055 a T057 |
 | Edge cases (sesión vencida, textos al límite, texto plano, cola vacía, fuera de jornada) | T025, T032, T049, T051, T028, T041, T016 |
 | SM-06 (puesta en marcha en menos de 5 minutos) | T059, T061 |

@@ -38,14 +38,14 @@ Diseño del contrato. El archivo versionado `contracts/openapi.json`, en la raí
 | `Category` | `id`, `name` |
 | `SlaPolicy` | `priority`, `rank`, `label`, `description`, `target_amount`, `target_unit` (`hours` o `days`) |
 | `Sla` | `state` (`on_track`, `at_risk`, `breached`, `paused`, `met`, `missed` o `null`), `due_at` (`null` si está en pausa o cancelado) |
-| `TicketSummary` | `id`, `title`, `status`, `priority`, `category: Category`, `requester: UserRef`, `assignee: UserRef \| null`, `created_at`, `sla: Sla` |
+| `TicketSummary` | `id`, `title`, `status`, `priority`, `category: Category`, `requester: UserRef`, `assignee: UserRef \| null`, `created_at`, `sla: Sla`, `comment_count` (FR-017a) |
 | `TicketDetail` | `TicketSummary` + `description`, `resolved_at`, `closed_at`, `cancelled_at`, `allowed_actions: TicketAction[]`, `history: Event[]`, `comments: Comment[]` |
 | `Event` | `id`, `kind`, `actor: UserRef`, `from_value`, `to_value`, `created_at` |
-| `Comment` | `id`, `author: UserRef`, `body`, `created_at` |
+| `Comment` | `id`, `author: UserRef`, `body`, `created_at`, `reply_to_id` (`null` si no cita a otro comentario; FR-017b) |
 | `TicketCreate` | `title` (1 a 120), `description` (1 a 5.000), `category_id`, `priority` (opcional; por defecto `medium`) |
 | `TicketUpdate` | `priority` |
 | `TransitionRequest` | `action`: `take`, `cancel`, `hold`, `resume`, `resolve`, `close` o `reopen` |
-| `CommentCreate` | `body` (1 a 2.000) |
+| `CommentCreate` | `body` (1 a 2.000) y `reply_to_id` (opcional; debe ser un comentario del mismo ticket, si no responde 422) |
 
 Los largos se validan después de recortar los espacios.
 

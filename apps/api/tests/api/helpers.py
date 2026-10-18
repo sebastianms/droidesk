@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from typing import Any
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from httpx2 import Response
 from sqlmodel import Session
@@ -13,6 +14,8 @@ from tests.factories import add_ticket, add_ticket_in
 LoginAs = Callable[[str], dict[str, str]]
 Act = Callable[[str, int, str], Response]
 Read = Callable[[str, int], Response]
+PostComment = Callable[[str, int, str], Response]
+PostReply = Callable[[str, int, str, int | None], Response]
 TICKETS_URL = "/api/v1/tickets"
 NOT_FOUND = {"code": "not_found", "message": "El ticket no existe."}
 NEW_TICKET = {
@@ -38,6 +41,17 @@ def reload(session: Session, ticket_id: int) -> Ticket:
 
 def transitions_url(ticket_id: int) -> str:
     return f"{TICKETS_URL}/{ticket_id}/transitions"
+
+
+def comments_url(ticket_id: int) -> str:
+    return f"{TICKETS_URL}/{ticket_id}/comments"
+
+
+def published_operations(app: FastAPI) -> dict[str, set[str]]:
+    """Métodos HTTP de cada ruta del contrato: `app.routes` no expone las de los routers incluidos."""
+    return {
+        path: set(operations) for path, operations in app.openapi()["paths"].items()
+    }
 
 
 def post_ticket(

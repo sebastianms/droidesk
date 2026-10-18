@@ -13,7 +13,9 @@ from droidesk_api.tickets.enums import Priority
 from droidesk_api.tickets.models import Ticket
 from tests.factories import add_ticket, make_ticket
 
-EXPECTED_TABLE_COUNT = 5  # users, categories, sla_policies, tickets, ticket_events
+EXPECTED_TABLE_COUNT = (
+    6  # users, categories, sla_policies, tickets, ticket_events, comments
+)
 
 
 def pragma(engine: Engine, name: str) -> object:

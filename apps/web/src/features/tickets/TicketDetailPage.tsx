@@ -5,6 +5,7 @@ import { ErrorNotice, LoadingNotice } from '../../ui/Notice'
 import { Panel } from '../../ui/Panel'
 import { homePathFor, type Role } from '../auth/access'
 import { getSession } from '../auth/session'
+import { Conversation } from './Conversation'
 import { DateTime } from './DateTime'
 import { Fact, Facts } from './Facts'
 import { assigneeName, PRIORITY_LABEL } from './labels'
@@ -94,6 +95,9 @@ function TicketView({ ticket }: { ticket: TicketDetail }) {
         <p className={styles.description}>{ticket.description}</p>
       </Panel>
       <TicketActions ticket={ticket} />
+      <Panel title={`Comentarios (${ticket.comment_count})`}>
+        <Conversation ticket={ticket} />
+      </Panel>
       <Panel title="Historial">
         <Timeline events={ticket.history} />
       </Panel>

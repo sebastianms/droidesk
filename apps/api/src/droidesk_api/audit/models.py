@@ -22,4 +22,5 @@ class TicketEvent(SQLModel, table=True):
     kind: EventKind = Field(sa_type=text_enum(EventKind))
     from_value: str | None = Field(default=None, max_length=VALUE_MAX_LENGTH)
     to_value: str | None = Field(default=None, max_length=VALUE_MAX_LENGTH)
+    comment_id: int | None = Field(default=None, foreign_key="comments.id")
     created_at: datetime

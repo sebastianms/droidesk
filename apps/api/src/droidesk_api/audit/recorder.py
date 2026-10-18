@@ -15,6 +15,7 @@ class NewEvent:
     created_at: datetime
     from_value: str | None = None
     to_value: str | None = None
+    comment_id: int | None = None
 
 
 def record_event(session: Session, event: NewEvent) -> TicketEvent:

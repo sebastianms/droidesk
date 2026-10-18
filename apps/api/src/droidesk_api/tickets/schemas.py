@@ -5,10 +5,15 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
 from droidesk_api.audit.enums import EventKind
+from droidesk_api.core.ids import Id
 from droidesk_api.sla.status import SlaState
 from droidesk_api.tickets.enums import Priority, TicketStatus
 from droidesk_api.tickets.lifecycle import TicketAction
-from droidesk_api.tickets.models import DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH
+from droidesk_api.tickets.models import (
+    COMMENT_MAX_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
+    TITLE_MAX_LENGTH,
+)
 
 # Los largos se validan después de recortar los espacios: un texto de solo espacios queda vacío.
 Title = Annotated[
@@ -19,6 +24,12 @@ Description = Annotated[
     str,
     StringConstraints(
         strip_whitespace=True, min_length=1, max_length=DESCRIPTION_MAX_LENGTH
+    ),
+]
+CommentBody = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True, min_length=1, max_length=COMMENT_MAX_LENGTH
     ),
 ]
 # Las acciones que cambian el estado; comentar y cambiar la prioridad tienen sus propios endpoints.
@@ -70,6 +81,7 @@ class TicketSummary(BaseModel):
     assignee: UserRef | None
     created_at: datetime
     sla: Sla
+    comment_count: int
 
 
 class Event(BaseModel):
@@ -83,6 +95,16 @@ class Event(BaseModel):
     created_at: datetime
 
 
+class Comment(BaseModel):
+    """Texto plano: quien lo muestre no debe interpretarlo como HTML."""
+
+    id: int
+    author: UserRef
+    body: str
+    created_at: datetime
+    reply_to_id: int | None
+
+
 class TicketDetail(TicketSummary):
     description: str
     resolved_at: datetime | None
@@ -90,14 +112,20 @@ class TicketDetail(TicketSummary):
     cancelled_at: datetime | None
     allowed_actions: list[TicketAction]
     history: list[Event]
+    comments: list[Comment]
 
 
 class TicketCreate(BaseModel):
     title: Title
     description: Description
-    category_id: int
+    category_id: Id
     priority: Priority = Priority.MEDIUM
 
 
 class TransitionRequest(BaseModel):
     action: StateAction
+
+
+class CommentCreate(BaseModel):
+    body: CommentBody
+    reply_to_id: Id | None = None

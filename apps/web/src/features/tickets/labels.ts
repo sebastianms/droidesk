@@ -43,3 +43,9 @@ const UNASSIGNED_LABEL = 'Sin asignar'
 export function assigneeName({ assignee }: Pick<TicketSummary, 'assignee'>): string {
   return assignee?.name ?? UNASSIGNED_LABEL
 }
+
+/** "Sin comentarios", "1 comentario" o "N comentarios". */
+export function commentCountLabel(count: number): string {
+  if (count === 0) return 'Sin comentarios'
+  return count === 1 ? '1 comentario' : `${count} comentarios`
+}

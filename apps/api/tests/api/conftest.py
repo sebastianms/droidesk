@@ -2,7 +2,16 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx2 import Response
 
-from tests.api.helpers import TICKETS_URL, Act, LoginAs, Read, transitions_url
+from tests.api.helpers import (
+    TICKETS_URL,
+    Act,
+    LoginAs,
+    PostComment,
+    PostReply,
+    Read,
+    comments_url,
+    transitions_url,
+)
 
 
 # Los tokens duran 8 horas con el reloj inyectado: cada llamada ingresa de nuevo,
@@ -25,3 +34,27 @@ def read(client: TestClient, login_as: LoginAs) -> Read:
         return client.get(f"{TICKETS_URL}/{ticket_id}", headers=login_as(username))
 
     return fetch
+
+
+@pytest.fixture
+def comment(client: TestClient, login_as: LoginAs) -> PostComment:
+    def post(username: str, ticket_id: int, body: str) -> Response:
+        return client.post(
+            comments_url(ticket_id), headers=login_as(username), json={"body": body}
+        )
+
+    return post
+
+
+@pytest.fixture
+def reply(client: TestClient, login_as: LoginAs) -> PostReply:
+    def post(
+        username: str, ticket_id: int, body: str, reply_to_id: int | None
+    ) -> Response:
+        return client.post(
+            comments_url(ticket_id),
+            headers=login_as(username),
+            json={"body": body, "reply_to_id": reply_to_id},
+        )
+
+    return post

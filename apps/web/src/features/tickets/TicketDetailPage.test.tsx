@@ -1,7 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { ticketDetail, ticketEvent } from '../../test/fixtures'
+import { $api } from '../../api/client'
+import { ticketComment, ticketDetail, ticketEvent } from '../../test/fixtures'
 import { agentElena, jsonResponse, renderRoutes, requesterAna, signInAs, stubApi } from '../../test/helpers'
 import type { User } from '../auth/access'
 import { formatDateTime } from './dates'
@@ -10,6 +11,8 @@ import { TicketDetailPage } from './TicketDetailPage'
 
 const DETAIL = 'GET /api/v1/tickets/42'
 const TRANSITION = 'POST /api/v1/tickets/42/transitions'
+const COMMENT = 'POST /api/v1/tickets/42/comments'
+const LIST = 'GET /api/v1/tickets'
 
 function renderDetail(path = '/tickets/42', user: User = requesterAna) {
   signInAs(user)
@@ -350,6 +353,189 @@ describe('TicketDetailPage', () => {
       await waitFor(() => expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument())
       expect(within(screen.getByRole('region', { name: 'Datos' })).getByText('En progreso')).toBeVisible()
       expect(screen.getByText('Un agente ya tomó este ticket.')).toBeVisible()
+    })
+  })
+
+  describe('comments', () => {
+    const elena = { id: 5, name: 'Elena Vidal' }
+
+    it('shows them under "Comentarios", from the oldest to the newest, with author and local time', async () => {
+      const comments = [
+        ticketComment({ id: 1, body: 'La VPN sigue sin entrar.' }),
+        ticketComment({
+          id: 2,
+          author: elena,
+          body: '¿Desde qué red te conectas?',
+          created_at: '2026-10-19T14:10:00Z',
+        }),
+      ]
+      stubApi({ [DETAIL]: () => jsonResponse(ticketDetail({ allowed_actions: [], comments })) })
+
+      renderDetail()
+
+      const panel = within(await screen.findByRole('region', { name: /^Comentarios/ }))
+      expect(panel.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+        `Ana RojasLa VPN sigue sin entrar.${formatDateTime('2026-10-19T13:05:00Z')}`,
+        `Elena Vidal¿Desde qué red te conectas?${formatDateTime('2026-10-19T14:10:00Z')}`,
+      ])
+    })
+
+    it.each([
+      [0, 'Comentarios (0)'],
+      [1, 'Comentarios (1)'],
+      [4, 'Comentarios (4)'],
+    ])('names the panel with the total: %i comments', async (total, title) => {
+      const comments = Array.from({ length: total }, (_, index) => ticketComment({ id: index + 1 }))
+      stubApi({ [DETAIL]: () => jsonResponse(ticketDetail({ comments })) })
+
+      renderDetail()
+
+      expect(await screen.findByRole('region', { name: title })).toBeVisible()
+    })
+
+    it('says so when nobody has commented yet', async () => {
+      stubApi({ [DETAIL]: () => jsonResponse(ticketDetail({ allowed_actions: [] })) })
+
+      renderDetail()
+
+      const panel = within(await screen.findByRole('region', { name: /^Comentarios/ }))
+      expect(panel.getByText('Sin comentarios todavía.')).toBeVisible()
+    })
+
+    it('shows the text of a comment as plain text, without interpreting it', async () => {
+      const markup = '<img src=x onerror="alert(1)"> **negrita** &amp;'
+      stubApi({ [DETAIL]: () => jsonResponse(ticketDetail({ comments: [ticketComment({ body: markup })] })) })
+
+      renderDetail()
+
+      expect(await screen.findByText(markup)).toBeVisible()
+      expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    })
+
+    it('offers the field to comment when the API allows it', async () => {
+      stubApi({ [DETAIL]: () => jsonResponse(ticketDetail({ allowed_actions: ['comment'] })) })
+
+      renderDetail()
+
+      const panel = within(await screen.findByRole('region', { name: /^Comentarios/ }))
+      expect(panel.getByLabelText('Agregar un comentario')).toBeVisible()
+      expect(panel.getByRole('button', { name: 'Comentar' })).toBeVisible()
+    })
+
+    it('keeps the conversation of a closed ticket but no longer offers to comment', async () => {
+      const closed = ticketDetail({ status: 'closed', allowed_actions: [], comments: [ticketComment()] })
+      stubApi({ [DETAIL]: () => jsonResponse(closed) })
+
+      renderDetail()
+
+      const panel = within(await screen.findByRole('region', { name: /^Comentarios/ }))
+      expect(panel.getByText('La VPN sigue rechazando mis credenciales.')).toBeVisible()
+      expect(panel.queryByLabelText('Agregar un comentario')).not.toBeInTheDocument()
+    })
+
+    it('adds the comment, empties the field and shows the ticket back in progress when the reply resumes it', async () => {
+      const reply = ticketComment({ id: 2, body: 'Ya probé con otra red.', created_at: '2026-10-19T15:00:00Z' })
+      stubApi({
+        [DETAIL]: () =>
+          jsonResponse(
+            ticketDetail({
+              status: 'on_hold',
+              assignee: elena,
+              sla: { state: 'paused', due_at: null },
+              allowed_actions: ['comment'],
+              comments: [ticketComment({ author: elena, body: '¿Desde qué red te conectas?' })],
+            }),
+          ),
+        [COMMENT]: () =>
+          jsonResponse(
+            ticketDetail({
+              status: 'in_progress',
+              assignee: elena,
+              allowed_actions: ['comment'],
+              comments: [ticketComment({ author: elena, body: '¿Desde qué red te conectas?' }), reply],
+              history: [
+                ticketEvent({ id: 5, kind: 'commented', from_value: null, to_value: null }),
+                ticketEvent({ id: 6, kind: 'status_changed', from_value: 'on_hold', to_value: 'in_progress' }),
+              ],
+            }),
+            201,
+          ),
+      })
+      renderDetail()
+      await userEvent.click(await screen.findByLabelText('Agregar un comentario'))
+      await userEvent.paste('Ya probé con otra red.')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Comentar' }))
+
+      const panel = within(screen.getByRole('region', { name: /^Comentarios/ }))
+      expect(await panel.findByText('Ya probé con otra red.')).toBeVisible()
+      expect(panel.getByLabelText('Agregar un comentario')).toHaveValue('')
+      expect(screen.getByRole('region', { name: 'Comentarios (2)' })).toBeVisible()
+      expect(within(screen.getByRole('region', { name: 'Datos' })).getByText('En progreso')).toBeVisible()
+      const history = within(screen.getByRole('region', { name: 'Historial' }))
+      expect(history.getByText('Ana Rojas agregó un comentario')).toBeVisible()
+      expect(history.getByText('Ana Rojas cambió el estado de En espera a En progreso')).toBeVisible()
+    })
+
+    it('empties the field as the new comment appears, without waiting for the lists to refresh', async () => {
+      let listRequests = 0
+      stubApi({
+        [DETAIL]: () => jsonResponse(ticketDetail({ allowed_actions: ['comment'] })),
+        // La primera lectura llena la caché; la que sigue al comentario no termina.
+        [LIST]: () => (++listRequests === 1 ? jsonResponse([]) : new Promise<Response>(() => {})),
+        [COMMENT]: () =>
+          jsonResponse(
+            ticketDetail({ allowed_actions: ['comment'], comments: [ticketComment({ id: 2, body: 'Hola' })] }),
+            201,
+          ),
+      })
+      const { queryClient } = renderDetail()
+      await queryClient.prefetchQuery(
+        $api.queryOptions('get', '/api/v1/tickets', { params: { query: { view: 'mine' } } }),
+      )
+      await userEvent.click(await screen.findByLabelText('Agregar un comentario'))
+      await userEvent.paste('Hola')
+      const field = screen.getByLabelText<HTMLTextAreaElement>('Agregar un comentario')
+      const fieldWhenTheCommentAppears: string[] = []
+      const watcher = new MutationObserver(() => {
+        if (screen.queryByRole('list')) fieldWhenTheCommentAppears.push(field.value)
+      })
+      watcher.observe(document.body, { childList: true, subtree: true })
+
+      await userEvent.click(screen.getByRole('button', { name: 'Comentar' }))
+
+      await waitFor(() => expect(fieldWhenTheCommentAppears.length).toBeGreaterThan(0))
+      watcher.disconnect()
+      expect(listRequests).toBe(2)
+      expect(fieldWhenTheCommentAppears.every((value) => value === '')).toBe(true)
+    })
+
+    it('explains why the comment was refused, brings the page up to date and stops offering the field', async () => {
+      let detailRequests = 0
+      stubApi({
+        [DETAIL]: () =>
+          ++detailRequests === 1
+            ? jsonResponse(ticketDetail({ status: 'resolved', allowed_actions: ['comment'] }))
+            : jsonResponse(ticketDetail({ status: 'closed', allowed_actions: [] })),
+        [COMMENT]: () =>
+          jsonResponse(
+            {
+              code: 'action_not_allowed',
+              message: 'La acción «Comentar» no está disponible con el ticket en estado «Cerrado».',
+            },
+            409,
+          ),
+      })
+      renderDetail()
+      await userEvent.click(await screen.findByLabelText('Agregar un comentario'))
+      await userEvent.paste('Gracias')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Comentar' }))
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('en estado «Cerrado»')
+      await waitFor(() => expect(screen.queryByLabelText('Agregar un comentario')).not.toBeInTheDocument())
+      expect(within(screen.getByRole('region', { name: 'Datos' })).getByText('Cerrado')).toBeVisible()
+      expect(screen.getByRole('alert')).toHaveTextContent('en estado «Cerrado»')
     })
   })
 })

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { serverMessage } from '../../api/errors'
 import { EmptyState } from '../../ui/EmptyState'
 import { ErrorNotice, LoadingNotice } from '../../ui/Notice'
+import { CommentCount } from './CommentCount'
 import { DateTime } from './DateTime'
 import { Fact, Facts } from './Facts'
 import { assigneeName, PRIORITY_LABEL } from './labels'
@@ -46,9 +47,12 @@ function TicketCard({ ticket, showRequester }: { ticket: TicketSummary; showRequ
   return (
     <li className={styles.ticket}>
       <div className={styles.ticketHeader}>
-        <Link to={ticketPath(ticket.id)} className={styles.title}>
-          {ticket.title}
-        </Link>
+        <div className={styles.heading}>
+          <Link to={ticketPath(ticket.id)} className={styles.title}>
+            {ticket.title}
+          </Link>
+          <CommentCount count={ticket.comment_count} />
+        </div>
         <StatusLight status={ticket.status} />
       </div>
       <Facts>

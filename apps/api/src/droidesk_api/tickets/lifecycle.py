@@ -138,13 +138,21 @@ def authorize_transition(
         raise ForbiddenError(f"Tu perfil no puede realizar la acción «{label}».")
     transition = next((t for t in candidates if t.source == status), None)
     if transition is None:
-        raise ActionNotAllowedError(
-            f"La acción «{label}» no está disponible con el ticket en estado «{STATUS_LABELS[status]}»."
-        )
+        raise ActionNotAllowedError(_unavailable_message(action, status))
     missing = _missing_relation(transition, viewer)
     if missing is not None:
         raise ActionNotAllowedError(RELATION_REQUIREMENTS[missing].format(action=label))
     return transition
+
+
+def authorize_comment(status: TicketStatus, viewer: Viewer) -> None:
+    if not _can_comment(status, viewer):
+        raise ActionNotAllowedError(_unavailable_message(TicketAction.COMMENT, status))
+
+
+def automatic_resume() -> Transition:
+    """La retoma que dispara el comentario del solicitante (FR-018): la misma fila de la tabla, sin exigir al agente asignado."""
+    return next(t for t in TRANSITIONS if t.action == TicketAction.RESUME)
 
 
 def allowed_actions(status: TicketStatus, viewer: Viewer) -> list[TicketAction]:
@@ -157,6 +165,10 @@ def comment_resumes_hold(status: TicketStatus, viewer: Viewer) -> bool:
         and viewer.role == Role.REQUESTER
         and viewer.relation == Relation.OWNER
     )
+
+
+def _unavailable_message(action: TicketAction, status: TicketStatus) -> str:
+    return f"La acción «{ACTION_LABELS[action]}» no está disponible con el ticket en estado «{STATUS_LABELS[status]}»."
 
 
 def _is_allowed(action: TicketAction, status: TicketStatus, viewer: Viewer) -> bool:

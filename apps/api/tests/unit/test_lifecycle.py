@@ -4,12 +4,15 @@ from droidesk_api.core.errors import ActionNotAllowedError, ForbiddenError
 from droidesk_api.identity.enums import Role
 from droidesk_api.tickets.enums import TicketStatus
 from droidesk_api.tickets.lifecycle import (
+    FINAL_STATUSES,
     TRANSITIONS,
     Relation,
     TicketAction,
     Viewer,
     allowed_actions,
+    authorize_comment,
     authorize_transition,
+    automatic_resume,
     comment_resumes_hold,
     relation_of,
 )
@@ -240,6 +243,37 @@ def test_agent_comment_keeps_the_ticket_on_hold(viewer: Viewer) -> None:
 )
 def test_requester_comment_does_not_resume_outside_hold(status: TicketStatus) -> None:
     assert comment_resumes_hold(status, OWNER) is False
+
+
+@pytest.mark.parametrize("status", [s for s in TicketStatus if s not in FINAL_STATUSES])
+@pytest.mark.parametrize("viewer", [OWNER, ASSIGNEE, OTHER_AGENT])
+def test_the_owner_and_any_agent_may_comment_until_the_ticket_is_final(
+    status: TicketStatus, viewer: Viewer
+) -> None:
+    authorize_comment(status, viewer)
+
+
+@pytest.mark.parametrize("status", sorted(FINAL_STATUSES))
+@pytest.mark.parametrize("viewer", [OWNER, ASSIGNEE, OTHER_AGENT])
+def test_commenting_on_a_final_ticket_is_not_allowed(
+    status: TicketStatus, viewer: Viewer
+) -> None:
+    with pytest.raises(ActionNotAllowedError, match="«Comentar» no está disponible"):
+        authorize_comment(status, viewer)
+
+
+def test_a_foreign_requester_may_not_comment() -> None:
+    with pytest.raises(ActionNotAllowedError):
+        authorize_comment(TicketStatus.IN_PROGRESS, FOREIGN_REQUESTER)
+
+
+def test_the_automatic_resume_is_the_resume_row_of_the_table() -> None:
+    resume = automatic_resume()
+    assert (resume.action, resume.source, resume.target) == (
+        TicketAction.RESUME,
+        TicketStatus.ON_HOLD,
+        TicketStatus.IN_PROGRESS,
+    )
 
 
 def test_requester_is_the_owner_of_their_ticket() -> None:

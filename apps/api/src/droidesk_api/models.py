@@ -3,6 +3,6 @@
 from droidesk_api.audit.models import TicketEvent
 from droidesk_api.identity.models import User
 from droidesk_api.sla.models import SlaPolicy
-from droidesk_api.tickets.models import Category, Ticket
+from droidesk_api.tickets.models import Category, Comment, Ticket
 
-__all__ = ["Category", "SlaPolicy", "Ticket", "TicketEvent", "User"]
+__all__ = ["Category", "Comment", "SlaPolicy", "Ticket", "TicketEvent", "User"]

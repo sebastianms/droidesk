@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ACTION_LABEL, assigneeName, PRIORITY_LABEL, SLA_STATE_LABEL, STATUS_LABEL } from './labels'
+import { ACTION_LABEL, assigneeName, commentCountLabel, PRIORITY_LABEL, SLA_STATE_LABEL, STATUS_LABEL } from './labels'
 
 describe('labels', () => {
   it.each([
@@ -29,6 +29,17 @@ describe('labels', () => {
 
     it('says "Sin asignar" while nobody has taken the ticket', () => {
       expect(assigneeName({ assignee: null })).toBe('Sin asignar')
+    })
+  })
+
+  describe('commentCountLabel', () => {
+    it.each([
+      [0, 'Sin comentarios'],
+      [1, '1 comentario'],
+      [2, '2 comentarios'],
+      [12, '12 comentarios'],
+    ])('says %i as "%s"', (count, label) => {
+      expect(commentCountLabel(count)).toBe(label)
     })
   })
 })

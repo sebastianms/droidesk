@@ -112,3 +112,11 @@ La decisión de fondo no cambia. Se fijaron estos detalles al implementarla:
 - **El detalle trae el historial** en orden cronológico, con el autor resuelto en una sola consulta (`identity.service.users_by_id`), sin N+1. Un test compara las consultas de un ticket con 1 evento y uno con 7.
 - **Sin rutas de escritura sobre eventos**: un test verifica que ninguna ruta toca eventos ni historial y que ningún cuerpo de petición usa el esquema `Event`.
 - **Máximo 3 argumentos, verificado por ruff** (`PLR0913`, `max-args = 3`). Deckard detectó `to_detail` con 4 argumentos (criticidad 8). Los datos que se calculan aparte de la fila se agrupan en objetos inmutables (`DetailFacts`, `Change`). La regla no aplica a los tests ni a los handlers de los routers, cuyos parámetros inyecta FastAPI.
+
+---
+
+## Extensión 2026-10-18 · Comentarios (Fase 7)
+
+- **`comment_count` sin N+1**: una subconsulta escalar correlacionada dentro de la misma consulta del listado y del detalle, que usa el índice `(ticket_id, created_at)` como índice cubriente y funciona igual en PostgreSQL. La consulta se arma con `RowStatement(...)` porque las sobrecargas tipadas de `sqlmodel.select` llegan solo a 4 entidades.
+- **Responder a un comentario**: `reply_to_id` debe ser un comentario del mismo ticket. Si no, responde 422 en el campo, con el mismo mensaje para un comentario inexistente y para uno ajeno. La validación ocurre antes de tocar el ticket.
+- **Ids acotados**: todo id entero que llega del cliente (ruta o cuerpo) usa el tipo `core.ids.Id`, con un rango de `1..2^63-1`, que es el entero de 64 bits de SQLite y el `bigint` de PostgreSQL. Antes, un id fuera de rango llegaba al driver y respondía 500 por desbordamiento; ahora responde 422 sin consultar la base. El contrato publica el mínimo y el máximo. En los esquemas del cuerpo, FastAPI los escribe como `float`, así que el máximo aparece redondeado, pero la validación sigue siendo exacta.

@@ -333,6 +333,7 @@ class TestMyTickets:
             "assignee",
             "created_at",
             "sla",
+            "comment_count",
         }
 
     def test_a_listed_ticket_without_agent_has_no_assignee(

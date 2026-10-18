@@ -102,3 +102,12 @@ La decisión de fondo no cambia. Al implementar `apply_transition` se fijó:
 - **Carrera probada con hilos**: 3 agentes con sesiones propias sobre SQLite en archivo. Una barrera los detiene justo antes del `UPDATE`, así que todos leyeron el ticket abierto. Gana exactamente uno, y se registra un solo par de eventos `assigned` y `status_changed`.
 - **La cola incluye los Resueltos**, porque no son finales: esperan la confirmación del solicitante y muestran el SLA como Cumplido o Incumplido.
 - **El SLA se calcula en un colaborador `TicketSla(session, calendar)`**: lo que se muestra, el vencimiento inicial, la clave de orden de la cola y la reanudación (suma la espera y recalcula el vencimiento). El servicio queda con los casos de uso.
+
+---
+
+## Extensión 2026-10-18 · Comentarios (Fase 7)
+
+- **El retomar automático reutiliza la tabla**: `automatic_resume()` devuelve la misma transición `on_hold → in_progress` de `TRANSITIONS`, sin exigir al agente asignado, y pasa por el mismo `UPDATE` condicional que recalcula el SLA. No hay una segunda tabla de reglas.
+- **Quién comenta** sale de la misma regla que `allowed_actions`: el solicitante dueño o cualquier agente, y nunca en un estado final.
+- **Orden y atomicidad**: primero el `UPDATE` del estado y después el comentario, con los eventos `commented` y `status_changed` a nombre del solicitante, todo en una transacción. Si otro retomó el ticket mientras tanto, no queda ni comentario ni eventos, y el 409 dice "El ticket cambió mientras escribías tu comentario" en vez del mensaje genérico de la transición.
+- **También sin retomar, el comentario es condicional**: actualiza `updated_at` solo si el ticket sigue en el estado leído. Así un comentario nunca queda en un ticket que se canceló o cerró en ese mismo instante.

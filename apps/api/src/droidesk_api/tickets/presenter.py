@@ -5,7 +5,7 @@ from droidesk_api.core.db import persisted_id
 from droidesk_api.identity.models import User
 from droidesk_api.tickets import schemas
 from droidesk_api.tickets.lifecycle import TicketAction
-from droidesk_api.tickets.models import Category, Ticket
+from droidesk_api.tickets.models import Category, Comment, Ticket
 
 
 @dataclass(frozen=True)
@@ -16,6 +16,7 @@ class TicketRow:
     category: Category
     requester: User
     assignee: User | None
+    comment_count: int
 
 
 @dataclass(frozen=True)
@@ -25,6 +26,7 @@ class DetailFacts:
     sla: schemas.Sla
     allowed_actions: list[TicketAction]
     history: list[schemas.Event]
+    comments: list[schemas.Comment]
 
 
 def to_summary(row: TicketRow, sla: schemas.Sla) -> schemas.TicketSummary:
@@ -39,6 +41,7 @@ def to_summary(row: TicketRow, sla: schemas.Sla) -> schemas.TicketSummary:
         assignee=_user_ref(row.assignee),
         created_at=ticket.created_at,
         sla=sla,
+        comment_count=row.comment_count,
     )
 
 
@@ -52,6 +55,7 @@ def to_detail(row: TicketRow, facts: DetailFacts) -> schemas.TicketDetail:
         cancelled_at=ticket.cancelled_at,
         allowed_actions=facts.allowed_actions,
         history=facts.history,
+        comments=facts.comments,
     )
 
 
@@ -63,6 +67,16 @@ def to_event(event: TicketEvent, actor: User) -> schemas.Event:
         from_value=event.from_value,
         to_value=event.to_value,
         created_at=event.created_at,
+    )
+
+
+def to_comment(comment: Comment, author: User) -> schemas.Comment:
+    return schemas.Comment(
+        id=persisted_id(comment),
+        author=schemas.UserRef.model_validate(author),
+        body=comment.body,
+        created_at=comment.created_at,
+        reply_to_id=comment.reply_to_id,
     )
 
 

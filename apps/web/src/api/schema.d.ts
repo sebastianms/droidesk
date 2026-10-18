@@ -121,7 +121,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Tickets */
+        /**
+         * List Tickets
+         * @description Lista según el perfil.
+         *
+         *     - Solicitante: `mine` (por defecto), sus tickets del más reciente al más antiguo.
+         *     - Agente: `queue` (por defecto), los tickets no finales; y `assigned`, los suyos.
+         *       Ambas van por vencimiento: primero el reloj corriendo, luego los en espera.
+         *
+         *     Pedir una vista que no es de su perfil responde 403.
+         */
         get: operations["list_tickets"];
         put?: never;
         /** Create Ticket */
@@ -158,7 +167,14 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Transition Ticket */
+        /**
+         * Transition Ticket
+         * @description Aplica una acción de estado; `allowed_actions` del ticket dice cuáles ofrecer.
+         *
+         *     403 si el perfil nunca puede hacerla; 409 `already_taken` si otro agente tomó el
+         *     ticket primero y 409 `action_not_allowed` si el estado o la relación con el ticket
+         *     no la permiten.
+         */
         post: operations["transition_ticket"];
         delete?: never;
         options?: never;

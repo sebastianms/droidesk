@@ -1,9 +1,19 @@
 import { screen, waitFor } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
-import { agentElena, renderRoutes, requesterAna, signInAs } from '../test/helpers'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { categories, slaPolicies, ticketDetail } from '../test/fixtures'
+import { agentElena, jsonResponse, renderRoutes, requesterAna, signInAs, stubApi } from '../test/helpers'
 import { routes } from './router'
 
 describe('route guards', () => {
+  beforeEach(() => {
+    stubApi({
+      'GET /api/v1/tickets': () => jsonResponse([]),
+      'GET /api/v1/tickets/42': () => jsonResponse(ticketDetail()),
+      'GET /api/v1/categories': () => jsonResponse(categories),
+      'GET /api/v1/sla-policies': () => jsonResponse(slaPolicies),
+    })
+  })
+
   it.each(['/requester', '/agent', '/'])('sends an anonymous visitor from %s to the login screen', async (path) => {
     const { router } = renderRoutes(routes, path)
 
@@ -73,5 +83,41 @@ describe('route guards', () => {
 
     expect(await screen.findByRole('heading', { name: 'Cola de tickets' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/agent')
+  })
+
+  it('lets a requester open the form for a new ticket', async () => {
+    signInAs(requesterAna)
+
+    renderRoutes(routes, '/requester/new')
+
+    expect(await screen.findByRole('heading', { name: 'Nuevo ticket' })).toBeInTheDocument()
+  })
+
+  it('keeps an agent out of the form for a new ticket and sends them to the queue', async () => {
+    signInAs(agentElena)
+
+    const { router } = renderRoutes(routes, '/requester/new')
+
+    expect(await screen.findByRole('heading', { name: 'Cola de tickets' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/agent')
+  })
+
+  it('sends an anonymous visitor from a ticket to the login screen', async () => {
+    const { router } = renderRoutes(routes, '/tickets/42')
+
+    expect(await screen.findByRole('heading', { name: 'DroiDesk' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/login')
+  })
+
+  it.each([
+    ['requester', requesterAna],
+    ['agent', agentElena],
+  ])('lets a %s open a ticket', async (_role, user) => {
+    signInAs(user)
+
+    const { router } = renderRoutes(routes, '/tickets/42')
+
+    expect(await screen.findByRole('heading', { name: 'No puedo entrar a la VPN' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/tickets/42')
   })
 })

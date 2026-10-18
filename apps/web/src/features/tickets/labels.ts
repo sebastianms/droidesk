@@ -1,4 +1,4 @@
-import type { components } from '../../api/schema'
+import type { Priority, SlaState, TicketAction, TicketStatus } from './types'
 
 export const STATUS_LABEL = {
   open: 'Abierto',
@@ -7,14 +7,14 @@ export const STATUS_LABEL = {
   resolved: 'Resuelto',
   closed: 'Cerrado',
   cancelled: 'Cancelado',
-} as const
+} as const satisfies Record<TicketStatus, string>
 
 export const PRIORITY_LABEL = {
   critical: 'Crítica',
   high: 'Alta',
   medium: 'Media',
   low: 'Baja',
-} as const satisfies Record<components['schemas']['Priority'], string>
+} as const satisfies Record<Priority, string>
 
 export const ACTION_LABEL = {
   take: 'Tomar',
@@ -26,7 +26,7 @@ export const ACTION_LABEL = {
   reopen: 'Reabrir',
   comment: 'Comentar',
   change_priority: 'Cambiar prioridad',
-} as const
+} as const satisfies Record<TicketAction, string>
 
 export const SLA_STATE_LABEL = {
   on_track: 'En plazo',
@@ -35,4 +35,4 @@ export const SLA_STATE_LABEL = {
   paused: 'En pausa',
   met: 'Cumplido',
   missed: 'Incumplido',
-} as const
+} as const satisfies Record<SlaState, string>

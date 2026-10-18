@@ -11,6 +11,7 @@ from droidesk_api.tickets.lifecycle import (
     Viewer,
     allowed_actions,
     authorize_comment,
+    authorize_priority_change,
     authorize_transition,
     automatic_resume,
     comment_resumes_hold,
@@ -265,6 +266,55 @@ def test_commenting_on_a_final_ticket_is_not_allowed(
 def test_a_foreign_requester_may_not_comment() -> None:
     with pytest.raises(ActionNotAllowedError):
         authorize_comment(TicketStatus.IN_PROGRESS, FOREIGN_REQUESTER)
+
+
+PRIORITY_EDITABLE = [TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.ON_HOLD]
+PRIORITY_LOCKED = [
+    TicketStatus.RESOLVED,
+    TicketStatus.CLOSED,
+    TicketStatus.CANCELLED,
+]
+
+
+@pytest.mark.parametrize("status", PRIORITY_EDITABLE)
+@pytest.mark.parametrize("viewer", [ASSIGNEE, OTHER_AGENT])
+def test_any_agent_may_change_the_priority_until_the_ticket_is_resolved(
+    status: TicketStatus, viewer: Viewer
+) -> None:
+    authorize_priority_change(status, viewer)
+
+
+@pytest.mark.parametrize("status", PRIORITY_LOCKED)
+@pytest.mark.parametrize("viewer", [ASSIGNEE, OTHER_AGENT])
+def test_an_agent_may_not_change_the_priority_of_a_resolved_or_final_ticket(
+    status: TicketStatus, viewer: Viewer
+) -> None:
+    with pytest.raises(ActionNotAllowedError, match="«Cambiar prioridad» no está"):
+        authorize_priority_change(status, viewer)
+
+
+@pytest.mark.parametrize("status", list(TicketStatus))
+@pytest.mark.parametrize("viewer", [OWNER, FOREIGN_REQUESTER])
+def test_a_requester_is_forbidden_to_change_the_priority_in_any_status(
+    status: TicketStatus, viewer: Viewer
+) -> None:
+    with pytest.raises(ForbiddenError, match="«Cambiar prioridad»"):
+        authorize_priority_change(status, viewer)
+
+
+@pytest.mark.parametrize("status", list(TicketStatus))
+@pytest.mark.parametrize("viewer", ALL_VIEWERS)
+def test_the_priority_is_authorized_exactly_when_the_ticket_offers_it(
+    status: TicketStatus, viewer: Viewer
+) -> None:
+    offered = TicketAction.CHANGE_PRIORITY in allowed_actions(status, viewer)
+    try:
+        authorize_priority_change(status, viewer)
+    except ForbiddenError, ActionNotAllowedError:
+        authorized = False
+    else:
+        authorized = True
+    assert authorized is offered
 
 
 def test_the_automatic_resume_is_the_resume_row_of_the_table() -> None:

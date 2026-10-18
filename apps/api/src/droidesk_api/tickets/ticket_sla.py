@@ -56,6 +56,16 @@ class TicketSla:
             col(Ticket.on_hold_since): None,
         }
 
+    def priority_values(self, ticket: Ticket, priority: Priority) -> ColumnValues:
+        """Otra prioridad recalcula el vencimiento desde la creación: su plazo más las esperas ya acumuladas."""
+        facts = replace(
+            self._facts(ticket), target_minutes=self._target_minutes[priority]
+        )
+        return {
+            col(Ticket.priority): priority,
+            col(Ticket.sla_due_at): recalculated_due_at(facts, self._calendar),
+        }
+
     def _facts(self, ticket: Ticket) -> SlaFacts:
         return SlaFacts(
             status=ticket.status,

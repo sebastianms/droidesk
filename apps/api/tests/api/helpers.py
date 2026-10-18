@@ -16,6 +16,7 @@ Act = Callable[[str, int, str], Response]
 Read = Callable[[str, int], Response]
 PostComment = Callable[[str, int, str], Response]
 PostReply = Callable[[str, int, str, int | None], Response]
+PatchTicket = Callable[[str, int, dict[str, Any]], Response]
 TICKETS_URL = "/api/v1/tickets"
 NOT_FOUND = {"code": "not_found", "message": "El ticket no existe."}
 NEW_TICKET = {

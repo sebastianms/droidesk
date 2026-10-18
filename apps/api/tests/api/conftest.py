@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from fastapi.testclient import TestClient
 from httpx2 import Response
@@ -6,6 +8,7 @@ from tests.api.helpers import (
     TICKETS_URL,
     Act,
     LoginAs,
+    PatchTicket,
     PostComment,
     PostReply,
     Read,
@@ -58,3 +61,13 @@ def reply(client: TestClient, login_as: LoginAs) -> PostReply:
         )
 
     return post
+
+
+@pytest.fixture
+def patch_ticket(client: TestClient, login_as: LoginAs) -> PatchTicket:
+    def patch(username: str, ticket_id: int, body: dict[str, Any]) -> Response:
+        return client.patch(
+            f"{TICKETS_URL}/{ticket_id}", headers=login_as(username), json=body
+        )
+
+    return patch

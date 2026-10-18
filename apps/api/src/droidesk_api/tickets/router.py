@@ -59,6 +59,24 @@ def read_ticket(
     return service.get_ticket_for(user, ticket_id)
 
 
+@router.patch("/tickets/{ticket_id}", responses=error_responses(401, 403, 404, 409))
+def update_ticket(
+    ticket_id: Id,
+    body: schemas.TicketUpdate,
+    user: CurrentUser,
+    service: TicketServiceDep,
+) -> schemas.TicketDetail:
+    """Ajusta la prioridad de un ticket y devuelve su detalle actualizado.
+
+    Solo un agente, y con el ticket sin resolver ni finalizado. El vencimiento se recalcula desde
+    la creación con el plazo de la nueva prioridad y el cambio queda en el historial; pedir la
+    prioridad que el ticket ya tiene responde 200 sin cambios. 403 si el perfil no puede ajustarla
+    y 409 `action_not_allowed` si el ticket está Resuelto, Cerrado o Cancelado, o cambió mientras
+    tanto; un ticket ajeno responde 404.
+    """
+    return service.change_priority(user, ticket_id, body)
+
+
 @router.post(
     "/tickets/{ticket_id}/transitions", responses=error_responses(401, 403, 404, 409)
 )

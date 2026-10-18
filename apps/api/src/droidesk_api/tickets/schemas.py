@@ -122,6 +122,10 @@ class TicketCreate(BaseModel):
     priority: Priority = Priority.MEDIUM
 
 
+class TicketUpdate(BaseModel):
+    priority: Priority
+
+
 class TransitionRequest(BaseModel):
     action: StateAction
 

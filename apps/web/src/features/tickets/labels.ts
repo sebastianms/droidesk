@@ -1,4 +1,4 @@
-import type { Priority, SlaState, TicketAction, TicketStatus } from './types'
+import type { Priority, SlaState, TicketAction, TicketStatus, TicketSummary } from './types'
 
 export const STATUS_LABEL = {
   open: 'Abierto',
@@ -36,3 +36,10 @@ export const SLA_STATE_LABEL = {
   met: 'Cumplido',
   missed: 'Incumplido',
 } as const satisfies Record<SlaState, string>
+
+const UNASSIGNED_LABEL = 'Sin asignar'
+
+/** El agente que tiene el ticket, o "Sin asignar" mientras nadie lo haya tomado. */
+export function assigneeName({ assignee }: Pick<TicketSummary, 'assignee'>): string {
+  return assignee?.name ?? UNASSIGNED_LABEL
+}

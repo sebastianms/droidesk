@@ -149,20 +149,21 @@
 **Objetivo**: el agente ve la cola, toma tickets y los mueve; el solicitante cierra o reabre.
 **Test independiente**: escenarios 6, 7, 10, 11 y 14 del quickstart.
 
-- [ ] T037 [US2] Extender `apps/api/src/droidesk_api/tickets/service.py`:
+- [x] T037 [US2] Extender `apps/api/src/droidesk_api/tickets/service.py`:
   - `list_queue`, con las vistas `queue` y `assigned` ordenadas con la clave de `sla/status.py`;
   - `take`, como actualización condicional, con los eventos `assigned` y `status_changed`;
   - en `hold`, `resume`, `resolve`, `close` y `reopen`, los efectos sobre `on_hold_since`, `sla_paused_minutes`, `resolved_at` y `closed_at`.
-- [ ] T038 [US2] Ampliar `GET /api/v1/tickets` en `apps/api/src/droidesk_api/tickets/router.py` con `view=queue|assigned` para agentes; un solicitante que pide esas vistas recibe 403.
-- [ ] T039 [US2] Crear `apps/api/tests/api/test_us2_agent_queue.py`:
+  - *Implementado*: el cálculo del SLA pasó al colaborador `tickets/ticket_sla.py`. `take` responde `already_taken` también si el ticket ya tenía otro asignado al leerlo (ADL-008). La cola incluye los Resueltos.
+- [x] T038 [US2] Ampliar `GET /api/v1/tickets` en `apps/api/src/droidesk_api/tickets/router.py` con `view=queue|assigned` para agentes; un solicitante que pide esas vistas recibe 403.
+- [x] T039 [US2] Crear `apps/api/tests/api/test_us2_agent_queue.py`:
   - la cola sin estados finales y la vista de asignados;
   - tomar, y una carrera de toma con hilos que deja exactamente un ganador;
   - tomar un ticket cancelado responde 409;
   - las transiciones inválidas responden 409, y un agente no asignado no puede mover el ticket;
   - `allowed_actions` según quién consulta.
-- [ ] T040 [US2] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
-- [ ] T041 [P] [US2] Completar `apps/web/src/features/agent/QueuePage.tsx` (pestañas "Cola" y "Asignados a mí", estado con luz, solicitante, categoría y asignado) y su test `QueuePage.test.tsx`.
-- [ ] T042 [US2] Extender `apps/web/src/features/tickets/TicketActions.tsx`:
+- [x] T040 [US2] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
+- [x] T041 [P] [US2] Completar `apps/web/src/features/agent/QueuePage.tsx` (pestañas "Cola" y "Asignados a mí", estado con luz, solicitante, categoría y asignado) y su test `QueuePage.test.tsx`.
+- [x] T042 [US2] Extender `apps/web/src/features/tickets/TicketActions.tsx`:
   - acciones de agente y de solicitante;
   - el mensaje de `already_taken`;
   - invalidar la cola y el detalle;

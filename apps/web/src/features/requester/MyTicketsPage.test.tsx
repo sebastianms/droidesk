@@ -95,6 +95,8 @@ describe('MyTicketsPage', () => {
     expect(within(item).getByText('Crítica')).toBeVisible()
     expect(within(item).getByText('Hardware')).toBeVisible()
     expect(within(item).getByText('Elena Vidal')).toBeVisible()
+    expect(within(item).getByText('Fecha de creación')).toBeVisible()
+    expect(within(item).queryByText('Solicitante')).not.toBeInTheDocument()
     expect(within(item).getByText(formatDateTime('2026-10-19T13:05:00Z'))).toBeVisible()
     expect(within(item).getByText('Por vencer')).toBeVisible()
     expect(within(item).getByText(formatDateTime('2026-10-19T17:00:00Z'))).toBeVisible()

@@ -1,11 +1,17 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { $api } from '../../api/client'
-import type { TicketDetail } from './types'
+import type { TicketDetail, TicketView } from './types'
 
+const LIST_PATH = '/api/v1/tickets'
 const DETAIL_PATH = '/api/v1/tickets/{ticket_id}'
 
 function detailInit(ticketId: number) {
   return { params: { path: { ticket_id: ticketId } } }
+}
+
+/** Un listado de tickets: `mine` para el solicitante, `queue` y `assigned` para el agente. */
+export function useTicketList(view: TicketView) {
+  return $api.useQuery('get', LIST_PATH, { params: { query: { view } } })
 }
 
 export function useTicketDetail(ticketId: number) {
@@ -27,6 +33,6 @@ export function refreshTicketDetail(queryClient: QueryClient, ticketId: number):
 
 /** Vuelve a pedir todos los listados, incluso los que no están en pantalla, para que lleguen al día cuando se abran. */
 export function refreshTicketLists(queryClient: QueryClient): Promise<void> {
-  const listKey = $api.queryOptions('get', '/api/v1/tickets').queryKey
+  const listKey = $api.queryOptions('get', LIST_PATH).queryKey
   return queryClient.invalidateQueries({ queryKey: listKey, refetchType: 'all' })
 }

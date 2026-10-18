@@ -1,0 +1,25 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-bottom: var(--border-plate);
+}
+
+.tab {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 3px solid transparent;
+  color: var(--color-astro-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tab:hover {
+  background: var(--color-astro-blue-soft);
+}
+
+/* La pestaña activa se distingue por el subrayado y el peso, no solo por el color. */
+.tab[aria-current="page"] {
+  border-bottom-color: var(--color-astro-blue);
+  background: var(--color-astro-blue-soft);
+  font-weight: 700;
+}

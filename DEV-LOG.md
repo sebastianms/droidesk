@@ -4018,3 +4018,445 @@ Checking color tokens in module.css files
 ### #26 · 🧑 Usuario
 > si
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 16s
+- **Herramientas:** Bash ×4
+- **Git:** `7259bb7` docs: corrige el quickstart, extiende ADL-002, ADL-004 y ADL-008 y actualiza SDD, DECISIONS y AI-USAGE · PR https://github.com/sebastianms/droidesk/pull/4
+- **Tokens:** entrada 8 · cache leída 703.5k · cache escrita 3.5k · salida 2.9k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #4 de la Fase 4: https://github.com/sebastianms/droidesk/pull/4
+
+- Antes de commitear marqué T029–T036 como hechas en `tasks.md` y la Fase 4 como `[DONE · PR #4]` en el roadmap.
+- Después hice los 5 commits y el push a `phase/04-requester-tickets`; el árbol quedó limpio.
+- El CI de GitHub pasó en los dos jobs, `api` y `web`.
+
+Cuando hagas el squash and merge, creo `phase/05-agent-queue` desde `main` actualizado y arranco la US2. En esa fase el agente ve la cola, toma un ticket y cambia su estado, y desaparece el 409 de "Tomar".
+
+</details>
+
+### #27 · 🧑 Usuario
+> mezclado
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 53s
+- **Herramientas:** Bash ×3 · Agent ×1
+- **Tokens:** entrada 8 · cache leída 721k · cache escrita 3.9k · salida 4.7k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Creé `phase/05-agent-queue` desde `main` actualizado y lancé al subagente de la API de la US2 (T037–T040). Cuando regenere el contrato, lanzo el de la web (T041–T042).
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 15m 52s
+- **Herramientas:** Bash ×61 · Write ×2 · Agent ×2 · StructuredOutput ×1 · Read ×1 · SubagentHandback ×1
+- **Archivos modificados:** `apps/api/src/droidesk_api/tickets/ticket_sla.py`, `apps/api/tests/api/test_us2_agent_queue.py`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 15m 6s · 7.5M tokens
+- **Tokens:** entrada 8 · cache leída 560.4k · cache escrita 11.7k · salida 5.4k · hit 98%
+
+<details><summary>Respuesta</summary>
+
+Siguen en paralelo la web de la US2 y la revisión de deckard sobre la API. Ya actualicé ADL-008, el contrato REST y `tasks.md` con lo que se implementó.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+continua
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading rest-api.md contract
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_us1_requester_tickets.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading seed.py and authorization.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Skimming service.py with graft
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading context7 skill instructions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Querying SQLAlchemy docs via context7
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating service.py imports
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running full API test suite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Trimming temporary tests in test_us1_requester_tickets.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking clock usage in security.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Documenting views in router.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Extracting helpers from test_us1
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking token lifetime in security.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Planning US2 test file
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing test_us2_agent_queue.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Drafting TestSimultaneousTake thread race
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting test_us2_agent_queue.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting structure of test_us2_agent_queue.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Mutating then restoring service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding take-race tests to test_ticket_service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Regenerating openapi.json contract
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing TicketService in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Rerunning full API pytest suite
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 12m 57s
+- **Herramientas:** Bash ×84 · Read ×4 · SubagentHandback ×4 · Agent ×2 · Write ×2 · StructuredOutput ×1
+- **Archivos modificados:** `apps/web/src/features/agent/QueuePage.test.tsx`, `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/e2e/us2.mjs`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 2m 10s · 783.9k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 2m 7s · 739.4k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 8m 34s · 4.3M tokens
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 1m 14s · 395.1k tokens
+- **Tokens:** entrada 22 · cache leída 2.1M · cache escrita 30.5k · salida 10.7k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Terminé la US2 de la Fase 5, rama `phase/05-agent-queue`, sin commitear. El agente ya ve la cola, toma tickets y los mueve por la máquina de estados, y el solicitante puede cerrar o reabrir. Falta tu aprobación para el commit y el push.
+
+**Pruebas**
+- **En el navegador**, contra un stack aislado que ya borré, con dos agentes y una solicitante. Pasan los escenarios 6, 7, 10, 11 y 14:
+  - La cola sale ordenada por urgencia: Crítica primero.
+  - **Tomar:** el ticket pasa a En progreso y aparece en "Asignados a mí".
+  - **Toma simultánea:** Elena y Felipe hicieron clic a la vez. Ganó uno y el otro vio "Este ticket ya fue tomado por otro agente."
+  - **Espera, resolver, reabrir y cerrar:** al reabrir, el vencimiento no cambió. Al cerrar, el SLA quedó en "Cumplido" y el ticket salió de la cola.
+  - **Transición inválida por API:** la dueña recibe 409 y el agente 403.
+  - En móvil no hay scroll horizontal, y no hubo errores de consola ni de CSP.
+- **API:** 724 tests, 99,89 % de cobertura total y 100 % en el flujo crítico. La carrera con 3 hilos dejó exactamente un ganador en 10 de 10 corridas.
+- **Web:** 350 tests y 100 % de líneas. Lint, typecheck y build pasan, y el contrato está al día.
+- **deckard:** revisó la API y después el diff completo, sin nada de criticidad ≥ 8. Apliqué sus ajustes menores en la API.
+
+**Decisiones que conviene que conozcas**
+- **"Ya fue tomado" también con la cola desactualizada:** si el ticket ya tenía otro agente cuando se intenta tomar, la respuesta es `already_taken`, no solo cuando se pierde la carrera exacta. Si el ticket fue cancelado, el mensaje es otro.
+- **La cola incluye los Resueltos**, porque esperan la confirmación del solicitante y muestran el SLA como Cumplido o Incumplido.
+- **Solo cancelar pide confirmación.** Resolver es reversible, y "Confirmar cierre" ya es la confirmación del solicitante. Si quieres un diálogo también al cerrar, es un cambio pequeño.
+- **Pestañas en la URL:** "Asignados a mí" vive en `/agent?view=assigned`, así que sobrevive a recargar.
+
+**Documentos:** T037–T042 en curso en `tasks.md` y la Fase 5 aparece EN CURSO en el roadmap. Extendí ADL-004 y ADL-008, y actualicé el contrato REST y AI-USAGE.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión; la base está como la dejaste.
+
+Commits propuestos:
+1. `feat(api): agrega la cola del agente, la toma condicional y los efectos de cada transición`
+2. `feat(contracts): documenta las vistas de la cola y las respuestas 409 en el contrato`
+3. `feat(web): agrega la cola con pestañas, el listado compartido y las acciones por rol`
+4. `docs: extiende ADL-004 y ADL-008 y actualiza SDD, contrato REST y AI-USAGE`
+
+¿Apruebas el commit y el push? Si apruebas, también abro el PR #5.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+continua
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading ADL-004 and ADL-008
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading lifecycle.py and SLA helpers
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Resolving React Router docs via context7
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking engine setup in conftest.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading AppLayout.module.css
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Leyendo el final de test_us2_agent_queue.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading openapi-react-query's index.mjs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Evaluando TestSimultaneousTake en test_us2_agent_queue.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading TicketDetailPage.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Searching MyTicketsPage.tsx labels
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Extracting shared TicketList component
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running vitest after refactor
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_us2_agent_queue.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Diagnosing QueuePage router failure
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading STATUS_FIELDS in factories.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing QueuePage.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying test_us2_agent_queue.py lint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restoring TicketActions.tsx after mutation check
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Looping Simultaneous take tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Formatting test files with Biome
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting stray .vitest/json/output.json lint error
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Formatting QueuePage.test.tsx with Biome
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running checkpoint and API pytest
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Revisando queries.ts y TicketActions.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Revisando tests de QueuePage.test.tsx
+
+</details>
+
+### #28 · 🧑 Usuario
+> si, ya probe en local, todo bien
+

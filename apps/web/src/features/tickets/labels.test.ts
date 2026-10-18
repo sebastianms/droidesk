@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ACTION_LABEL, PRIORITY_LABEL, SLA_STATE_LABEL, STATUS_LABEL } from './labels'
+import { ACTION_LABEL, assigneeName, PRIORITY_LABEL, SLA_STATE_LABEL, STATUS_LABEL } from './labels'
 
 describe('labels', () => {
   it.each([
@@ -20,5 +20,15 @@ describe('labels', () => {
     expect(STATUS_LABEL.on_hold).toBe('En espera')
     expect(ACTION_LABEL.close).toBe('Confirmar cierre')
     expect(SLA_STATE_LABEL.at_risk).toBe('Por vencer')
+  })
+
+  describe('assigneeName', () => {
+    it('is the name of the agent who has the ticket', () => {
+      expect(assigneeName({ assignee: { id: 5, name: 'Elena Vidal' } })).toBe('Elena Vidal')
+    })
+
+    it('says "Sin asignar" while nobody has taken the ticket', () => {
+      expect(assigneeName({ assignee: null })).toBe('Sin asignar')
+    })
   })
 })

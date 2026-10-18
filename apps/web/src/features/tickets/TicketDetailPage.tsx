@@ -7,7 +7,7 @@ import { homePathFor, type Role } from '../auth/access'
 import { getSession } from '../auth/session'
 import { DateTime } from './DateTime'
 import { Fact, Facts } from './Facts'
-import { PRIORITY_LABEL } from './labels'
+import { assigneeName, PRIORITY_LABEL } from './labels'
 import { useTicketDetail } from './queries'
 import { SlaInfo, StatusLight } from './StatusLight'
 import { TicketActions } from './TicketActions'
@@ -65,7 +65,7 @@ function TicketView({ ticket }: { ticket: TicketDetail }) {
           <Fact term="Prioridad">{PRIORITY_LABEL[ticket.priority]}</Fact>
           <Fact term="Categoría">{ticket.category.name}</Fact>
           <Fact term="Solicitante">{ticket.requester.name}</Fact>
-          <Fact term="Agente">{ticket.assignee?.name ?? 'Sin asignar'}</Fact>
+          <Fact term="Agente">{assigneeName(ticket)}</Fact>
           <Fact term="Fecha de creación">
             <DateTime value={ticket.created_at} />
           </Fact>

@@ -828,6 +828,7 @@
     },
     "/api/v1/tickets": {
       "get": {
+        "description": "Lista según el perfil.\n\n- Solicitante: `mine` (por defecto), sus tickets del más reciente al más antiguo.\n- Agente: `queue` (por defecto), los tickets no finales; y `assigned`, los suyos.\n  Ambas van por vencimiento: primero el reloj corriendo, luego los en espera.\n\nPedir una vista que no es de su perfil responde 403.",
         "operationId": "list_tickets",
         "parameters": [
           {
@@ -1037,6 +1038,7 @@
     },
     "/api/v1/tickets/{ticket_id}/transitions": {
       "post": {
+        "description": "Aplica una acción de estado; `allowed_actions` del ticket dice cuáles ofrecer.\n\n403 si el perfil nunca puede hacerla; 409 `already_taken` si otro agente tomó el\nticket primero y 409 `action_not_allowed` si el estado o la relación con el ticket\nno la permiten.",
         "operationId": "transition_ticket",
         "parameters": [
           {

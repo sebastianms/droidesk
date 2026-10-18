@@ -5,6 +5,7 @@ from typing import Annotated, Any, Protocol
 
 from fastapi import Depends, Request
 from sqlalchemy import Engine, Enum, create_engine, event
+from sqlalchemy.orm import Mapped
 from sqlalchemy.pool import ConnectionPoolEntry
 from sqlmodel import Session, SQLModel
 
@@ -16,6 +17,9 @@ NAMING_CONVENTION = {
     "pk": "pk_%(table_name)s",
 }
 ENUM_COLUMN_LENGTH = 20
+
+# Columnas de una tabla con el valor que recibe cada una en un UPDATE.
+ColumnValues = dict[Mapped[Any], Any]
 
 # Debe fijarse antes de que se defina cualquier tabla: todos los modelos importan este módulo.
 SQLModel.metadata.naming_convention = NAMING_CONVENTION

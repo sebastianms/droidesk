@@ -90,4 +90,15 @@ Una tabla declarativa en un solo lugar evita reglas dispersas en routers o en la
 La decisión de fondo no cambia. Al implementar `apply_transition` se fijó:
 - **Toda transición es condicional**, no solo `take` y `cancel`: `UPDATE tickets … WHERE id = ? AND status = <origen>`. Si no cambia filas, otro ganó la carrera y se responde 409. Un test intercala un `take` ajeno entre la lectura y la escritura para probarlo.
 - **403 o 409**: un rol que nunca puede hacer la acción recibe 403 `forbidden`; el rol correcto en un estado o relación que no corresponde recibe 409 `action_not_allowed`. El escenario 14 del quickstart se corrigió para reflejarlo.
-- Los efectos de fechas de cada acción (`cancelled_at`, `on_hold_since`, `resolved_at`, `closed_at` y vaciar `resolved_at` al reabrir) viven junto a la transición en el servicio; `take` y `resume`, que asignan y recalculan el SLA, llegan con US2.
+- Los efectos de fechas de cada acción (`cancelled_at`, `on_hold_since`, `resolved_at`, `closed_at` y vaciar `resolved_at` al reabrir) viven junto a la transición en el servicio. `take` y `resume`, que asignan y recalculan el SLA, se completaron en la Fase 5 (ver la extensión siguiente).
+
+---
+
+## Extensión 2026-10-18 · Cola del agente (Fase 5)
+
+- **`already_taken` también con datos desactualizados**: si el ticket ya tiene otro agente asignado, `take` responde 409 `already_taken` ("Este ticket ya fue tomado por otro agente."), haya perdido la carrera o no.
+  - Dos personas casi nunca coinciden en milisegundos; lo normal es tomar desde una cola que ya cambió.
+  - Si el ticket se canceló, o el mismo agente ya lo tiene, la respuesta sigue siendo `action_not_allowed`.
+- **Carrera probada con hilos**: 3 agentes con sesiones propias sobre SQLite en archivo. Una barrera los detiene justo antes del `UPDATE`, así que todos leyeron el ticket abierto. Gana exactamente uno, y se registra un solo par de eventos `assigned` y `status_changed`.
+- **La cola incluye los Resueltos**, porque no son finales: esperan la confirmación del solicitante y muestran el SLA como Cumplido o Incumplido.
+- **El SLA se calcula en un colaborador `TicketSla(session, calendar)`**: lo que se muestra, el vencimiento inicial, la clave de orden de la cola y la reanudación (suma la espera y recalcula el vencimiento). El servicio queda con los casos de uso.

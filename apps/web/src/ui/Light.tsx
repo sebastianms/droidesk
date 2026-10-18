@@ -1,6 +1,6 @@
 import styles from './Light.module.css'
 
-type LightVariant = 'ok' | 'warn' | 'alert' | 'holo' | 'off'
+export type LightVariant = 'ok' | 'warn' | 'alert' | 'holo' | 'off'
 
 interface LightProps {
   variant: LightVariant

@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { ACTION_LABEL, assigneeName, commentCountLabel, PRIORITY_LABEL, SLA_STATE_LABEL, STATUS_LABEL } from './labels'
+import { slaPolicies } from '../../test/fixtures'
+import {
+  ACTION_LABEL,
+  assigneeName,
+  commentCountLabel,
+  PRIORITY_LABEL,
+  policyLabel,
+  SLA_STATE_LABEL,
+  SORT_LABEL,
+  STATUS_LABEL,
+  shownCountLabel,
+} from './labels'
 
 describe('labels', () => {
   it.each([
@@ -11,6 +22,7 @@ describe('labels', () => {
       ['take', 'cancel', 'hold', 'resume', 'resolve', 'close', 'reopen', 'comment', 'change_priority'],
     ],
     ['SLA state', SLA_STATE_LABEL, ['on_track', 'at_risk', 'breached', 'paused', 'met', 'missed']],
+    ['sort order', SORT_LABEL, ['due', 'priority', 'recent']],
   ])('has a Spanish label for every %s code of the data model', (_name, labels, codes) => {
     expect(Object.keys(labels)).toEqual(codes)
     for (const label of Object.values(labels)) expect(label).not.toBe('')
@@ -40,6 +52,32 @@ describe('labels', () => {
       [12, '12 comentarios'],
     ])('says %i as "%s"', (count, label) => {
       expect(commentCountLabel(count)).toBe(label)
+    })
+  })
+
+  describe('shownCountLabel', () => {
+    it.each([
+      [2, 5, 'Mostrando 2 de 5 tickets'],
+      [0, 3, 'Mostrando 0 de 3 tickets'],
+      [1, 1, 'Mostrando 1 de 1 ticket'],
+      [1, 4, 'Mostrando 1 de 4 tickets'],
+    ])('says %i of %i as "%s"', (shown, total, label) => {
+      expect(shownCountLabel(shown, total)).toBe(label)
+    })
+  })
+
+  describe('policyLabel', () => {
+    it.each([
+      [0, 'Crítica · 4 horas hábiles'],
+      [1, 'Alta · 1 día hábil'],
+      [2, 'Media · 3 días hábiles'],
+      [3, 'Baja · 5 días hábiles'],
+    ])('says the priority and its deadline for the policy %i', (index, label) => {
+      expect(policyLabel(slaPolicies[index])).toBe(label)
+    })
+
+    it('uses the singular only for exactly one unit', () => {
+      expect(policyLabel({ ...slaPolicies[0], target_amount: 1 })).toBe('Crítica · 1 hora hábil')
     })
   })
 })

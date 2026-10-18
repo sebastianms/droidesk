@@ -1,15 +1,17 @@
 import type { QueryClient } from '@tanstack/react-query'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { $api } from '../../api/client'
-import { ticketDetail } from '../../test/fixtures'
+import { slaPolicies, ticketDetail } from '../../test/fixtures'
 import { agentElena, jsonResponse, renderRoutes, requesterAna, signInAs, stubApi } from '../../test/helpers'
 import { ACTION_LABEL } from './labels'
 import { TicketActions } from './TicketActions'
 import type { TicketAction, TicketDetail, TicketView, TransitionAction } from './types'
 
 const TRANSITION = 'POST /api/v1/tickets/42/transitions'
+const PATCH = 'PATCH /api/v1/tickets/42'
+const POLICIES = 'GET /api/v1/sla-policies'
 const LIST = 'GET /api/v1/tickets'
 const DETAIL_KEY = ['get', '/api/v1/tickets/{ticket_id}', { params: { path: { ticket_id: 42 } } }]
 const EVERY_VIEW: TicketView[] = ['queue', 'assigned', 'mine']
@@ -42,6 +44,11 @@ function buttonNames() {
   return screen.queryAllByRole('button').map((button) => button.textContent)
 }
 
+/** Los botones de las transiciones: el ajuste de prioridad es otro control, con su propio botón. */
+function transitionNames() {
+  return buttonNames().filter((name) => name !== ACTION_LABEL.change_priority)
+}
+
 function sentActions(fetchMock: ReturnType<typeof stubApi>) {
   return Promise.all(
     fetchMock.mock.calls
@@ -52,6 +59,11 @@ function sentActions(fetchMock: ReturnType<typeof stubApi>) {
 }
 
 describe('TicketActions', () => {
+  // Los tickets que permiten ajustar la prioridad piden las políticas de SLA para ofrecerlas.
+  beforeEach(() => {
+    stubApi({ [POLICIES]: () => jsonResponse(slaPolicies) })
+  })
+
   describe('buttons', () => {
     it.each<[TicketAction, string]>([
       ['take', 'Tomar'],
@@ -93,7 +105,7 @@ describe('TicketActions', () => {
       it('offers only the transitions the API allows', () => {
         renderActions(ticketAllowing(...allowed))
 
-        expect(buttonNames()).toEqual(names)
+        expect(transitionNames()).toEqual(names)
       })
 
       it('highlights the main action and leaves the others as secondary', () => {
@@ -110,15 +122,15 @@ describe('TicketActions', () => {
       expect(buttonNames()).toEqual(['Cancelar'])
     })
 
-    it('does not make buttons out of comment and change_priority, which are not transitions yet', () => {
-      renderActions(ticketAllowing('cancel', 'comment', 'change_priority'))
+    it('does not make a transition button out of comment', () => {
+      renderActions(ticketAllowing('cancel', 'comment'))
 
       expect(buttonNames()).toEqual(['Cancelar'])
     })
 
     it.each([
       ['no actions', []],
-      ['only actions that are not transitions', ['comment', 'change_priority']],
+      ['only comment, which has its own box', ['comment']],
     ] as [string, TicketAction[]][])('shows nothing at all with %s', (_case, actions) => {
       renderActions(ticketAllowing(...actions))
 
@@ -252,6 +264,202 @@ describe('TicketActions', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Resolver' }))
 
       await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+    })
+  })
+
+  describe('changing the priority', () => {
+    const highPriority = () => ticketDetail({ priority: 'high', allowed_actions: ['comment', 'change_priority'] })
+
+    function sentPriorities(fetchMock: ReturnType<typeof stubApi>) {
+      return Promise.all(
+        fetchMock.mock.calls
+          .map(([request]) => request)
+          .filter((request) => request.method === 'PATCH')
+          .map(async (request) => (await request.json()).priority),
+      )
+    }
+
+    function stubPriorityApi(handlers: Parameters<typeof stubApi>[0] = {}) {
+      return stubApi({ [POLICIES]: () => jsonResponse(slaPolicies), ...handlers })
+    }
+
+    async function pick(label: string) {
+      await userEvent.selectOptions(await screen.findByRole('combobox', { name: 'Prioridad' }), label)
+    }
+
+    it('offers the control, alone in the panel, when the API allows changing the priority', async () => {
+      renderActions(ticketAllowing('comment', 'change_priority'), agentElena)
+
+      const panel = within(screen.getByRole('region', { name: 'Acciones' }))
+      expect(await panel.findByRole('combobox', { name: 'Prioridad' })).toBeVisible()
+      expect(panel.getByRole('button', { name: 'Cambiar prioridad' })).toBeVisible()
+      expect(buttonNames()).toEqual(['Cambiar prioridad'])
+    })
+
+    it('does not offer it, nor ask for the priorities, when the API does not allow it', () => {
+      const fetchMock = stubPriorityApi()
+      renderActions(ticketAllowing('resolve', 'comment'), agentElena)
+
+      expect(screen.queryByRole('combobox', { name: 'Prioridad' })).not.toBeInTheDocument()
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it('offers every priority with the deadline it commits to', async () => {
+      renderActions(highPriority(), agentElena)
+
+      await screen.findByRole('combobox', { name: 'Prioridad' })
+
+      expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+        'Crítica · 4 horas hábiles',
+        'Alta · 1 día hábil',
+        'Media · 3 días hábiles',
+        'Baja · 5 días hábiles',
+      ])
+    })
+
+    it('starts on the current priority, with nothing to change yet', async () => {
+      renderActions(highPriority(), agentElena)
+
+      expect(await screen.findByRole('combobox', { name: 'Prioridad' })).toHaveValue('high')
+      expect(screen.getByRole('button', { name: 'Cambiar prioridad' })).toBeDisabled()
+    })
+
+    it('enables the change only while the picked priority differs from the current one', async () => {
+      renderActions(highPriority(), agentElena)
+
+      await pick('Baja · 5 días hábiles')
+      expect(screen.getByRole('button', { name: 'Cambiar prioridad' })).toBeEnabled()
+
+      await pick('Alta · 1 día hábil')
+      expect(screen.getByRole('button', { name: 'Cambiar prioridad' })).toBeDisabled()
+    })
+
+    it('asks the API for the picked priority and keeps the ticket it answers with', async () => {
+      const updated = ticketDetail({ priority: 'low', allowed_actions: ['comment', 'change_priority'] })
+      const fetchMock = stubPriorityApi({ [PATCH]: () => jsonResponse(updated) })
+      const { queryClient } = renderActions(highPriority(), agentElena)
+      await pick('Baja · 5 días hábiles')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      await waitFor(() => expect(queryClient.getQueryData(DETAIL_KEY)).toEqual(updated))
+      expect(await sentPriorities(fetchMock)).toEqual(['low'])
+    })
+
+    it('refreshes the queue, the assigned tickets and "Mis tickets", which show the old priority and order', async () => {
+      const fetchMock = stubPriorityApi({
+        [LIST]: () => jsonResponse([]),
+        [PATCH]: () => jsonResponse(ticketDetail({ priority: 'low' })),
+      })
+      const { queryClient } = renderActions(highPriority(), agentElena)
+      await cacheEveryList(queryClient)
+      fetchMock.mockClear()
+      await pick('Baja · 5 días hábiles')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      await waitFor(() => expect(requestedViews(fetchMock)).toEqual(['assigned', 'mine', 'queue']))
+    })
+
+    it('blocks the change while it is in flight', async () => {
+      let finish: (response: Response) => void = () => {}
+      stubPriorityApi({ [PATCH]: () => new Promise<Response>((resolve) => (finish = resolve)) })
+      const { queryClient } = renderActions(highPriority(), agentElena)
+      await pick('Baja · 5 días hábiles')
+      expect(screen.getByRole('button', { name: 'Cambiar prioridad' })).toBeEnabled()
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      expect(screen.getByRole('button', { name: 'Cambiar prioridad' })).toBeDisabled()
+      const updated = ticketDetail({ priority: 'low' })
+      finish(jsonResponse(updated))
+      await waitFor(() => expect(queryClient.getQueryData(DETAIL_KEY)).toEqual(updated))
+    })
+
+    it('shows the explanation of the API when the ticket changed in the meantime, and brings the screen up to date', async () => {
+      const fetchMock = stubPriorityApi({
+        [LIST]: () => jsonResponse([]),
+        [PATCH]: () =>
+          jsonResponse(
+            { code: 'action_not_allowed', message: 'El ticket cambió mientras ajustabas su prioridad.' },
+            409,
+          ),
+      })
+      const { queryClient } = renderActions(highPriority(), agentElena)
+      await cacheEveryList(queryClient)
+      const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+      fetchMock.mockClear()
+      await pick('Baja · 5 días hábiles')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('El ticket cambió mientras ajustabas su prioridad.')
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: DETAIL_KEY })
+      await waitFor(() => expect(requestedViews(fetchMock)).toEqual(['assigned', 'mine', 'queue']))
+    })
+
+    it('lets the agent try again after a rejection, keeping the priority they picked', async () => {
+      stubPriorityApi({
+        [PATCH]: () => jsonResponse({ code: 'action_not_allowed', message: 'El ticket cambió.' }, 409),
+      })
+      renderActions(highPriority(), agentElena)
+      await pick('Baja · 5 días hábiles')
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+      await screen.findByRole('alert')
+
+      expect(screen.getByRole('combobox', { name: 'Prioridad' })).toHaveValue('low')
+      expect(screen.getByRole('button', { name: 'Cambiar prioridad' })).toBeEnabled()
+    })
+
+    it('shows a generic message when the failure has no explanation', async () => {
+      stubPriorityApi({ [PATCH]: () => jsonResponse({ detail: 'boom' }, 500) })
+      renderActions(highPriority(), agentElena)
+      await pick('Baja · 5 días hábiles')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Bip-bup: no pude cambiar la prioridad. Intenta de nuevo.',
+      )
+    })
+
+    it('clears the failure when the next attempt goes through', async () => {
+      let attempts = 0
+      stubPriorityApi({
+        [PATCH]: () => (++attempts === 1 ? jsonResponse({ detail: 'boom' }, 500) : jsonResponse(ticketDetail())),
+      })
+      renderActions(highPriority(), agentElena)
+      await pick('Baja · 5 días hábiles')
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+      await screen.findByRole('alert')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+    })
+
+    it('says it is loading the priorities until they arrive', () => {
+      stubApi({ [POLICIES]: () => new Promise<Response>(() => {}) })
+      renderActions(highPriority(), agentElena)
+
+      expect(screen.getByRole('status')).toHaveTextContent('Bip-bup: cargando las prioridades...')
+    })
+
+    it('says it could not load the priorities, without offering to change anything', async () => {
+      stubApi({ [POLICIES]: () => jsonResponse({ detail: 'boom' }, 500) })
+      renderActions(highPriority(), agentElena)
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Bip-bup: no pude cargar las prioridades. Intenta de nuevo.',
+      )
+      expect(screen.queryByRole('button', { name: 'Cambiar prioridad' })).not.toBeInTheDocument()
+    })
+
+    it('shows the message of the API when it explains why the priorities did not load', async () => {
+      stubApi({ [POLICIES]: () => jsonResponse({ code: 'forbidden', message: 'No puedes ver las prioridades.' }, 403) })
+      renderActions(highPriority(), agentElena)
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('No puedes ver las prioridades.')
     })
   })
 

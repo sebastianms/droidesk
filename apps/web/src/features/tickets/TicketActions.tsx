@@ -7,13 +7,15 @@ import { ConfirmDialog } from '../../ui/ConfirmDialog'
 import { ErrorNotice } from '../../ui/Notice'
 import { Panel } from '../../ui/Panel'
 import { ACTION_LABEL } from './labels'
-import { refreshTicketDetail, refreshTicketLists, storeTicketDetail } from './queries'
+import { PriorityControl } from './PriorityControl'
+import { ticketChangeHandlers } from './queries'
 import styles from './TicketActions.module.css'
-import type { TicketAction, TicketDetail, TransitionAction } from './types'
+import type { Priority, TicketAction, TicketDetail, TransitionAction } from './types'
 
 const FAILURE = 'Bip-bup: no pude aplicar el cambio. Intenta de nuevo.'
+const PRIORITY_FAILURE = 'Bip-bup: no pude cambiar la prioridad. Intenta de nuevo.'
 
-// Las acciones que cambian el estado y su énfasis. `comment` y `change_priority` no son transiciones.
+// Las acciones que cambian el estado y su énfasis. `comment` y `change_priority` tienen su propio control.
 const TRANSITION_VARIANT = {
   take: 'primary',
   cancel: 'secondary',
@@ -32,21 +34,21 @@ function isTransition(action: TicketAction): action is TransitionAction {
 export function TicketActions({ ticket }: { ticket: TicketDetail }) {
   const queryClient = useQueryClient()
   const [confirmingCancel, setConfirmingCancel] = useState(false)
-  const transition = $api.useMutation('post', '/api/v1/tickets/{ticket_id}/transitions', {
-    onSuccess: (updated) => {
-      storeTicketDetail(queryClient, updated)
-      return refreshTicketLists(queryClient)
-    },
-    // Si el cambio ya no era posible, el detalle en pantalla y los listados están desactualizados.
-    onError: () => Promise.all([refreshTicketDetail(queryClient, ticket.id), refreshTicketLists(queryClient)]),
-  })
+  const handlers = ticketChangeHandlers(queryClient, ticket.id)
+  const transition = $api.useMutation('post', '/api/v1/tickets/{ticket_id}/transitions', handlers)
+  const priorityChange = $api.useMutation('patch', '/api/v1/tickets/{ticket_id}', handlers)
   const actions = ticket.allowed_actions.filter(isTransition)
+  const canChangePriority = ticket.allowed_actions.includes('change_priority')
 
   // Con el fallo a la vista el panel se queda, aunque la API ya no permita ninguna acción: explica por qué.
-  if (actions.length === 0 && !transition.isError) return null
+  if (actions.length === 0 && !canChangePriority && !transition.isError && !priorityChange.isError) return null
 
   function run(action: TransitionAction) {
     transition.mutate({ params: { path: { ticket_id: ticket.id } }, body: { action } })
+  }
+
+  function changePriority(priority: Priority, onDone: () => void) {
+    priorityChange.mutate({ params: { path: { ticket_id: ticket.id } }, body: { priority } }, { onSuccess: onDone })
   }
 
   function confirmCancel() {
@@ -56,23 +58,27 @@ export function TicketActions({ ticket }: { ticket: TicketDetail }) {
 
   return (
     <Panel title="Acciones">
-      <div className={styles.actions}>
-        {actions.map((action) => (
-          <Button
-            key={action}
-            variant={TRANSITION_VARIANT[action]}
-            disabled={transition.isPending}
-            onClick={() => (action === 'cancel' ? setConfirmingCancel(true) : run(action))}
-          >
-            {ACTION_LABEL[action]}
-          </Button>
-        ))}
+      <div className={styles.body}>
+        {actions.length > 0 && (
+          <div className={styles.actions}>
+            {actions.map((action) => (
+              <Button
+                key={action}
+                variant={TRANSITION_VARIANT[action]}
+                disabled={transition.isPending}
+                onClick={() => (action === 'cancel' ? setConfirmingCancel(true) : run(action))}
+              >
+                {ACTION_LABEL[action]}
+              </Button>
+            ))}
+          </div>
+        )}
+        {transition.isError && <ErrorNotice message={serverMessage(transition.error) ?? FAILURE} />}
+        {canChangePriority && (
+          <PriorityControl current={ticket.priority} pending={priorityChange.isPending} onSubmit={changePriority} />
+        )}
+        {priorityChange.isError && <ErrorNotice message={serverMessage(priorityChange.error) ?? PRIORITY_FAILURE} />}
       </div>
-      {transition.isError && (
-        <div className={styles.failure}>
-          <ErrorNotice message={serverMessage(transition.error) ?? FAILURE} />
-        </div>
-      )}
       <ConfirmDialog
         open={confirmingCancel}
         title="Cancelar ticket"

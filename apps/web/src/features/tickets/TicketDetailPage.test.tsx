@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { $api } from '../../api/client'
-import { ticketComment, ticketDetail, ticketEvent } from '../../test/fixtures'
+import { slaPolicies, ticketComment, ticketDetail, ticketEvent } from '../../test/fixtures'
 import { agentElena, jsonResponse, renderRoutes, requesterAna, signInAs, stubApi } from '../../test/helpers'
 import type { User } from '../auth/access'
 import { formatDateTime } from './dates'
@@ -12,6 +12,8 @@ import { TicketDetailPage } from './TicketDetailPage'
 const DETAIL = 'GET /api/v1/tickets/42'
 const TRANSITION = 'POST /api/v1/tickets/42/transitions'
 const COMMENT = 'POST /api/v1/tickets/42/comments'
+const PRIORITY = 'PATCH /api/v1/tickets/42'
+const POLICIES = 'GET /api/v1/sla-policies'
 const LIST = 'GET /api/v1/tickets'
 
 function renderDetail(path = '/tickets/42', user: User = requesterAna) {
@@ -353,6 +355,93 @@ describe('TicketDetailPage', () => {
       await waitFor(() => expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument())
       expect(within(screen.getByRole('region', { name: 'Datos' })).getByText('En progreso')).toBeVisible()
       expect(screen.getByText('Un agente ya tomó este ticket.')).toBeVisible()
+    })
+  })
+
+  describe('the priority', () => {
+    it('shows the new priority, deadline and history once the agent changes it', async () => {
+      stubApi({
+        [DETAIL]: () =>
+          jsonResponse(
+            ticketDetail({
+              status: 'in_progress',
+              priority: 'critical',
+              sla: { state: 'on_track', due_at: '2026-10-19T17:00:00Z' },
+              allowed_actions: ['comment', 'change_priority'],
+            }),
+          ),
+        [POLICIES]: () => jsonResponse(slaPolicies),
+        [PRIORITY]: () =>
+          jsonResponse(
+            ticketDetail({
+              status: 'in_progress',
+              priority: 'low',
+              sla: { state: 'on_track', due_at: '2026-10-26T13:05:00Z' },
+              allowed_actions: ['comment', 'change_priority'],
+              history: [
+                ticketEvent(),
+                ticketEvent({
+                  id: 2,
+                  kind: 'priority_changed',
+                  actor: { id: 5, name: 'Elena Vidal' },
+                  from_value: 'critical',
+                  to_value: 'low',
+                }),
+              ],
+            }),
+          ),
+      })
+      renderDetail('/tickets/42', agentElena)
+      await userEvent.selectOptions(await screen.findByRole('combobox', { name: 'Prioridad' }), 'Baja · 5 días hábiles')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      const facts = within(screen.getByRole('region', { name: 'Datos' }))
+      expect(await facts.findByText('Baja')).toBeVisible()
+      expect(facts.getByText(formatDateTime('2026-10-26T13:05:00Z'))).toBeVisible()
+      expect(
+        within(screen.getByRole('region', { name: 'Historial' })).getByText(
+          'Elena Vidal cambió la prioridad de Crítica a Baja',
+        ),
+      ).toBeVisible()
+      expect(screen.getByRole('combobox', { name: 'Prioridad' })).toHaveValue('low')
+      expect(screen.getByRole('button', { name: 'Cambiar prioridad' })).toBeDisabled()
+    })
+
+    it('explains why the change failed and brings the page up to date, with no action left', async () => {
+      let detailRequests = 0
+      stubApi({
+        [DETAIL]: () =>
+          ++detailRequests === 1
+            ? jsonResponse(ticketDetail({ status: 'in_progress', allowed_actions: ['comment', 'change_priority'] }))
+            : jsonResponse(ticketDetail({ status: 'resolved', allowed_actions: ['comment'] })),
+        [POLICIES]: () => jsonResponse(slaPolicies),
+        [PRIORITY]: () =>
+          jsonResponse(
+            { code: 'action_not_allowed', message: 'El ticket se resolvió mientras ajustabas su prioridad.' },
+            409,
+          ),
+      })
+      renderDetail('/tickets/42', agentElena)
+      await userEvent.selectOptions(await screen.findByRole('combobox', { name: 'Prioridad' }), 'Baja · 5 días hábiles')
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cambiar prioridad' }))
+
+      expect(await screen.findByText('El ticket se resolvió mientras ajustabas su prioridad.')).toBeVisible()
+      await waitFor(() => expect(screen.queryByRole('combobox', { name: 'Prioridad' })).not.toBeInTheDocument())
+      expect(within(screen.getByRole('region', { name: 'Datos' })).getByText('Resuelto')).toBeVisible()
+      expect(within(screen.getByRole('region', { name: 'Acciones' })).getByRole('alert')).toHaveTextContent(
+        'El ticket se resolvió mientras ajustabas su prioridad.',
+      )
+    })
+
+    it('does not offer to change it to a requester', async () => {
+      stubApi({ [DETAIL]: () => jsonResponse(ticketDetail({ allowed_actions: ['cancel', 'comment'] })) })
+
+      renderDetail()
+
+      await screen.findByRole('region', { name: 'Acciones' })
+      expect(screen.queryByRole('combobox', { name: 'Prioridad' })).not.toBeInTheDocument()
     })
   })
 

@@ -282,6 +282,86 @@ describe('QueuePage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('No puedes ver esta vista.')
   })
 
+  describe('the filters and the sort order', () => {
+    const critical = ticketSummary({ id: 1, title: 'Crítico', priority: 'critical' })
+    const low = ticketSummary({ id: 2, title: 'Menor', priority: 'low' })
+    const high = ticketSummary({ id: 3, title: 'Importante', priority: 'high' })
+
+    async function shownTitles() {
+      const items = await screen.findAllByRole('listitem')
+      return items.map((item) => within(item).getByRole('link').textContent)
+    }
+
+    it.each<[TicketView, string]>([
+      ['queue', '/agent?priority=critical'],
+      ['assigned', '/agent?view=assigned&priority=critical'],
+    ])('apply to the tickets of the %s view, from the address', async (view, entry) => {
+      stubLists({ [view]: [low, critical, high] })
+
+      renderQueue(entry)
+
+      expect(await shownTitles()).toEqual(['Crítico'])
+      expect(screen.getByLabelText('Prioridad')).toHaveDisplayValue('Crítica')
+      expect(screen.getByText('Mostrando 1 de 3 tickets')).toBeVisible()
+    })
+
+    it('combine with the view: changing a control keeps "view" in the address', async () => {
+      stubLists({ assigned: [low, critical, high] })
+      const { router } = renderQueue('/agent?view=assigned&priority=critical')
+      await screen.findAllByRole('listitem')
+
+      await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'Prioridad')
+
+      expect(router.state.location.search).toBe('?view=assigned&priority=critical&sort=priority')
+      expect(tab('Asignados a mí')).toHaveAttribute('aria-current', 'page')
+    })
+
+    it('keeps the order of the API when no sort order is chosen, and uses the chosen one otherwise', async () => {
+      stubLists({ queue: [low, critical, high] })
+      renderQueue()
+      expect(await shownTitles()).toEqual(['Menor', 'Crítico', 'Importante'])
+
+      await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'Prioridad')
+      expect(await shownTitles()).toEqual(['Crítico', 'Importante', 'Menor'])
+
+      await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'Predeterminado')
+      expect(await shownTitles()).toEqual(['Menor', 'Crítico', 'Importante'])
+    })
+
+    it('stay as they are when the agent switches tab, and apply to the tickets of the new view', async () => {
+      stubLists({ queue: [low, critical], assigned: [high, critical, low] })
+      const { router } = renderQueue('/agent?priority=critical&sort=due')
+      expect(await screen.findByText('Mostrando 1 de 2 tickets')).toBeVisible()
+
+      await userEvent.click(tab('Asignados a mí'))
+
+      expect(await screen.findByText('Mostrando 1 de 3 tickets')).toBeVisible()
+      expect(await shownTitles()).toEqual(['Crítico'])
+      expect(router.state.location.search).toBe('?priority=critical&sort=due&view=assigned')
+      expect(screen.getByLabelText('Prioridad')).toHaveDisplayValue('Crítica')
+      expect(screen.getByLabelText('Ordenar por')).toHaveDisplayValue('Vencimiento')
+      expect(tab('Asignados a mí')).toHaveAttribute('aria-current', 'page')
+    })
+
+    it('are not offered when the view is empty, which keeps its own message', async () => {
+      stubLists({})
+
+      renderQueue('/agent?view=assigned&priority=critical')
+
+      expect(await screen.findByText('Bip-bup: no tienes tickets asignados')).toBeVisible()
+      expect(screen.queryByLabelText('Prioridad')).not.toBeInTheDocument()
+    })
+
+    it('say apart from the empty view that the filters left nothing', async () => {
+      stubLists({ queue: [low, high] })
+
+      renderQueue('/agent?priority=critical')
+
+      expect(await screen.findByText('Bip-bup: ningún ticket coincide con los filtros')).toBeVisible()
+      expect(screen.queryByText('Bip-bup: la cola está despejada')).not.toBeInTheDocument()
+    })
+  })
+
   describe('taking a ticket from its detail', () => {
     const ELENA = { id: agentElena.id, name: agentElena.name }
     const MARTA = { id: 6, name: 'Marta Soto' }

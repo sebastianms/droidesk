@@ -10,7 +10,8 @@ import { DateTime } from './DateTime'
 import { Fact, Facts } from './Facts'
 import { assigneeName, PRIORITY_LABEL } from './labels'
 import { useTicketDetail } from './queries'
-import { SlaInfo, StatusLight } from './StatusLight'
+import { SlaLight } from './SlaLight'
+import { StatusLight } from './StatusLight'
 import { TicketActions } from './TicketActions'
 import styles from './TicketDetailPage.module.css'
 import { Timeline } from './Timeline'
@@ -72,7 +73,7 @@ function TicketView({ ticket }: { ticket: TicketDetail }) {
             <DateTime value={ticket.created_at} />
           </Fact>
           <Fact term="SLA">
-            <SlaInfo sla={ticket.sla} />
+            <SlaLight sla={ticket.sla} />
           </Fact>
           {ticket.resolved_at && (
             <Fact term="Fecha de resolución">

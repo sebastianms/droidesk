@@ -215,6 +215,30 @@ export interface components {
          * @enum {string}
          */
         ErrorCode: "not_authenticated" | "forbidden" | "not_found" | "already_taken" | "action_not_allowed";
+        /**
+         * Event
+         * @description Una entrada del historial; `from_value` y `to_value` son estados, prioridades o el nombre del agente asignado.
+         */
+        Event: {
+            actor: components["schemas"]["UserRef"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** From Value */
+            from_value: string | null;
+            /** Id */
+            id: number;
+            kind: components["schemas"]["EventKind"];
+            /** To Value */
+            to_value: string | null;
+        };
+        /**
+         * EventKind
+         * @enum {string}
+         */
+        EventKind: "created" | "assigned" | "status_changed" | "priority_changed" | "commented";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -333,6 +357,8 @@ export interface components {
             created_at: string;
             /** Description */
             description: string;
+            /** History */
+            history: components["schemas"]["Event"][];
             /** Id */
             id: number;
             priority: components["schemas"]["Priority"];

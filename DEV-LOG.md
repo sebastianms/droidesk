@@ -4460,3 +4460,239 @@ Revisando tests de QueuePage.test.tsx
 ### #28 · 🧑 Usuario
 > si, ya probe en local, todo bien
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 20s
+- **Herramientas:** Bash ×3
+- **Git:** `1e4c8d1` docs: extiende ADL-004 y ADL-008 y actualiza SDD, contrato REST y AI-USAGE · PR https://github.com/sebastianms/droidesk/pull/5
+- **Tokens:** entrada 6 · cache leída 685.9k · cache escrita 2.5k · salida 2.4k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #5 de la Fase 5: https://github.com/sebastianms/droidesk/pull/5
+
+- Antes de commitear marqué T037–T042 como hechas en `tasks.md` y la Fase 5 como `[DONE · PR #5]` en el roadmap.
+- Después hice los 4 commits y el push a `phase/05-agent-queue`; el árbol quedó limpio.
+- El CI de GitHub pasó en los dos jobs, `api` y `web`.
+
+Cuando hagas el squash and merge, creo `phase/06-ticket-history` desde `main` actualizado y arranco la US3. En esa fase el detalle muestra el historial cronológico e inmutable del ticket, con autor, fecha y hora.
+
+</details>
+
+### #29 · 🧑 Usuario
+> mezclado
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 22m 44s
+- **Herramientas:** Bash ×83 · Read ×6 · Agent ×4 · SubagentHandback ×4 · Write ×2
+- **Archivos modificados:** `apps/api/tests/api/test_us3_history.py`, `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/e2e/us3.mjs`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 6m 17s · 2.9M tokens
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 1m 18s · 393.1k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 4m 43s · 2.1M tokens
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 44s · 245.8k tokens
+- **Tokens:** entrada 34 · cache leída 4.2M · cache escrita 33.5k · salida 14.9k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Terminé la US3 de la Fase 6, rama `phase/06-ticket-history`, sin commitear. Ahora el detalle de cada ticket muestra el historial completo e inmutable, con quién hizo cada cambio y cuándo, igual para los dos perfiles. Falta tu aprobación para el commit y el push.
+
+**Pruebas**
+- **En el navegador**, contra un stack aislado que ya borré, pasa el escenario 15:
+  - Ana creó un ticket y Elena lo tomó, lo dejó en espera, lo retomó y lo resolvió.
+  - Ana ve los 6 eventos en orden, con fecha y hora, por ejemplo "Elena Vidal cambió el estado de En espera a En progreso".
+  - El historial no tiene ningún control para editar ni borrar, y al confirmar el cierre se suma el evento a nombre de Ana.
+  - Repetí la prueba después de las correcciones de deckard y siguió pasando.
+- **API:** 747 tests, 99,89 % de cobertura total y 100 % en el flujo crítico.
+  - Un test confirma que leer un ticket con 7 eventos hace las mismas consultas que leer uno con 1 evento.
+  - Otro confirma que no existe ninguna ruta para editar ni borrar eventos.
+- **Web:** 362 tests y 100 % de líneas. Lint, typecheck y build pasan, y el contrato está al día.
+
+**deckard** encontró un hallazgo de criticidad 8: una función recibía 4 argumentos y el máximo del proyecto es 3.
+- Lo corregí y activé la regla `PLR0913` de ruff para que la build falle si vuelve a pasar.
+- La regla destapó otras 3 funciones del servicio, que también corregí.
+- La regla no aplica a los tests ni a los handlers de los routers, cuyos parámetros inyecta FastAPI.
+- La re-revisión no encontró nada ≥ 8.
+
+**Documentos:** T043–T045 en curso en `tasks.md` y la Fase 6 aparece EN CURSO en el roadmap. Extendí ADL-002 y actualicé AI-USAGE.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión.
+
+Commits propuestos:
+1. `feat(api): incluye el historial del ticket en el detalle y limita las funciones a 3 argumentos`
+2. `feat(contracts): agrega el historial al detalle del ticket en el contrato`
+3. `feat(web): muestra la línea de tiempo del ticket en el detalle`
+4. `docs: extiende ADL-002 y actualiza SDD y AI-USAGE`
+
+¿Apruebas el commit y el push? Si apruebas, también abro el PR #6.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_us2_agent_queue.py fixtures
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting test_recorder.py and export_openapi.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Moving fixtures into conftest.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_app.py OpenAPI assertions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating test_app.py schema assertions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running test_us3_history.py tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Regenerating schema.d.ts types
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Creating Timeline.tsx and styles
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running biome on web files
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking Timeline.tsx coverage results
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Building web app with Vite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking coverage in seed.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Leyendo service.py y recorder.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Buscando contadores de consultas duplicados en los tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking ruff max-args docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting PLR0913 hits in router.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding users_by_id to service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_identity_service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding users_by_id tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reworking Event docstring in schemas.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Editing Timeline.tsx and its test
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running web coverage and build
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying openapi.json md5 unchanged
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading service.py and audit models
+
+</details>
+
+### #30 · 🧑 Usuario
+> revisado, aprobado
+

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from droidesk_api.audit.models import TicketEvent
 from droidesk_api.core.db import persisted_id
 from droidesk_api.identity.models import User
 from droidesk_api.tickets import schemas
@@ -17,6 +18,15 @@ class TicketRow:
     assignee: User | None
 
 
+@dataclass(frozen=True)
+class DetailFacts:
+    """Lo que el servicio calcula aparte de la fila para armar el detalle."""
+
+    sla: schemas.Sla
+    allowed_actions: list[TicketAction]
+    history: list[schemas.Event]
+
+
 def to_summary(row: TicketRow, sla: schemas.Sla) -> schemas.TicketSummary:
     ticket = row.ticket
     return schemas.TicketSummary(
@@ -32,17 +42,27 @@ def to_summary(row: TicketRow, sla: schemas.Sla) -> schemas.TicketSummary:
     )
 
 
-def to_detail(
-    row: TicketRow, sla: schemas.Sla, allowed_actions: list[TicketAction]
-) -> schemas.TicketDetail:
+def to_detail(row: TicketRow, facts: DetailFacts) -> schemas.TicketDetail:
     ticket = row.ticket
     return schemas.TicketDetail(
-        **dict(to_summary(row, sla)),
+        **dict(to_summary(row, facts.sla)),
         description=ticket.description,
         resolved_at=ticket.resolved_at,
         closed_at=ticket.closed_at,
         cancelled_at=ticket.cancelled_at,
-        allowed_actions=allowed_actions,
+        allowed_actions=facts.allowed_actions,
+        history=facts.history,
+    )
+
+
+def to_event(event: TicketEvent, actor: User) -> schemas.Event:
+    return schemas.Event(
+        id=persisted_id(event),
+        kind=event.kind,
+        actor=schemas.UserRef.model_validate(actor),
+        from_value=event.from_value,
+        to_value=event.to_value,
+        created_at=event.created_at,
     )
 
 

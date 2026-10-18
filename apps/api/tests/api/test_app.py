@@ -209,6 +209,8 @@ class TestOpenApi:
             "UserRef",
             "Sla",
             "TicketAction",
+            "Event",
+            "EventKind",
         } <= names
 
     def test_ticket_detail_extends_the_summary(self, schema: dict[str, Any]) -> None:
@@ -220,6 +222,7 @@ class TestOpenApi:
             "closed_at",
             "cancelled_at",
             "allowed_actions",
+            "history",
         }
 
     def test_new_tickets_declare_their_limits_and_default_priority(

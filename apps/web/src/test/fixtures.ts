@@ -1,4 +1,4 @@
-import type { Category, SlaPolicy, TicketDetail, TicketSummary } from '../features/tickets/types'
+import type { Category, SlaPolicy, TicketDetail, TicketEvent, TicketSummary } from '../features/tickets/types'
 
 export const categories: Category[] = [
   { id: 1, name: 'Hardware' },
@@ -65,6 +65,19 @@ export function ticketDetail(overrides: Partial<TicketDetail> = {}): TicketDetai
     closed_at: null,
     cancelled_at: null,
     allowed_actions: ['cancel', 'comment'],
+    history: [],
+    ...overrides,
+  }
+}
+
+export function ticketEvent(overrides: Partial<TicketEvent> = {}): TicketEvent {
+  return {
+    id: 1,
+    kind: 'created',
+    actor: { id: 1, name: 'Ana Rojas' },
+    from_value: null,
+    to_value: 'open',
+    created_at: '2026-10-19T13:05:00Z',
     ...overrides,
   }
 }

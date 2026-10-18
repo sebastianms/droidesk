@@ -1,4 +1,5 @@
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar
 
@@ -7,7 +8,7 @@ from sqlmodel import Session, col, select, update
 from sqlmodel.sql.expression import Select
 
 from droidesk_api.audit.enums import EventKind
-from droidesk_api.audit.recorder import NewEvent, record_event
+from droidesk_api.audit.recorder import NewEvent, list_events, record_event
 from droidesk_api.core.clock import Clock
 from droidesk_api.core.db import ColumnValues, persisted_id
 from droidesk_api.core.errors import (
@@ -20,6 +21,7 @@ from droidesk_api.core.errors import (
 )
 from droidesk_api.identity.enums import Role
 from droidesk_api.identity.models import User
+from droidesk_api.identity.service import users_by_id
 from droidesk_api.sla.calendar import BusinessCalendar
 from droidesk_api.tickets import presenter, schemas
 from droidesk_api.tickets.access import TICKET_NOT_FOUND_MESSAGE, ensure_can_view
@@ -35,7 +37,7 @@ from droidesk_api.tickets.lifecycle import (
     relation_of,
 )
 from droidesk_api.tickets.models import Category, Ticket
-from droidesk_api.tickets.presenter import TicketRow
+from droidesk_api.tickets.presenter import DetailFacts, TicketRow
 from droidesk_api.tickets.ticket_sla import TicketSla
 
 RowStatement = Select[Ticket, Category, User, User | None]
@@ -57,6 +59,15 @@ STAMPED_DATES: dict[TicketAction, DateColumn] = {
 CLEARED_DATES: dict[TicketAction, DateColumn] = {
     TicketAction.REOPEN: col(Ticket.resolved_at)
 }
+
+
+@dataclass(frozen=True)
+class Change:
+    """Una transición autorizada, con quién la aplica y cuándo."""
+
+    transition: Transition
+    actor: User
+    now: datetime
 
 
 class TicketService:
@@ -130,21 +141,31 @@ class TicketService:
 
     def get_ticket_for(self, user: User, ticket_id: int) -> schemas.TicketDetail:
         row = self._visible_row(user, ticket_id)
-        sla = self._sla.view_of(row.ticket, self._clock.now())
-        actions = allowed_actions(row.ticket.status, _viewer_of(user, row.ticket))
-        return presenter.to_detail(row, sla, actions)
+        facts = DetailFacts(
+            sla=self._sla.view_of(row.ticket, self._clock.now()),
+            allowed_actions=allowed_actions(
+                row.ticket.status, _viewer_of(user, row.ticket)
+            ),
+            history=self._history_of(row.ticket),
+        )
+        return presenter.to_detail(row, facts)
 
     def apply_transition(
         self, user: User, ticket_id: int, action: TicketAction
     ) -> schemas.TicketDetail:
         ticket = self._visible_row(user, ticket_id).ticket
-        transition = _authorize(user, ticket, action)
-        now = self._clock.now()
-        self._move(ticket, transition, user, now)
-        for event in _transition_events(ticket_id, transition, user, now):
+        change = Change(_authorize(user, ticket, action), user, self._clock.now())
+        self._move(ticket, change)
+        for event in _transition_events(ticket_id, change):
             record_event(self._session, event)
         self._session.commit()
         return self.get_ticket_for(user, ticket_id)
+
+    def _history_of(self, ticket: Ticket) -> list[schemas.Event]:
+        """Las entradas en orden cronológico; los autores se leen en una sola consulta."""
+        events = list_events(self._session, persisted_id(ticket))
+        actors = users_by_id(self._session, {event.actor_id for event in events})
+        return [presenter.to_event(event, actors[event.actor_id]) for event in events]
 
     def _new_ticket(
         self, requester: User, data: schemas.TicketCreate, now: datetime
@@ -160,31 +181,28 @@ class TicketService:
             sla_due_at=self._sla.initial_due_at(data.priority, now),
         )
 
-    def _move(
-        self, ticket: Ticket, transition: Transition, actor: User, now: datetime
-    ) -> None:
+    def _move(self, ticket: Ticket, change: Change) -> None:
         """Actualización condicional: si otro cambió el estado antes, no afecta filas y se rechaza."""
-        effects = self._effects_of(transition.action, ticket, actor, now)
+        transition = change.transition
         statement = (
             update(Ticket)
             .where(
                 col(Ticket.id) == persisted_id(ticket),
                 col(Ticket.status) == transition.source,
             )
-            .values(status=transition.target, updated_at=now)
-            .values(effects)
+            .values(status=transition.target, updated_at=change.now)
+            .values(self._effects_of(ticket, change))
         )
         if self._session.exec(statement).rowcount == 0:
-            raise self._lost_race(persisted_id(ticket), transition, actor)
+            raise self._lost_race(persisted_id(ticket), transition, change.actor)
 
-    def _effects_of(
-        self, action: TicketAction, ticket: Ticket, actor: User, now: datetime
-    ) -> ColumnValues:
+    def _effects_of(self, ticket: Ticket, change: Change) -> ColumnValues:
+        action = change.transition.action
         if action == TicketAction.TAKE:
-            return {col(Ticket.assignee_id): persisted_id(actor)}
+            return {col(Ticket.assignee_id): persisted_id(change.actor)}
         if action == TicketAction.RESUME:
-            return self._sla.resume_values(ticket, now)
-        return _date_effects(action, now)
+            return self._sla.resume_values(ticket, change.now)
+        return _date_effects(action, change.now)
 
     def _lost_race(
         self, ticket_id: int, transition: Transition, actor: User
@@ -265,10 +283,9 @@ def _date_effects(
     return {STAMPED_DATES[action]: now}
 
 
-def _transition_events(
-    ticket_id: int, transition: Transition, actor: User, now: datetime
-) -> list[NewEvent]:
+def _transition_events(ticket_id: int, change: Change) -> list[NewEvent]:
     """Tomar un ticket lo asigna y además cambia su estado: dos eventos, en ese orden."""
+    transition, actor = change.transition, change.actor
     events = []
     if transition.action == TicketAction.TAKE:
         events.append(
@@ -276,7 +293,7 @@ def _transition_events(
                 ticket_id=ticket_id,
                 actor_id=persisted_id(actor),
                 kind=EventKind.ASSIGNED,
-                created_at=now,
+                created_at=change.now,
                 to_value=actor.name,
             )
         )
@@ -285,7 +302,7 @@ def _transition_events(
             ticket_id=ticket_id,
             actor_id=persisted_id(actor),
             kind=EventKind.STATUS_CHANGED,
-            created_at=now,
+            created_at=change.now,
             from_value=transition.source.value,
             to_value=transition.target.value,
         )

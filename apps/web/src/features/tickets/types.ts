@@ -4,6 +4,8 @@ type Schemas = components['schemas']
 
 export type TicketSummary = Schemas['TicketSummary']
 export type TicketDetail = Schemas['TicketDetail']
+export type TicketEvent = Schemas['Event']
+export type EventKind = Schemas['EventKind']
 export type TicketStatus = Schemas['TicketStatus']
 export type TicketView = Schemas['TicketView']
 export type TicketAction = Schemas['TicketAction']

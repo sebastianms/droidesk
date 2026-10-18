@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import Engine, event
 from sqlmodel import Session, func, select
 
 from droidesk_api.core.errors import NotAuthenticatedError
@@ -8,6 +9,7 @@ from droidesk_api.identity.service import (
     UNKNOWN_USER_MESSAGE,
     authenticate,
     list_demo_users,
+    users_by_id,
 )
 
 
@@ -89,3 +91,26 @@ class TestListDemoUsers:
             "bruno",
             "Carla",
         ]
+
+
+class TestUsersById:
+    @pytest.mark.usefixtures("demo_data")
+    def test_returns_the_requested_users_keyed_by_id(self, session: Session) -> None:
+        found = users_by_id(session, [1, 5, 1])
+        assert {id_: user.username for id_, user in found.items()} == {
+            1: "ana.rojas",
+            5: "elena.vidal",
+        }
+
+    @pytest.mark.usefixtures("demo_data")
+    def test_ignores_ids_that_do_not_exist(self, session: Session) -> None:
+        assert list(users_by_id(session, [1, 999])) == [1]
+
+    def test_asking_for_nobody_does_not_query(self, engine: Engine) -> None:
+        statements: list[str] = []
+        event.listen(
+            engine, "before_cursor_execute", lambda *args: statements.append(args[2])
+        )
+        with Session(engine) as session:
+            assert users_by_id(session, []) == {}
+        assert statements == []

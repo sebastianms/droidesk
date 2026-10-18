@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { ticketDetail } from '../../test/fixtures'
+import { ticketDetail, ticketEvent } from '../../test/fixtures'
 import { agentElena, jsonResponse, renderRoutes, requesterAna, signInAs, stubApi } from '../../test/helpers'
 import type { User } from '../auth/access'
 import { formatDateTime } from './dates'
@@ -135,6 +135,22 @@ describe('TicketDetailPage', () => {
       expect(screen.queryByRole('img')).not.toBeInTheDocument()
     })
 
+    it('shows its history under "Historial", from the oldest event to the newest', async () => {
+      const history = [
+        ticketEvent({ id: 1 }),
+        ticketEvent({ id: 2, kind: 'assigned', actor: { id: 5, name: 'Elena Vidal' }, to_value: 'Elena Vidal' }),
+      ]
+      stubApi({ [DETAIL]: () => jsonResponse(ticketDetail({ history })) })
+
+      renderDetail()
+
+      const timeline = within(await screen.findByRole('region', { name: 'Historial' }))
+      expect(timeline.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+        `Ana Rojas creó el ticket${formatDateTime('2026-10-19T13:05:00Z')}`,
+        `Elena Vidal tomó el ticket${formatDateTime('2026-10-19T13:05:00Z')}`,
+      ])
+    })
+
     it('asks the API for the ticket of the address', async () => {
       const fetchMock = stubApi({ [DETAIL]: () => jsonResponse(ticketDetail()) })
 
@@ -266,6 +282,7 @@ describe('TicketDetailPage', () => {
               status: 'in_progress',
               assignee: { id: 5, name: 'Elena Vidal' },
               allowed_actions: ['hold', 'resolve', 'comment'],
+              history: [ticketEvent(), ticketEvent({ id: 2, kind: 'assigned', actor: { id: 5, name: 'Elena Vidal' } })],
             }),
           ),
       })
@@ -280,6 +297,9 @@ describe('TicketDetailPage', () => {
         'Dejar en espera',
         'Resolver',
       ])
+      expect(
+        within(screen.getByRole('region', { name: 'Historial' })).getByText('Elena Vidal tomó el ticket'),
+      ).toBeVisible()
       expect(router.state.location.pathname).toBe('/tickets/42')
     })
 

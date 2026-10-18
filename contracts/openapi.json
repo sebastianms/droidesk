@@ -70,6 +70,69 @@
         "title": "ErrorCode",
         "type": "string"
       },
+      "Event": {
+        "description": "Una entrada del historial; `from_value` y `to_value` son estados, prioridades o el nombre del agente asignado.",
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/UserRef"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "from_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Value"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/EventKind"
+          },
+          "to_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Value"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "actor",
+          "from_value",
+          "to_value",
+          "created_at"
+        ],
+        "title": "Event",
+        "type": "object"
+      },
+      "EventKind": {
+        "enum": [
+          "created",
+          "assigned",
+          "status_changed",
+          "priority_changed",
+          "commented"
+        ],
+        "title": "EventKind",
+        "type": "string"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -359,6 +422,13 @@
             "title": "Description",
             "type": "string"
           },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            },
+            "title": "History",
+            "type": "array"
+          },
           "id": {
             "title": "Id",
             "type": "integer"
@@ -406,7 +476,8 @@
           "resolved_at",
           "closed_at",
           "cancelled_at",
-          "allowed_actions"
+          "allowed_actions",
+          "history"
         ],
         "title": "TicketDetail",
         "type": "object"

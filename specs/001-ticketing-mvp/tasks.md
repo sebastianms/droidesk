@@ -178,12 +178,12 @@
 **Objetivo**: los dos perfiles ven la línea de tiempo completa e inmutable de un ticket.
 **Test independiente**: escenario 15 del quickstart.
 
-- [ ] T043 [US3] Incluir en `TicketDetail`, en `apps/api/src/droidesk_api/tickets/service.py`, el historial en orden cronológico con el autor, usando `apps/api/src/droidesk_api/audit/recorder.py`.
-- [ ] T044 [US3] Crear `apps/api/tests/api/test_us3_history.py`:
+- [x] T043 [US3] Incluir en `TicketDetail`, en `apps/api/src/droidesk_api/tickets/service.py`, el historial en orden cronológico con el autor, usando `apps/api/src/droidesk_api/audit/recorder.py`.
+- [x] T044 [US3] Crear `apps/api/tests/api/test_us3_history.py`:
   - eventos y valores anterior y nuevo después de crear, tomar, dejar en espera y resolver;
   - el solicitante ve su historial y uno ajeno responde 404;
   - no existe ruta para editar ni borrar eventos.
-- [ ] T045 [US3] Crear `apps/web/src/features/tickets/Timeline.tsx` (etiquetas en español, autor, fecha y hora local) y su test `Timeline.test.tsx`.
+- [x] T045 [US3] Crear `apps/web/src/features/tickets/Timeline.tsx` (etiquetas en español, autor, fecha y hora local) y su test `Timeline.test.tsx`.
 
 **Checkpoint**: escenario 15 en verde; gates de cobertura.
 

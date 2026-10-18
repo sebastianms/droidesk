@@ -1,0 +1,27 @@
+import pytest
+from fastapi.testclient import TestClient
+from httpx2 import Response
+
+from tests.api.helpers import TICKETS_URL, Act, LoginAs, Read, transitions_url
+
+
+# Los tokens duran 8 horas con el reloj inyectado: cada llamada ingresa de nuevo,
+# para que los tests puedan adelantar el reloj días enteros.
+@pytest.fixture
+def act(client: TestClient, login_as: LoginAs) -> Act:
+    def perform(username: str, ticket_id: int, action: str) -> Response:
+        return client.post(
+            transitions_url(ticket_id),
+            headers=login_as(username),
+            json={"action": action},
+        )
+
+    return perform
+
+
+@pytest.fixture
+def read(client: TestClient, login_as: LoginAs) -> Read:
+    def fetch(username: str, ticket_id: int) -> Response:
+        return client.get(f"{TICKETS_URL}/{ticket_id}", headers=login_as(username))
+
+    return fetch

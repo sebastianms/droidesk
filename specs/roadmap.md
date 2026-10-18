@@ -33,9 +33,9 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 
 - [x] El agente ve la cola, toma un ticket y cambia su estado según la máquina de estados.
 
-## Phase 6: Historial del ticket — `phase/06-ticket-history`
+## Phase 6: Historial del ticket — `phase/06-ticket-history` [DONE · PR #6]
 
-- [ ] Solicitante y agente ven qué pasó con un ticket, quién lo hizo y cuándo.
+- [x] Solicitante y agente ven qué pasó con un ticket, quién lo hizo y cuándo.
 
 ## Phase 7: Comentarios — `phase/07-comments`
 

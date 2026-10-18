@@ -17,7 +17,9 @@ from droidesk_api.tickets.enums import TicketStatus
 from droidesk_api.tickets.lifecycle import TRANSITIONS
 from tests.api.helpers import (
     TICKETS_URL,
+    Act,
     LoginAs,
+    Read,
     add_ticket_id,
     add_ticket_in_id,
     post_ticket,
@@ -40,9 +42,6 @@ from tests.factories import (
 )
 from tests.fakes import FakeClock
 
-Act = Callable[[str, int, str], Response]
-Read = Callable[[str, int], Response]
-
 
 class ListAs(Protocol):
     def __call__(self, username: str, view: str | None = None) -> Response: ...
@@ -58,28 +57,6 @@ OTHER_USERNAME_BY_ROLE = {
     Role.AGENT: REQUESTER_USERNAME,
     Role.REQUESTER: AGENT_USERNAME,
 }
-
-
-# Los tokens duran 8 horas con el reloj inyectado: cada llamada ingresa de nuevo,
-# para que los tests puedan adelantar el reloj días enteros.
-@pytest.fixture
-def act(client: TestClient, login_as: LoginAs) -> Act:
-    def perform(username: str, ticket_id: int, action: str) -> Response:
-        return client.post(
-            transitions_url(ticket_id),
-            headers=login_as(username),
-            json={"action": action},
-        )
-
-    return perform
-
-
-@pytest.fixture
-def read(client: TestClient, login_as: LoginAs) -> Read:
-    def fetch(username: str, ticket_id: int) -> Response:
-        return client.get(f"{TICKETS_URL}/{ticket_id}", headers=login_as(username))
-
-    return fetch
 
 
 @pytest.fixture

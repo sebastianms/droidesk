@@ -13,6 +13,7 @@ from droidesk_api.tickets.enums import TicketStatus
 from droidesk_api.tickets.models import DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH, Ticket
 from tests.api.helpers import (
     NEW_TICKET,
+    NOT_FOUND,
     TICKETS_URL,
     LoginAs,
     add_ticket_id,
@@ -31,7 +32,6 @@ from tests.factories import (
 )
 from tests.fakes import FakeClock
 
-NOT_FOUND = {"code": "not_found", "message": "El ticket no existe."}
 SANTIAGO_FRIDAY_EVENING = datetime(2026, 10, 23, 23, 0, tzinfo=UTC)  # 20:00 local
 
 

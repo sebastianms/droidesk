@@ -104,3 +104,11 @@ La decisión de fondo no cambia. Se fijaron estos detalles al implementarla:
 - **Servicio con colaboradores inyectados**: `TicketService(session, clock, calendar)`, con la presentación en `tickets/presenter.py` y la regla de visibilidad en `tickets/access.py`, que no depende de FastAPI. `identity/authorization.py` queda solo con dependencias HTTP.
 - **Un dato inválido que solo conoce la base**, como una categoría inexistente, responde 422 con el mismo formato que la validación de FastAPI (`loc` en el campo). El servicio lanza `InvalidFieldError`, una excepción sin framework fuera de la jerarquía `DomainError`, porque no es un `{code, message}`. La web trata ambos 422 igual.
 - **Listados con una sola consulta**: JOIN con alias para el solicitante y el asignado, sin `Relationship` de SQLModel.
+
+---
+
+## Extensión 2026-10-18 · Historial (Fase 6)
+
+- **El detalle trae el historial** en orden cronológico, con el autor resuelto en una sola consulta (`identity.service.users_by_id`), sin N+1. Un test compara las consultas de un ticket con 1 evento y uno con 7.
+- **Sin rutas de escritura sobre eventos**: un test verifica que ninguna ruta toca eventos ni historial y que ningún cuerpo de petición usa el esquema `Event`.
+- **Máximo 3 argumentos, verificado por ruff** (`PLR0913`, `max-args = 3`). Deckard detectó `to_detail` con 4 argumentos (criticidad 8). Los datos que se calculan aparte de la fila se agrupan en objetos inmutables (`DetailFacts`, `Change`). La regla no aplica a los tests ni a los handlers de los routers, cuyos parámetros inyecta FastAPI.

@@ -12,6 +12,7 @@ import { useTicketDetail } from './queries'
 import { SlaInfo, StatusLight } from './StatusLight'
 import { TicketActions } from './TicketActions'
 import styles from './TicketDetailPage.module.css'
+import { Timeline } from './Timeline'
 import type { TicketDetail } from './types'
 
 const BACK_LABEL = {
@@ -93,6 +94,9 @@ function TicketView({ ticket }: { ticket: TicketDetail }) {
         <p className={styles.description}>{ticket.description}</p>
       </Panel>
       <TicketActions ticket={ticket} />
+      <Panel title="Historial">
+        <Timeline events={ticket.history} />
+      </Panel>
     </>
   )
 }

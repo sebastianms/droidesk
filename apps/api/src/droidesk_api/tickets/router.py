@@ -40,6 +40,14 @@ def list_tickets(
     service: TicketServiceDep,
     view: schemas.TicketView | None = None,
 ) -> list[schemas.TicketSummary]:
+    """Lista según el perfil.
+
+    - Solicitante: `mine` (por defecto), sus tickets del más reciente al más antiguo.
+    - Agente: `queue` (por defecto), los tickets no finales; y `assigned`, los suyos.
+      Ambas van por vencimiento: primero el reloj corriendo, luego los en espera.
+
+    Pedir una vista que no es de su perfil responde 403.
+    """
     return service.list_tickets(user, view)
 
 
@@ -59,4 +67,10 @@ def transition_ticket(
     user: CurrentUser,
     service: TicketServiceDep,
 ) -> schemas.TicketDetail:
+    """Aplica una acción de estado; `allowed_actions` del ticket dice cuáles ofrecer.
+
+    403 si el perfil nunca puede hacerla; 409 `already_taken` si otro agente tomó el
+    ticket primero y 409 `action_not_allowed` si el estado o la relación con el ticket
+    no la permiten.
+    """
     return service.apply_transition(user, ticket_id, body.action)

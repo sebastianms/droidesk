@@ -9,9 +9,17 @@ from sqlmodel import Session
 
 from droidesk_api.audit.enums import EventKind
 from droidesk_api.audit.recorder import list_events
-from droidesk_api.core.db import persisted_id
 from droidesk_api.tickets.enums import TicketStatus
 from droidesk_api.tickets.models import DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH, Ticket
+from tests.api.helpers import (
+    NEW_TICKET,
+    TICKETS_URL,
+    LoginAs,
+    add_ticket_id,
+    post_ticket,
+    reload,
+    transitions_url,
+)
 from tests.factories import (
     AGENT_ID,
     AGENT_USERNAME,
@@ -23,35 +31,8 @@ from tests.factories import (
 )
 from tests.fakes import FakeClock
 
-LoginAs = Callable[[str], dict[str, str]]
-TICKETS_URL = "/api/v1/tickets"
-NEW_TICKET = {
-    "title": "No puedo entrar a la VPN",
-    "description": "Desde esta mañana la VPN rechaza mis credenciales.",
-    "category_id": 4,
-}
 NOT_FOUND = {"code": "not_found", "message": "El ticket no existe."}
 SANTIAGO_FRIDAY_EVENING = datetime(2026, 10, 23, 23, 0, tzinfo=UTC)  # 20:00 local
-
-
-def add_ticket_id(session: Session, **overrides: Any) -> int:
-    return persisted_id(add_ticket(session, **overrides))
-
-
-def reload(session: Session, ticket_id: int) -> Ticket:
-    """Lee el ticket tal como lo dejó la API, que usa otra sesión."""
-    session.expire_all()
-    return session.get_one(Ticket, ticket_id)
-
-
-def transitions_url(ticket_id: int) -> str:
-    return f"{TICKETS_URL}/{ticket_id}/transitions"
-
-
-def post_ticket(
-    client: TestClient, headers: dict[str, str], **overrides: Any
-) -> Response:
-    return client.post(TICKETS_URL, headers=headers, json=NEW_TICKET | overrides)
 
 
 def invalid_field(response: Response) -> list[str | int]:
@@ -398,16 +379,6 @@ class TestMyTickets:
     ) -> None:
         response = client.get(
             TICKETS_URL, params={"view": view}, headers=login_as(REQUESTER_USERNAME)
-        )
-        assert (response.status_code, response.json()["code"]) == (403, "forbidden")
-
-    @pytest.mark.parametrize("view", [None, "queue", "assigned", "mine"])
-    def test_an_agent_has_no_list_available_yet(
-        self, client: TestClient, login_as: LoginAs, view: str | None
-    ) -> None:
-        params = {} if view is None else {"view": view}
-        response = client.get(
-            TICKETS_URL, params=params, headers=login_as(AGENT_USERNAME)
         )
         assert (response.status_code, response.json()["code"]) == (403, "forbidden")
 
@@ -829,23 +800,3 @@ class TestTransitionRequests:
         self.request(client, login_as(username), ticket_id, action)
         stamped = getattr(reload(session, ticket_id), field)
         assert stamped == (clock.now() if expected else None)
-
-    @pytest.mark.parametrize("action", ["take", "resume"])
-    def test_actions_that_arrive_with_the_agent_queue_are_not_available_yet(
-        self,
-        client: TestClient,
-        login_as: LoginAs,
-        session: Session,
-        action: str,
-    ) -> None:
-        ticket_id = add_ticket_id(
-            session,
-            status=TicketStatus.ON_HOLD if action == "resume" else TicketStatus.OPEN,
-            assignee_id=AGENT_ID,
-            on_hold_since=CREATED_AT,
-        )
-        response = self.request(client, login_as(AGENT_USERNAME), ticket_id, action)
-        assert (response.status_code, response.json()["code"]) == (
-            409,
-            "action_not_allowed",
-        )

@@ -1,6 +1,5 @@
 from collections.abc import Callable, Sequence
 from datetime import datetime
-from functools import cached_property
 from typing import ClassVar
 
 from sqlalchemy.orm import Mapped, aliased
@@ -10,28 +9,24 @@ from sqlmodel.sql.expression import Select
 from droidesk_api.audit.enums import EventKind
 from droidesk_api.audit.recorder import NewEvent, record_event
 from droidesk_api.core.clock import Clock
-from droidesk_api.core.db import persisted_id
+from droidesk_api.core.db import ColumnValues, persisted_id
 from droidesk_api.core.errors import (
     ActionNotAllowedError,
+    AlreadyTakenError,
+    DomainError,
     ForbiddenError,
     InvalidFieldError,
     NotFoundError,
 )
 from droidesk_api.identity.enums import Role
 from droidesk_api.identity.models import User
-from droidesk_api.sla.calendar import BusinessCalendar, add_business_minutes
-from droidesk_api.sla.models import SlaPolicy
-from droidesk_api.sla.status import (
-    SlaFacts,
-    SlaState,
-    sla_state,
-    target_minutes,
-)
+from droidesk_api.sla.calendar import BusinessCalendar
 from droidesk_api.tickets import presenter, schemas
 from droidesk_api.tickets.access import TICKET_NOT_FOUND_MESSAGE, ensure_can_view
-from droidesk_api.tickets.enums import Priority, TicketStatus
+from droidesk_api.tickets.enums import TicketStatus
 from droidesk_api.tickets.lifecycle import (
     ACTION_LABELS,
+    FINAL_STATUSES,
     TicketAction,
     Transition,
     Viewer,
@@ -41,9 +36,9 @@ from droidesk_api.tickets.lifecycle import (
 )
 from droidesk_api.tickets.models import Category, Ticket
 from droidesk_api.tickets.presenter import TicketRow
+from droidesk_api.tickets.ticket_sla import TicketSla
 
 RowStatement = Select[Ticket, Category, User, User | None]
-DateColumn = Mapped[datetime | None]
 Requester = aliased(User)
 Assignee = aliased(User)
 
@@ -51,14 +46,17 @@ DEFAULT_VIEWS = {
     Role.REQUESTER: schemas.TicketView.MINE,
     Role.AGENT: schemas.TicketView.QUEUE,
 }
+DateColumn = Mapped[datetime | None]
 # Fecha que cada acción de estado fija con la hora actual en el ticket, o vacía (reabrir quita la resolución).
-STAMPED_DATES = {
+STAMPED_DATES: dict[TicketAction, DateColumn] = {
     TicketAction.CANCEL: col(Ticket.cancelled_at),
     TicketAction.HOLD: col(Ticket.on_hold_since),
     TicketAction.RESOLVE: col(Ticket.resolved_at),
     TicketAction.CLOSE: col(Ticket.closed_at),
 }
-CLEARED_DATES = {TicketAction.REOPEN: col(Ticket.resolved_at)}
+CLEARED_DATES: dict[TicketAction, DateColumn] = {
+    TicketAction.REOPEN: col(Ticket.resolved_at)
+}
 
 
 class TicketService:
@@ -69,7 +67,7 @@ class TicketService:
     ) -> None:
         self._session = session
         self._clock = clock
-        self._calendar = calendar
+        self._sla = TicketSla(session, calendar)
 
     def create_ticket(
         self, requester: User, data: schemas.TicketCreate
@@ -110,17 +108,29 @@ class TicketService:
         )
         return self._summaries(self._rows(statement))
 
-    # La US2 agrega aquí las vistas del agente: (AGENT, QUEUE) y (AGENT, ASSIGNED).
+    def _list_queue(self, _agent: User) -> list[schemas.TicketSummary]:
+        return self._queue_summaries(_unfinished_statement())
+
+    def _list_assigned(self, agent: User) -> list[schemas.TicketSummary]:
+        statement = _unfinished_statement().where(
+            col(Ticket.assignee_id) == persisted_id(agent)
+        )
+        return self._queue_summaries(statement)
+
     _LISTINGS: ClassVar[
         dict[
             tuple[Role, schemas.TicketView],
             Callable[[TicketService, User], list[schemas.TicketSummary]],
         ]
-    ] = {(Role.REQUESTER, schemas.TicketView.MINE): _list_my_tickets}
+    ] = {
+        (Role.REQUESTER, schemas.TicketView.MINE): _list_my_tickets,
+        (Role.AGENT, schemas.TicketView.QUEUE): _list_queue,
+        (Role.AGENT, schemas.TicketView.ASSIGNED): _list_assigned,
+    }
 
     def get_ticket_for(self, user: User, ticket_id: int) -> schemas.TicketDetail:
         row = self._visible_row(user, ticket_id)
-        sla = self._sla_of(row.ticket, self._clock.now())
+        sla = self._sla.view_of(row.ticket, self._clock.now())
         actions = allowed_actions(row.ticket.status, _viewer_of(user, row.ticket))
         return presenter.to_detail(row, sla, actions)
 
@@ -128,22 +138,11 @@ class TicketService:
         self, user: User, ticket_id: int, action: TicketAction
     ) -> schemas.TicketDetail:
         ticket = self._visible_row(user, ticket_id).ticket
-        transition = authorize_transition(
-            action, ticket.status, _viewer_of(user, ticket)
-        )
+        transition = _authorize(user, ticket, action)
         now = self._clock.now()
-        self._move(ticket_id, transition, _date_effects(action, now), now)
-        record_event(
-            self._session,
-            NewEvent(
-                ticket_id=ticket_id,
-                actor_id=persisted_id(user),
-                kind=EventKind.STATUS_CHANGED,
-                created_at=now,
-                from_value=transition.source.value,
-                to_value=transition.target.value,
-            ),
-        )
+        self._move(ticket, transition, user, now)
+        for event in _transition_events(ticket_id, transition, user, now):
+            record_event(self._session, event)
         self._session.commit()
         return self.get_ticket_for(user, ticket_id)
 
@@ -158,30 +157,49 @@ class TicketService:
             requester_id=persisted_id(requester),
             created_at=now,
             updated_at=now,
-            sla_due_at=add_business_minutes(
-                now, self._target_minutes[data.priority], self._calendar
-            ),
+            sla_due_at=self._sla.initial_due_at(data.priority, now),
         )
 
     def _move(
-        self,
-        ticket_id: int,
-        transition: Transition,
-        effects: dict[DateColumn, datetime | None],
-        now: datetime,
+        self, ticket: Ticket, transition: Transition, actor: User, now: datetime
     ) -> None:
         """Actualización condicional: si otro cambió el estado antes, no afecta filas y se rechaza."""
+        effects = self._effects_of(transition.action, ticket, actor, now)
         statement = (
             update(Ticket)
-            .where(col(Ticket.id) == ticket_id, col(Ticket.status) == transition.source)
+            .where(
+                col(Ticket.id) == persisted_id(ticket),
+                col(Ticket.status) == transition.source,
+            )
             .values(status=transition.target, updated_at=now)
             .values(effects)
         )
         if self._session.exec(statement).rowcount == 0:
-            label = ACTION_LABELS[transition.action]
-            raise ActionNotAllowedError(
-                f"La acción «{label}» ya no está disponible: el ticket cambió de estado."
-            )
+            raise self._lost_race(persisted_id(ticket), transition, actor)
+
+    def _effects_of(
+        self, action: TicketAction, ticket: Ticket, actor: User, now: datetime
+    ) -> ColumnValues:
+        if action == TicketAction.TAKE:
+            return {col(Ticket.assignee_id): persisted_id(actor)}
+        if action == TicketAction.RESUME:
+            return self._sla.resume_values(ticket, now)
+        return _date_effects(action, now)
+
+    def _lost_race(
+        self, ticket_id: int, transition: Transition, actor: User
+    ) -> DomainError:
+        """Quien pierde una toma ante otro agente recibe `already_taken`; en las demás acciones, solo que el estado cambió."""
+        if transition.action == TicketAction.TAKE:
+            assignee_id = self._session.exec(
+                select(col(Ticket.assignee_id)).where(col(Ticket.id) == ticket_id)
+            ).one()
+            if _taken_by_another(assignee_id, actor):
+                return AlreadyTakenError()
+        label = ACTION_LABELS[transition.action]
+        return ActionNotAllowedError(
+            f"La acción «{label}» ya no está disponible: el ticket cambió de estado."
+        )
 
     def _visible_row(self, user: User, ticket_id: int) -> TicketRow:
         rows = self._rows(_row_statement().where(col(Ticket.id) == ticket_id))
@@ -193,37 +211,18 @@ class TicketService:
     def _rows(self, statement: RowStatement) -> list[TicketRow]:
         return [TicketRow(*columns) for columns in self._session.exec(statement)]
 
+    def _queue_summaries(self, statement: RowStatement) -> list[schemas.TicketSummary]:
+        rows = sorted(
+            self._rows(statement), key=lambda row: self._sla.queue_key(row.ticket)
+        )
+        return self._summaries(rows)
+
     def _summaries(self, rows: Sequence[TicketRow]) -> list[schemas.TicketSummary]:
         now = self._clock.now()
         return [
-            presenter.to_summary(row, self._sla_of(row.ticket, now)) for row in rows
+            presenter.to_summary(row, self._sla.view_of(row.ticket, now))
+            for row in rows
         ]
-
-    def _sla_of(self, ticket: Ticket, now: datetime) -> schemas.Sla:
-        state = sla_state(self._facts(ticket), now, self._calendar)
-        has_clock = state not in (None, SlaState.PAUSED)
-        return schemas.Sla(state=state, due_at=ticket.sla_due_at if has_clock else None)
-
-    def _facts(self, ticket: Ticket) -> SlaFacts:
-        return SlaFacts(
-            status=ticket.status,
-            created_at=ticket.created_at,
-            due_at=ticket.sla_due_at,
-            target_minutes=self._target_minutes[ticket.priority],
-            paused_minutes=ticket.sla_paused_minutes,
-            on_hold_since=ticket.on_hold_since,
-            resolved_at=ticket.resolved_at,
-        )
-
-    @cached_property
-    def _target_minutes(self) -> dict[Priority, int]:
-        policies = self._session.exec(select(SlaPolicy))
-        return {
-            policy.priority: target_minutes(
-                policy.target_amount, policy.target_unit, self._calendar
-            )
-            for policy in policies
-        }
 
 
 def _row_statement() -> RowStatement:
@@ -235,19 +234,60 @@ def _row_statement() -> RowStatement:
     )
 
 
+def _unfinished_statement() -> RowStatement:
+    return _row_statement().where(col(Ticket.status).not_in(tuple(FINAL_STATUSES)))
+
+
 def _viewer_of(user: User, ticket: Ticket) -> Viewer:
     relation = relation_of(persisted_id(user), ticket.requester_id, ticket.assignee_id)
     return Viewer(user.role, relation)
 
 
+def _authorize(user: User, ticket: Ticket, action: TicketAction) -> Transition:
+    """Si el ticket ya tiene otro dueño, tomarlo es `already_taken` aunque la lista del agente estuviera desactualizada."""
+    try:
+        return authorize_transition(action, ticket.status, _viewer_of(user, ticket))
+    except ActionNotAllowedError:
+        if action == TicketAction.TAKE and _taken_by_another(ticket.assignee_id, user):
+            raise AlreadyTakenError from None
+        raise
+
+
+def _taken_by_another(assignee_id: int | None, agent: User) -> bool:
+    return assignee_id not in (None, persisted_id(agent))
+
+
 def _date_effects(
     action: TicketAction, now: datetime
 ) -> dict[DateColumn, datetime | None]:
-    if action in STAMPED_DATES:
-        return {STAMPED_DATES[action]: now}
     if action in CLEARED_DATES:
         return {CLEARED_DATES[action]: None}
-    # `take` y `resume` suman asignación y recálculo del SLA: llegan con la cola (US2).
-    raise ActionNotAllowedError(
-        f"La acción «{ACTION_LABELS[action]}» aún no está disponible."
+    return {STAMPED_DATES[action]: now}
+
+
+def _transition_events(
+    ticket_id: int, transition: Transition, actor: User, now: datetime
+) -> list[NewEvent]:
+    """Tomar un ticket lo asigna y además cambia su estado: dos eventos, en ese orden."""
+    events = []
+    if transition.action == TicketAction.TAKE:
+        events.append(
+            NewEvent(
+                ticket_id=ticket_id,
+                actor_id=persisted_id(actor),
+                kind=EventKind.ASSIGNED,
+                created_at=now,
+                to_value=actor.name,
+            )
+        )
+    events.append(
+        NewEvent(
+            ticket_id=ticket_id,
+            actor_id=persisted_id(actor),
+            kind=EventKind.STATUS_CHANGED,
+            created_at=now,
+            from_value=transition.source.value,
+            to_value=transition.target.value,
+        )
     )
+    return events

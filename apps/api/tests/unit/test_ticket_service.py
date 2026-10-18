@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from datetime import datetime, time
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import pytest
@@ -9,14 +10,20 @@ from sqlmodel import Session, col, update
 from droidesk_api.audit.enums import EventKind
 from droidesk_api.audit.recorder import list_events
 from droidesk_api.core.db import persisted_id
-from droidesk_api.core.errors import ActionNotAllowedError
+from droidesk_api.core.errors import ActionNotAllowedError, AlreadyTakenError
 from droidesk_api.identity.models import User
 from droidesk_api.sla.calendar import BusinessCalendar, BusinessHours
 from droidesk_api.tickets.enums import TicketStatus
 from droidesk_api.tickets.lifecycle import TicketAction
 from droidesk_api.tickets.models import Ticket
 from droidesk_api.tickets.service import TicketService
-from tests.factories import AGENT_ID, CREATED_AT, REQUESTER_ID, add_ticket
+from tests.factories import (
+    AGENT_ID,
+    CREATED_AT,
+    OTHER_AGENT_ID,
+    REQUESTER_ID,
+    add_ticket,
+)
 from tests.fakes import FakeClock
 
 CALENDAR = BusinessCalendar(
@@ -48,19 +55,24 @@ class TestCompetingChange:
     def owner(self, session: Session) -> User:
         return session.get_one(User, REQUESTER_ID)
 
-    def take_by_another_agent(
-        self, engine: Engine, ticket_id: int
+    def change_by_someone_else(
+        self, engine: Engine, ticket_id: int, **values: Any
     ) -> Callable[[], None]:
-        def take() -> None:
+        def change() -> None:
             with Session(engine) as other_session:
                 other_session.exec(
-                    update(Ticket)
-                    .where(col(Ticket.id) == ticket_id)
-                    .values(status=TicketStatus.IN_PROGRESS, assignee_id=AGENT_ID)
+                    update(Ticket).where(col(Ticket.id) == ticket_id).values(**values)
                 )
                 other_session.commit()
 
-        return take
+        return change
+
+    def take_by_another_agent(
+        self, engine: Engine, ticket_id: int
+    ) -> Callable[[], None]:
+        return self.change_by_someone_else(
+            engine, ticket_id, status=TicketStatus.IN_PROGRESS, assignee_id=AGENT_ID
+        )
 
     def test_a_cancellation_that_loses_the_race_is_rejected(
         self, session: Session, engine: Engine, owner: User, ticket_id: int
@@ -99,3 +111,35 @@ class TestCompetingChange:
             for event in list_events(session, ticket_id)
             if event.kind == EventKind.STATUS_CHANGED
         ] == []
+
+    def test_a_take_that_loses_to_another_agent_is_reported_as_taken(
+        self, session: Session, engine: Engine, ticket_id: int
+    ) -> None:
+        clock = RacingClock(CREATED_AT, self.take_by_another_agent(engine, ticket_id))
+        loser = session.get_one(User, OTHER_AGENT_ID)
+        with pytest.raises(AlreadyTakenError):
+            TicketService(session, clock, CALENDAR).apply_transition(
+                loser, ticket_id, TicketAction.TAKE
+            )
+
+    def test_a_take_that_loses_to_the_same_agent_is_not_reported_as_taken(
+        self, session: Session, engine: Engine, ticket_id: int
+    ) -> None:
+        clock = RacingClock(CREATED_AT, self.take_by_another_agent(engine, ticket_id))
+        double_click = session.get_one(User, AGENT_ID)
+        with pytest.raises(ActionNotAllowedError, match="ya no está disponible"):
+            TicketService(session, clock, CALENDAR).apply_transition(
+                double_click, ticket_id, TicketAction.TAKE
+            )
+
+    def test_a_take_that_loses_to_a_cancellation_is_not_reported_as_taken(
+        self, session: Session, engine: Engine, ticket_id: int
+    ) -> None:
+        cancel = self.change_by_someone_else(
+            engine, ticket_id, status=TicketStatus.CANCELLED, cancelled_at=CREATED_AT
+        )
+        agent = session.get_one(User, AGENT_ID)
+        with pytest.raises(ActionNotAllowedError, match="ya no está disponible"):
+            TicketService(
+                session, RacingClock(CREATED_AT, cancel), CALENDAR
+            ).apply_transition(agent, ticket_id, TicketAction.TAKE)

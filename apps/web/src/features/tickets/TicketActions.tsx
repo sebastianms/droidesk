@@ -37,8 +37,8 @@ export function TicketActions({ ticket }: { ticket: TicketDetail }) {
       storeTicketDetail(queryClient, updated)
       return refreshTicketLists(queryClient)
     },
-    // Si el cambio ya no era posible, el detalle en pantalla está desactualizado.
-    onError: () => refreshTicketDetail(queryClient, ticket.id),
+    // Si el cambio ya no era posible, el detalle en pantalla y los listados están desactualizados.
+    onError: () => Promise.all([refreshTicketDetail(queryClient, ticket.id), refreshTicketLists(queryClient)]),
   })
   const actions = ticket.allowed_actions.filter(isTransition)
 

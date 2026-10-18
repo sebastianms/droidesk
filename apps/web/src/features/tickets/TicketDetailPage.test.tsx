@@ -257,6 +257,32 @@ describe('TicketDetailPage', () => {
       expect(screen.queryByRole('region', { name: 'Acciones' })).not.toBeInTheDocument()
     })
 
+    it('keeps the agent on the ticket once they take it, now in progress and theirs', async () => {
+      stubApi({
+        [DETAIL]: () => jsonResponse(ticketDetail({ allowed_actions: ['take', 'comment'] })),
+        [TRANSITION]: () =>
+          jsonResponse(
+            ticketDetail({
+              status: 'in_progress',
+              assignee: { id: 5, name: 'Elena Vidal' },
+              allowed_actions: ['hold', 'resolve', 'comment'],
+            }),
+          ),
+      })
+      const { router } = renderDetail('/tickets/42', agentElena)
+      await userEvent.click(await screen.findByRole('button', { name: 'Tomar' }))
+
+      const facts = within(screen.getByRole('region', { name: 'Datos' }))
+      expect(await facts.findByText('En progreso')).toBeVisible()
+      expect(facts.getByText('Elena Vidal')).toBeVisible()
+      const actions = within(screen.getByRole('region', { name: 'Acciones' }))
+      expect(actions.getAllByRole('button').map((button) => button.textContent)).toEqual([
+        'Dejar en espera',
+        'Resolver',
+      ])
+      expect(router.state.location.pathname).toBe('/tickets/42')
+    })
+
     it('cancels an open ticket after the confirmation', async () => {
       stubApi({
         [DETAIL]: () => jsonResponse(ticketDetail({ allowed_actions: ['cancel', 'comment'] })),

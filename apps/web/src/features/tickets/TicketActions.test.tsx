@@ -1,18 +1,37 @@
+import type { QueryClient } from '@tanstack/react-query'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { $api } from '../../api/client'
 import { ticketDetail } from '../../test/fixtures'
-import { jsonResponse, renderRoutes, requesterAna, signInAs, stubApi } from '../../test/helpers'
+import { agentElena, jsonResponse, renderRoutes, requesterAna, signInAs, stubApi } from '../../test/helpers'
+import { ACTION_LABEL } from './labels'
 import { TicketActions } from './TicketActions'
-import type { TicketAction, TicketDetail } from './types'
+import type { TicketAction, TicketDetail, TicketView, TransitionAction } from './types'
 
 const TRANSITION = 'POST /api/v1/tickets/42/transitions'
+const LIST = 'GET /api/v1/tickets'
 const DETAIL_KEY = ['get', '/api/v1/tickets/{ticket_id}', { params: { path: { ticket_id: 42 } } }]
-const LIST_KEY = ['get', '/api/v1/tickets']
+const EVERY_VIEW: TicketView[] = ['queue', 'assigned', 'mine']
 
-function renderActions(ticket: TicketDetail) {
-  signInAs(requesterAna)
+function renderActions(ticket: TicketDetail, user = requesterAna) {
+  signInAs(user)
   return renderRoutes([{ path: '/', element: <TicketActions ticket={ticket} /> }], '/')
+}
+
+/** Deja en caché los tres listados, como si el usuario ya los hubiera abierto antes de entrar al ticket. */
+async function cacheEveryList(queryClient: QueryClient) {
+  for (const view of EVERY_VIEW) {
+    await queryClient.prefetchQuery($api.queryOptions('get', '/api/v1/tickets', { params: { query: { view } } }))
+  }
+}
+
+function requestedViews(fetchMock: ReturnType<typeof stubApi>) {
+  return fetchMock.mock.calls
+    .map(([request]) => request)
+    .filter((request) => request.method === 'GET')
+    .map((request) => new URL(request.url).searchParams.get('view'))
+    .sort()
 }
 
 function ticketAllowing(...actions: TicketAction[]) {
@@ -54,6 +73,37 @@ describe('TicketActions', () => {
       expect(buttonNames()).toEqual(['Resolver', 'Dejar en espera'])
     })
 
+    describe.each<[string, TicketAction[], string[], string | null]>([
+      ['an agent looking at an open ticket', ['take', 'comment', 'change_priority'], ['Tomar'], 'Tomar'],
+      [
+        'the agent working on a ticket',
+        ['hold', 'resolve', 'comment', 'change_priority'],
+        ['Dejar en espera', 'Resolver'],
+        'Resolver',
+      ],
+      ['the agent with the ticket on hold', ['resume', 'comment', 'change_priority'], ['Retomar'], 'Retomar'],
+      [
+        'the requester of a resolved ticket',
+        ['close', 'reopen', 'comment'],
+        ['Confirmar cierre', 'Reabrir'],
+        'Confirmar cierre',
+      ],
+      ['the requester of an open ticket', ['cancel', 'comment'], ['Cancelar'], null],
+    ])('for %s', (_who, allowed, names, mainAction) => {
+      it('offers only the transitions the API allows', () => {
+        renderActions(ticketAllowing(...allowed))
+
+        expect(buttonNames()).toEqual(names)
+      })
+
+      it('highlights the main action and leaves the others as secondary', () => {
+        renderActions(ticketAllowing(...allowed))
+
+        const main = screen.queryAllByRole('button').filter((button) => /primary/.test(button.className))
+        expect(main.map((button) => button.textContent)).toEqual(mainAction ? [mainAction] : [])
+      })
+    })
+
     it('does not offer what the API does not allow', () => {
       renderActions(ticketAllowing('cancel'))
 
@@ -89,14 +139,32 @@ describe('TicketActions', () => {
       expect(await sentActions(fetchMock)).toEqual(['resolve'])
     })
 
-    it('refreshes the lists, which show the old status', async () => {
-      stubApi({ [TRANSITION]: () => jsonResponse(ticketDetail({ status: 'resolved' })) })
-      const { queryClient } = renderActions(ticketAllowing('resolve'))
-      const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+    it.each<TransitionAction>(['take', 'hold', 'resume', 'resolve', 'close', 'reopen'])(
+      'applies %s right away, with no confirmation',
+      async (action) => {
+        const fetchMock = stubApi({ [TRANSITION]: () => jsonResponse(ticketDetail()) })
+        renderActions(ticketAllowing(action))
 
-      await userEvent.click(screen.getByRole('button', { name: 'Resolver' }))
+        await userEvent.click(screen.getByRole('button', { name: ACTION_LABEL[action] }))
 
-      await waitFor(() => expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: LIST_KEY })))
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+        expect(await sentActions(fetchMock)).toEqual([action])
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      },
+    )
+
+    it('refreshes the queue, the assigned tickets and "Mis tickets", which show the old status', async () => {
+      const fetchMock = stubApi({
+        [LIST]: () => jsonResponse([]),
+        [TRANSITION]: () => jsonResponse(ticketDetail({ status: 'in_progress' })),
+      })
+      const { queryClient } = renderActions(ticketAllowing('take'), agentElena)
+      await cacheEveryList(queryClient)
+      fetchMock.mockClear()
+
+      await userEvent.click(screen.getByRole('button', { name: 'Tomar' }))
+
+      await waitFor(() => expect(requestedViews(fetchMock)).toEqual(['assigned', 'mine', 'queue']))
     })
 
     it('refreshes the detail when the change is rejected, because the screen is out of date', async () => {
@@ -107,6 +175,20 @@ describe('TicketActions', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Resolver' }))
 
       await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: DETAIL_KEY }))
+    })
+
+    it('refreshes the lists too when the change is rejected, because they are out of date as well', async () => {
+      const fetchMock = stubApi({
+        [LIST]: () => jsonResponse([]),
+        [TRANSITION]: () => jsonResponse({ code: 'already_taken', message: 'Ya lo tomó otro.' }, 409),
+      })
+      const { queryClient } = renderActions(ticketAllowing('take'), agentElena)
+      await cacheEveryList(queryClient)
+      fetchMock.mockClear()
+
+      await userEvent.click(screen.getByRole('button', { name: 'Tomar' }))
+
+      await waitFor(() => expect(requestedViews(fetchMock)).toEqual(['assigned', 'mine', 'queue']))
     })
 
     it('blocks the buttons while the change is in flight', async () => {
@@ -133,6 +215,18 @@ describe('TicketActions', () => {
 
       expect(await screen.findByRole('alert')).toHaveTextContent('El ticket ya fue tomado.')
       expect(screen.getByRole('button', { name: 'Cancelar' })).toBeEnabled()
+    })
+
+    it('tells the agent that another agent took the ticket first, in the words of the API', async () => {
+      stubApi({
+        [TRANSITION]: () =>
+          jsonResponse({ code: 'already_taken', message: 'Este ticket ya fue tomado por otro agente.' }, 409),
+      })
+      renderActions(ticketAllowing('take'), agentElena)
+
+      await userEvent.click(screen.getByRole('button', { name: 'Tomar' }))
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Este ticket ya fue tomado por otro agente.')
     })
 
     it('shows a generic message when the failure has no explanation', async () => {

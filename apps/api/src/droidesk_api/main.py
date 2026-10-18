@@ -11,9 +11,10 @@ from pydantic import BaseModel
 import droidesk_api.models  # noqa: F401  (registra las tablas en la metadata)
 from droidesk_api.core.config import get_settings
 from droidesk_api.core.db import build_engine
-from droidesk_api.core.errors import DomainError
+from droidesk_api.core.errors import DomainError, InvalidFieldError
 from droidesk_api.core.http_errors import (
     handle_domain_error,
+    handle_invalid_field,
     handle_validation_error,
 )
 from droidesk_api.identity.router import router as identity_router
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     )
     app.add_exception_handler(DomainError, handle_domain_error)
     app.add_exception_handler(RequestValidationError, handle_validation_error)
+    app.add_exception_handler(InvalidFieldError, handle_invalid_field)
     app.include_router(identity_router)
     app.include_router(sla_router)
     app.include_router(tickets_router)

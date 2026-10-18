@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from droidesk_api.core.errors import DomainError, ErrorCode
+from droidesk_api.core.errors import DomainError, ErrorCode, InvalidFieldError
 
 
 class ErrorBody(BaseModel):
@@ -49,4 +49,19 @@ async def handle_validation_error(_request: Request, error: Exception) -> JSONRe
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={"detail": jsonable_encoder(details)},
+    )
+
+
+async def handle_invalid_field(_request: Request, error: Exception) -> JSONResponse:
+    """Responde con la misma forma que el 422 de FastAPI, para que la web trate ambos igual."""
+    invalid_field = cast(InvalidFieldError, error)  # registrado solo para él
+    detail = [
+        {
+            "type": "value_error",
+            "loc": ["body", invalid_field.field],
+            "msg": invalid_field.message,
+        }
+    ]
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": detail}
     )

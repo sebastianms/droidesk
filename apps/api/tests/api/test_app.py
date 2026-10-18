@@ -27,6 +27,10 @@ EXPECTED_OPERATION_IDS = {
     "read_me",
     "list_categories",
     "list_sla_policies",
+    "create_ticket",
+    "list_tickets",
+    "read_ticket",
+    "transition_ticket",
 }
 ERRORS: dict[str, Callable[[], DomainError]] = {
     "unauthenticated": NotAuthenticatedError,
@@ -166,6 +170,86 @@ class TestOpenApi:
         assert operation["responses"][status]["content"]["application/json"][
             "schema"
         ] == {"$ref": "#/components/schemas/ErrorBody"}
+
+    @pytest.mark.parametrize(
+        ("path", "method", "statuses"),
+        [
+            ("/api/v1/tickets", "post", {"201", "401", "403", "422"}),
+            ("/api/v1/tickets", "get", {"200", "401", "403", "422"}),
+            ("/api/v1/tickets/{ticket_id}", "get", {"200", "401", "404", "422"}),
+            (
+                "/api/v1/tickets/{ticket_id}/transitions",
+                "post",
+                {"200", "401", "403", "404", "409", "422"},
+            ),
+        ],
+    )
+    def test_ticket_operations_document_the_responses_of_the_contract(
+        self, schema: dict[str, Any], path: str, method: str, statuses: set[str]
+    ) -> None:
+        assert set(schema["paths"][path][method]["responses"]) == statuses
+
+    def test_creating_a_ticket_answers_201_with_the_detail(
+        self, schema: dict[str, Any]
+    ) -> None:
+        created = schema["paths"]["/api/v1/tickets"]["post"]["responses"]["201"]
+        assert created["content"]["application/json"]["schema"] == {
+            "$ref": "#/components/schemas/TicketDetail"
+        }
+
+    def test_ticket_schemas_use_the_names_of_the_contract(
+        self, schema: dict[str, Any]
+    ) -> None:
+        names = set(schema["components"]["schemas"])
+        assert {
+            "TicketCreate",
+            "TicketSummary",
+            "TicketDetail",
+            "TransitionRequest",
+            "UserRef",
+            "Sla",
+            "TicketAction",
+        } <= names
+
+    def test_ticket_detail_extends_the_summary(self, schema: dict[str, Any]) -> None:
+        summary = schema["components"]["schemas"]["TicketSummary"]["properties"]
+        detail = schema["components"]["schemas"]["TicketDetail"]["properties"]
+        assert set(detail) - set(summary) == {
+            "description",
+            "resolved_at",
+            "closed_at",
+            "cancelled_at",
+            "allowed_actions",
+        }
+
+    def test_new_tickets_declare_their_limits_and_default_priority(
+        self, schema: dict[str, Any]
+    ) -> None:
+        properties = schema["components"]["schemas"]["TicketCreate"]["properties"]
+        assert (
+            (properties["title"]["minLength"], properties["title"]["maxLength"]),
+            (
+                properties["description"]["minLength"],
+                properties["description"]["maxLength"],
+            ),
+            properties["priority"]["default"],
+        ) == ((1, 120), (1, 5000), "medium")
+
+    def test_transitions_accept_only_state_actions(
+        self, schema: dict[str, Any]
+    ) -> None:
+        action = schema["components"]["schemas"]["TransitionRequest"]["properties"][
+            "action"
+        ]
+        assert action["enum"] == [
+            "take",
+            "cancel",
+            "hold",
+            "resume",
+            "resolve",
+            "close",
+            "reopen",
+        ]
 
     def test_login_documents_the_unknown_user_and_the_validation_error(
         self, schema: dict[str, Any]

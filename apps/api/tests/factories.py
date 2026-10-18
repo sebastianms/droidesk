@@ -3,6 +3,8 @@ from typing import Any
 
 from sqlmodel import Session
 
+from droidesk_api.identity.enums import Role
+from droidesk_api.identity.models import User
 from droidesk_api.tickets.models import Ticket
 
 REQUESTER_ID = 1
@@ -13,6 +15,17 @@ REQUESTER_USERNAME = "ana.rojas"
 AGENT_USERNAME = "elena.vidal"
 ANY_PASSWORD = "cualquier-clave"
 CREATED_AT = datetime(2026, 10, 19, 13, 5, tzinfo=UTC)  # lunes 10:05 en Santiago
+
+
+def make_user(user_id: int, role: Role) -> User:
+    handle = f"user{user_id}"
+    return User(
+        id=user_id,
+        username=handle,
+        name=handle,
+        email=f"{handle}@droidesk.local",
+        role=role,
+    )
 
 
 def make_ticket(**overrides: Any) -> Ticket:

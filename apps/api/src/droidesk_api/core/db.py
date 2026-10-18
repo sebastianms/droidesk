@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 from enum import StrEnum
 from sqlite3 import Connection
-from typing import Annotated, Any
+from typing import Annotated, Any, Protocol
 
 from fastapi import Depends, Request
 from sqlalchemy import Engine, Enum, create_engine, event
@@ -57,3 +57,14 @@ def get_session(request: Request) -> Iterator[Session]:
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+
+class HasOptionalId(Protocol):
+    id: int | None
+
+
+def persisted_id(row: HasOptionalId) -> int:
+    """El id de una fila ya guardada: `id` es opcional solo mientras la fila es nueva."""
+    if row.id is None:
+        raise ValueError("La fila aún no se guardó, así que no tiene id.")
+    return row.id

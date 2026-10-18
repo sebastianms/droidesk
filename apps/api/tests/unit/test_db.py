@@ -6,7 +6,7 @@ from sqlalchemy import Engine, Table, text
 from sqlalchemy.exc import IntegrityError, StatementError
 from sqlmodel import Session, SQLModel
 
-from droidesk_api.core.db import ENUM_COLUMN_LENGTH
+from droidesk_api.core.db import ENUM_COLUMN_LENGTH, persisted_id
 from droidesk_api.identity.enums import Role
 from droidesk_api.identity.models import User
 from droidesk_api.tickets.enums import Priority
@@ -93,3 +93,12 @@ def test_datetimes_come_back_in_utc(session: Session) -> None:
     assert session.get_one(Ticket, ticket.id).created_at == datetime(
         2026, 10, 19, 13, 5, tzinfo=UTC
     )
+
+
+def test_a_saved_row_exposes_its_id(session: Session, demo_data: None) -> None:
+    assert persisted_id(add_ticket(session)) == 1
+
+
+def test_a_row_that_was_not_saved_has_no_id() -> None:
+    with pytest.raises(ValueError, match="no se guardó"):
+        persisted_id(make_ticket())

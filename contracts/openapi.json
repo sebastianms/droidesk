@@ -19,6 +19,75 @@
         "title": "Category",
         "type": "object"
       },
+      "Comment": {
+        "description": "Texto plano: quien lo muestre no debe interpretarlo como HTML.",
+        "properties": {
+          "author": {
+            "$ref": "#/components/schemas/UserRef"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "reply_to_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reply To Id"
+          }
+        },
+        "required": [
+          "id",
+          "author",
+          "body",
+          "created_at",
+          "reply_to_id"
+        ],
+        "title": "Comment",
+        "type": "object"
+      },
+      "CommentCreate": {
+        "properties": {
+          "body": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          },
+          "reply_to_id": {
+            "anyOf": [
+              {
+                "maximum": 9.223372036854776e+18,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reply To Id"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "CommentCreate",
+        "type": "object"
+      },
       "DemoUser": {
         "description": "Usuario precargado, para que la pantalla de ingreso muestre con quién entrar.",
         "properties": {
@@ -339,6 +408,8 @@
       "TicketCreate": {
         "properties": {
           "category_id": {
+            "maximum": 9.223372036854776e+18,
+            "minimum": 1.0,
             "title": "Category Id",
             "type": "integer"
           },
@@ -413,6 +484,17 @@
             ],
             "title": "Closed At"
           },
+          "comment_count": {
+            "title": "Comment Count",
+            "type": "integer"
+          },
+          "comments": {
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            },
+            "title": "Comments",
+            "type": "array"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -472,12 +554,14 @@
           "assignee",
           "created_at",
           "sla",
+          "comment_count",
           "description",
           "resolved_at",
           "closed_at",
           "cancelled_at",
           "allowed_actions",
-          "history"
+          "history",
+          "comments"
         ],
         "title": "TicketDetail",
         "type": "object"
@@ -508,6 +592,10 @@
           },
           "category": {
             "$ref": "#/components/schemas/Category"
+          },
+          "comment_count": {
+            "title": "Comment Count",
+            "type": "integer"
           },
           "created_at": {
             "format": "date-time",
@@ -544,7 +632,8 @@
           "requester",
           "assignee",
           "created_at",
-          "sla"
+          "sla",
+          "comment_count"
         ],
         "title": "TicketSummary",
         "type": "object"
@@ -1049,6 +1138,8 @@
             "name": "ticket_id",
             "required": true,
             "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
               "title": "Ticket Id",
               "type": "integer"
             }
@@ -1107,6 +1198,96 @@
         ]
       }
     },
+    "/api/v1/tickets/{ticket_id}/comments": {
+      "post": {
+        "description": "Comenta un ticket que no está en un estado final y devuelve su detalle actualizado.\n\nSi el solicitante comenta un ticket En espera, este vuelve a En progreso y su plazo se\nreanuda. Un comentario del agente no cambia el estado. 409 `action_not_allowed` si el\nticket está Cerrado o Cancelado; un ticket ajeno responde 404.",
+        "operationId": "add_comment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ticket_id",
+            "required": true,
+            "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "title": "Ticket Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "No autenticado: falta el token, es inválido o expiró."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "No encontrado. Un ticket ajeno se informa igual que uno inexistente."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Conflicto: otro agente tomó el ticket, o la acción no está permitida en el estado actual."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Comment",
+        "tags": [
+          "tickets"
+        ]
+      }
+    },
     "/api/v1/tickets/{ticket_id}/transitions": {
       "post": {
         "description": "Aplica una acción de estado; `allowed_actions` del ticket dice cuáles ofrecer.\n\n403 si el perfil nunca puede hacerla; 409 `already_taken` si otro agente tomó el\nticket primero y 409 `action_not_allowed` si el estado o la relación con el ticket\nno la permiten.",
@@ -1117,6 +1298,8 @@
             "name": "ticket_id",
             "required": true,
             "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
               "title": "Ticket Id",
               "type": "integer"
             }

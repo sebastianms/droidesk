@@ -1,0 +1,25 @@
+.some,
+.none {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.some {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.none {
+  color: var(--color-ink-muted);
+}
+
+.icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}

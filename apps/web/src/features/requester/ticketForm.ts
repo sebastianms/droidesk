@@ -1,4 +1,5 @@
 import { validationIssues } from '../../api/errors'
+import { type TextRule, textError } from '../tickets/textError'
 
 export const TITLE_MAX_LENGTH = 120
 export const DESCRIPTION_MAX_LENGTH = 5000
@@ -8,6 +9,13 @@ export const TITLE_TOO_LONG = `El título admite hasta ${TITLE_MAX_LENGTH} carac
 export const DESCRIPTION_REQUIRED = 'Describe qué necesitas.'
 export const DESCRIPTION_TOO_LONG = `La descripción admite hasta ${DESCRIPTION_MAX_LENGTH.toLocaleString('es-CL')} caracteres.`
 export const CATEGORY_REQUIRED = 'Elige una categoría.'
+
+const TITLE_RULE: TextRule = { maxLength: TITLE_MAX_LENGTH, required: TITLE_REQUIRED, tooLong: TITLE_TOO_LONG }
+const DESCRIPTION_RULE: TextRule = {
+  maxLength: DESCRIPTION_MAX_LENGTH,
+  required: DESCRIPTION_REQUIRED,
+  tooLong: DESCRIPTION_TOO_LONG,
+}
 
 export interface TicketDraft {
   title: string
@@ -39,8 +47,8 @@ export function firstErrorField(errors: TicketFormErrors): TicketFormField | und
 
 export function validateTicketDraft(draft: TicketDraft): TicketFormErrors {
   return {
-    title: textError(draft.title, TITLE_MAX_LENGTH, TITLE_REQUIRED, TITLE_TOO_LONG),
-    description: textError(draft.description, DESCRIPTION_MAX_LENGTH, DESCRIPTION_REQUIRED, DESCRIPTION_TOO_LONG),
+    title: textError(draft.title, TITLE_RULE),
+    description: textError(draft.description, DESCRIPTION_RULE),
     category: draft.categoryId === '' ? CATEGORY_REQUIRED : undefined,
   }
 }
@@ -53,11 +61,4 @@ export function serverFieldErrors(error: unknown): TicketFormErrors {
     if (field) errors[field] ??= msg
   }
   return errors
-}
-
-// La API cuenta caracteres (puntos de código), no unidades UTF-16, y valida después de recortar.
-function textError(raw: string, maxLength: number, required: string, tooLong: string): string | undefined {
-  const length = [...raw.trim()].length
-  if (length === 0) return required
-  return length > maxLength ? tooLong : undefined
 }

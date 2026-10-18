@@ -1,4 +1,11 @@
-import type { Category, SlaPolicy, TicketDetail, TicketEvent, TicketSummary } from '../features/tickets/types'
+import type {
+  Category,
+  SlaPolicy,
+  TicketComment,
+  TicketDetail,
+  TicketEvent,
+  TicketSummary,
+} from '../features/tickets/types'
 
 export const categories: Category[] = [
   { id: 1, name: 'Hardware' },
@@ -53,19 +60,22 @@ export function ticketSummary(overrides: Partial<TicketSummary> = {}): TicketSum
     assignee: null,
     created_at: '2026-10-19T13:05:00Z',
     sla: { state: 'on_track', due_at: '2026-10-20T13:05:00Z' },
+    comment_count: 0,
     ...overrides,
   }
 }
 
 export function ticketDetail(overrides: Partial<TicketDetail> = {}): TicketDetail {
+  const comments = overrides.comments ?? []
   return {
-    ...ticketSummary(),
+    ...ticketSummary({ comment_count: comments.length }),
     description: 'Desde esta mañana la VPN rechaza mis credenciales.',
     resolved_at: null,
     closed_at: null,
     cancelled_at: null,
     allowed_actions: ['cancel', 'comment'],
     history: [],
+    comments,
     ...overrides,
   }
 }
@@ -78,6 +88,17 @@ export function ticketEvent(overrides: Partial<TicketEvent> = {}): TicketEvent {
     from_value: null,
     to_value: 'open',
     created_at: '2026-10-19T13:05:00Z',
+    ...overrides,
+  }
+}
+
+export function ticketComment(overrides: Partial<TicketComment> = {}): TicketComment {
+  return {
+    id: 1,
+    author: { id: 1, name: 'Ana Rojas' },
+    body: 'La VPN sigue rechazando mis credenciales.',
+    created_at: '2026-10-19T13:05:00Z',
+    reply_to_id: null,
     ...overrides,
   }
 }

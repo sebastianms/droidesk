@@ -102,6 +102,23 @@ describe('MyTicketsPage', () => {
     expect(within(item).getByText(formatDateTime('2026-10-19T17:00:00Z'))).toBeVisible()
   })
 
+  it('shows how many comments each ticket has, in words', async () => {
+    stubApi({
+      [TICKETS]: () =>
+        jsonResponse([
+          ticketSummary({ id: 3, title: 'Con varios', comment_count: 3 }),
+          ticketSummary({ id: 2, title: 'Con uno', comment_count: 1 }),
+          ticketSummary({ id: 1, title: 'Sin ninguno', comment_count: 0 }),
+        ]),
+    })
+
+    renderMyTickets()
+
+    const items = await screen.findAllByRole('listitem')
+    const counts = items.map((item) => within(item).getByText(/comentario/).textContent)
+    expect(counts).toEqual(['3 comentarios', '1 comentario', 'Sin comentarios'])
+  })
+
   it('says "Sin asignar" for a ticket nobody has taken', async () => {
     stubApi({ [TICKETS]: () => jsonResponse([ticketSummary({ assignee: null })]) })
 

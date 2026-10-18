@@ -149,6 +149,28 @@ describe('QueuePage', () => {
       expect(within(item).getByText(formatDateTime('2026-10-19T17:00:00Z'))).toBeVisible()
     })
 
+    it.each<[TicketView, string]>([
+      ['queue', '/agent'],
+      ['assigned', '/agent?view=assigned'],
+    ])('shows how many comments each ticket of the %s view has, in words', async (view, entry) => {
+      stubLists({
+        [view]: [
+          ticketSummary({ id: 3, title: 'Con varios', comment_count: 5 }),
+          ticketSummary({ id: 2, title: 'Con uno', comment_count: 1 }),
+          ticketSummary({ id: 1, title: 'Sin ninguno', comment_count: 0 }),
+        ],
+      })
+
+      renderQueue(entry)
+
+      const items = await screen.findAllByRole('listitem')
+      expect(items.map((item) => within(item).getByText(/comentario/).textContent)).toEqual([
+        '5 comentarios',
+        '1 comentario',
+        'Sin comentarios',
+      ])
+    })
+
     it('says "Sin asignar" for a ticket nobody has taken', async () => {
       stubLists({ queue: [ticketSummary({ assignee: null })] })
 

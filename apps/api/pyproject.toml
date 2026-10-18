@@ -48,7 +48,7 @@ extend-select = ["FAST", "DTZ", "N", "ERA", "PLR2004", "C90", "ARG", "T20", "S",
 max-complexity = 8
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "PLR2004", "ARG"]
+"tests/**" = ["S101", "S105", "S106", "PLR2004", "ARG"]
 
 [tool.mypy]
 files = ["src", "scripts", "tests"]

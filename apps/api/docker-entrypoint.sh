@@ -1,8 +1,7 @@
 #!/bin/sh
 set -eu
 
-if [ -f migrations/env.py ]; then
-    alembic upgrade head
-fi
+alembic upgrade head
+python -m droidesk_api.seed
 
 exec uvicorn --factory droidesk_api.main:create_app --host 0.0.0.0 --port 8000

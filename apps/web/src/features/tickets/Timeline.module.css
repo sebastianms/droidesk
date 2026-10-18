@@ -1,0 +1,41 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* La marca es solo decoración: cada evento dice qué pasó con palabras. */
+.event {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 var(--space-4) var(--space-6);
+  border-left: 2px solid var(--color-silver);
+}
+
+.event::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem;
+  left: -0.45rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--color-astro-blue);
+  outline: 2px solid var(--color-panel);
+}
+
+.event:last-child {
+  padding-bottom: 0;
+}
+
+.text {
+  overflow-wrap: anywhere;
+}
+
+.when {
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+}

@@ -95,3 +95,12 @@ Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
 - **Confirmaciones**: `<dialog>` nativo con `showModal()`. El navegador atrapa el foco, Escape cancela y el foco vuelve al botón, sin librería de modales.
 - **Acciones**: los botones salen solo de `allowed_actions`, filtrados por un mapa de las acciones de transición atado al contrato. La web no repite la máquina de estados.
 - **Listados en tarjetas**, no en tablas, para que se lean en móvil sin scroll horizontal. Las fechas se muestran en es-CL con la zona del navegador.
+
+---
+
+## Extensión 2026-10-18 · Cola del agente (Fase 5)
+
+- **Pestañas como enlaces**: "Cola" y "Asignados a mí" son enlaces con `aria-current="page"`, y la vista vive en la URL (`/agent?view=assigned`), así que sobrevive a recargar. No hace falta el patrón `role="tab"`, que obliga a manejar flechas, para dos vistas que son navegación.
+- **Un solo componente de listado**: `TicketList` encapsula carga, error, vacío y tarjetas para "Mis tickets", la cola y los asignados. Cada página aporta solo sus mensajes y si muestra al solicitante.
+- **Tras un 409 se refrescan el detalle y los listados**: con caché de 30 s, la cola podía seguir mostrando libre un ticket que otro ya tomó.
+- **Solo cancelar pide confirmación**: resolver es reversible (el solicitante reabre), y cerrar ya es la confirmación del solicitante ("Confirmar cierre").

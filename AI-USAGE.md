@@ -57,6 +57,9 @@ flowchart LR
 | 4 · US1 | API: esquemas, `TicketService` con transiciones condicionales, endpoints y tests. Web: formulario de nuevo ticket, "Mis tickets", detalle con acciones y confirmación, y componentes de formulario. Un subagente por app, en secuencia, unidos por el contrato regenerado | Sonnet 5.5 xHigh |
 | 4 · Checkpoint | Revisión de deckard sobre la API y luego sobre el diff completo, sin hallazgos de criticidad ≥ 8; se aplicaron 4 refactors menores en la API | Sonnet 5.5 xHigh (deckard) |
 | 4 · Orquestación | Prueba en navegador de los escenarios 1, 2, 4 y 12 contra un stack Docker aislado, corrección del escenario 14 del quickstart, y extensiones de ADL-002, ADL-004 y ADL-008 | Opus 5.5 Max |
+| 5 · US2 | API: vistas de la cola, `take` con carrera probada con hilos, efectos de cada transición y el colaborador `TicketSla`. Web: cola con pestañas, listado compartido y acciones por rol | Sonnet 5.5 xHigh |
+| 5 · Checkpoint | Revisión de deckard sobre la API y sobre el diff completo, sin hallazgos de criticidad ≥ 8; se aplicaron sus ajustes menores en la API | Sonnet 5.5 xHigh (deckard) |
+| 5 · Orquestación | Prueba en navegador de los escenarios 6, 7, 10, 11 y 14 con varios agentes a la vez, contra un stack aislado, y extensiones de ADL-004 y ADL-008 | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 

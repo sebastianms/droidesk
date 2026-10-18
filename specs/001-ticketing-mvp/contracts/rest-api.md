@@ -78,7 +78,7 @@ Sin paginación en el MVP: el volumen lo permite. Queda como deuda técnica para
 
 ### Ciclo de vida: `POST /api/v1/tickets/{id}/transitions`
 
-Un solo endpoint para todas las acciones de estado, de modo que `allowed_actions` y las transiciones se correspondan 1:1 ([ADL-008](../../../.design-logs/ADL-008-ticket-lifecycle-six-states.md)). La API valida el estado actual, el rol y la relación con el ticket. Toda transición es una actualización condicional sobre el estado de origen (`WHERE id = ? AND status = <origen>`): si otro cambió el ticket antes, responde `already_taken` (en `take`) o `action_not_allowed`. Un rol que nunca puede hacer la acción recibe 403 `forbidden`; el rol correcto en un estado o con una relación que no corresponde recibe 409 `action_not_allowed`.
+Un solo endpoint para todas las acciones de estado, de modo que `allowed_actions` y las transiciones se correspondan 1:1 ([ADL-008](../../../.design-logs/ADL-008-ticket-lifecycle-six-states.md)). La API valida el estado actual, el rol y la relación con el ticket. Toda transición es una actualización condicional sobre el estado de origen (`WHERE id = ? AND status = <origen>`): si otro cambió el ticket antes, responde `already_taken` (en `take`, también cuando el ticket ya tenía otro agente al leerlo) o `action_not_allowed`. Un rol que nunca puede hacer la acción recibe 403 `forbidden`; el rol correcto en un estado o con una relación que no corresponde recibe 409 `action_not_allowed`.
 
 ### Comentarios: `POST /api/v1/tickets/{id}/comments`
 

@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
+from droidesk_api.audit.enums import EventKind
 from droidesk_api.sla.status import SlaState
 from droidesk_api.tickets.enums import Priority, TicketStatus
 from droidesk_api.tickets.lifecycle import TicketAction
@@ -71,12 +72,24 @@ class TicketSummary(BaseModel):
     sla: Sla
 
 
+class Event(BaseModel):
+    """Una entrada del historial; `from_value` y `to_value` son estados, prioridades o el nombre del agente asignado."""
+
+    id: int
+    kind: EventKind
+    actor: UserRef
+    from_value: str | None
+    to_value: str | None
+    created_at: datetime
+
+
 class TicketDetail(TicketSummary):
     description: str
     resolved_at: datetime | None
     closed_at: datetime | None
     cancelled_at: datetime | None
     allowed_actions: list[TicketAction]
+    history: list[Event]
 
 
 class TicketCreate(BaseModel):

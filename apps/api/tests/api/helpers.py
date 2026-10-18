@@ -11,7 +11,10 @@ from droidesk_api.tickets.models import Ticket
 from tests.factories import add_ticket, add_ticket_in
 
 LoginAs = Callable[[str], dict[str, str]]
+Act = Callable[[str, int, str], Response]
+Read = Callable[[str, int], Response]
 TICKETS_URL = "/api/v1/tickets"
+NOT_FOUND = {"code": "not_found", "message": "El ticket no existe."}
 NEW_TICKET = {
     "title": "No puedo entrar a la VPN",
     "description": "Desde esta mañana la VPN rechaza mis credenciales.",

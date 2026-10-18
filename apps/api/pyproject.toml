@@ -42,13 +42,18 @@ source_pkgs = ["droidesk_api"]
 exclude_also = ["if TYPE_CHECKING:"]
 
 [tool.ruff.lint]
-extend-select = ["FAST", "DTZ", "N", "ERA", "PLR2004", "C90", "ARG", "T20", "S", "PT", "B", "I", "UP"]
+extend-select = ["FAST", "DTZ", "N", "ERA", "PLR0913", "PLR2004", "C90", "ARG", "T20", "S", "PT", "B", "I", "UP"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 8
 
+[tool.ruff.lint.pylint]
+max-args = 3
+
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S105", "S106", "PLR2004", "ARG"]
+"tests/**" = ["S101", "S105", "S106", "PLR0913", "PLR2004", "ARG"]
+# Los handlers reciben lo que inyecta FastAPI: ruta, cuerpo y dependencias.
+"src/droidesk_api/*/router.py" = ["PLR0913"]
 
 [tool.mypy]
 files = ["src", "scripts", "tests"]

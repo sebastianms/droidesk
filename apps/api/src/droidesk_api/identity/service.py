@@ -1,5 +1,8 @@
-from sqlmodel import Session, select
+from collections.abc import Iterable
 
+from sqlmodel import Session, col, select
+
+from droidesk_api.core.db import persisted_id
 from droidesk_api.core.errors import NotAuthenticatedError
 from droidesk_api.identity.enums import Role
 from droidesk_api.identity.models import User
@@ -24,3 +27,12 @@ def list_demo_users(session: Session) -> list[User]:
         session.exec(select(User)),
         key=lambda user: (ROLE_ORDER[user.role], user.name.casefold()),
     )
+
+
+def users_by_id(session: Session, ids: Iterable[int]) -> dict[int, User]:
+    """Los usuarios pedidos en una sola consulta, o ninguna si no se pide ninguno."""
+    wanted = set(ids)
+    if not wanted:
+        return {}
+    statement = select(User).where(col(User.id).in_(wanted))
+    return {persisted_id(user): user for user in session.exec(statement)}

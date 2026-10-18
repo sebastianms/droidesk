@@ -1,4 +1,5 @@
-import type { Priority, SlaState, TicketAction, TicketStatus, TicketSummary } from './types'
+import type { SortKey } from './listFilters'
+import type { Priority, SlaPolicy, SlaState, TargetUnit, TicketAction, TicketStatus, TicketSummary } from './types'
 
 export const STATUS_LABEL = {
   open: 'Abierto',
@@ -37,6 +38,23 @@ export const SLA_STATE_LABEL = {
   missed: 'Incumplido',
 } as const satisfies Record<SlaState, string>
 
+export const SORT_LABEL = {
+  due: 'Vencimiento',
+  priority: 'Prioridad',
+  recent: 'Más recientes',
+} as const satisfies Record<SortKey, string>
+
+const TARGET_UNIT_LABEL = {
+  hours: { one: 'hora hábil', many: 'horas hábiles' },
+  days: { one: 'día hábil', many: 'días hábiles' },
+} as const satisfies Record<TargetUnit, { one: string; many: string }>
+
+/** La prioridad con el plazo que compromete, como "Crítica · 4 horas hábiles". */
+export function policyLabel({ label, target_amount, target_unit }: SlaPolicy): string {
+  const unit = TARGET_UNIT_LABEL[target_unit]
+  return `${label} · ${target_amount} ${target_amount === 1 ? unit.one : unit.many}`
+}
+
 const UNASSIGNED_LABEL = 'Sin asignar'
 
 /** El agente que tiene el ticket, o "Sin asignar" mientras nadie lo haya tomado. */
@@ -48,4 +66,9 @@ export function assigneeName({ assignee }: Pick<TicketSummary, 'assignee'>): str
 export function commentCountLabel(count: number): string {
   if (count === 0) return 'Sin comentarios'
   return count === 1 ? '1 comentario' : `${count} comentarios`
+}
+
+/** "Mostrando N de M tickets"; el total en singular es "1 ticket". */
+export function shownCountLabel(shown: number, total: number): string {
+  return `Mostrando ${shown} de ${total} ${total === 1 ? 'ticket' : 'tickets'}`
 }

@@ -135,7 +135,7 @@ def authorize_transition(
     if not candidates:
         raise ActionNotAllowedError(f"La acción «{label}» no es un cambio de estado.")
     if not any(t.role == viewer.role for t in candidates):
-        raise ForbiddenError(f"Tu perfil no puede realizar la acción «{label}».")
+        raise ForbiddenError(_forbidden_message(action))
     transition = next((t for t in candidates if t.source == status), None)
     if transition is None:
         raise ActionNotAllowedError(_unavailable_message(action, status))
@@ -148,6 +148,17 @@ def authorize_transition(
 def authorize_comment(status: TicketStatus, viewer: Viewer) -> None:
     if not _can_comment(status, viewer):
         raise ActionNotAllowedError(_unavailable_message(TicketAction.COMMENT, status))
+
+
+def authorize_priority_change(status: TicketStatus, viewer: Viewer) -> None:
+    """403 si el perfil nunca puede ajustar la prioridad; 409 si el agente la pide con el ticket resuelto o final."""
+    if _can_change_priority(status, viewer):
+        return
+    if viewer.role != Role.AGENT:
+        raise ForbiddenError(_forbidden_message(TicketAction.CHANGE_PRIORITY))
+    raise ActionNotAllowedError(
+        _unavailable_message(TicketAction.CHANGE_PRIORITY, status)
+    )
 
 
 def automatic_resume() -> Transition:
@@ -167,6 +178,10 @@ def comment_resumes_hold(status: TicketStatus, viewer: Viewer) -> bool:
     )
 
 
+def _forbidden_message(action: TicketAction) -> str:
+    return f"Tu perfil no puede realizar la acción «{ACTION_LABELS[action]}»."
+
+
 def _unavailable_message(action: TicketAction, status: TicketStatus) -> str:
     return f"La acción «{ACTION_LABELS[action]}» no está disponible con el ticket en estado «{STATUS_LABELS[status]}»."
 
@@ -175,7 +190,7 @@ def _is_allowed(action: TicketAction, status: TicketStatus, viewer: Viewer) -> b
     if action == TicketAction.COMMENT:
         return _can_comment(status, viewer)
     if action == TicketAction.CHANGE_PRIORITY:
-        return viewer.role == Role.AGENT and status in PRIORITY_EDITABLE_STATUSES
+        return _can_change_priority(status, viewer)
     return any(
         t.action == action
         and t.source == status
@@ -189,6 +204,10 @@ def _can_comment(status: TicketStatus, viewer: Viewer) -> bool:
     if status in FINAL_STATUSES:
         return False
     return viewer.role == Role.AGENT or viewer.relation == Relation.OWNER
+
+
+def _can_change_priority(status: TicketStatus, viewer: Viewer) -> bool:
+    return viewer.role == Role.AGENT and status in PRIORITY_EDITABLE_STATUSES
 
 
 def _missing_relation(transition: Transition, viewer: Viewer) -> Relation | None:

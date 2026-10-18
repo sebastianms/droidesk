@@ -222,21 +222,24 @@
 **Objetivo**: la prioridad se elige y se ajusta, el SLA se ve con luces y la cola se ordena por urgencia.
 **Test independiente**: escenarios 5 y 13 del quickstart, más los bordes del SLA.
 
-- [ ] T052 [US5] Agregar `PATCH /api/v1/tickets/{id}` en `apps/api/src/droidesk_api/tickets/router.py` y `change_priority` en `apps/api/src/droidesk_api/tickets/service.py`:
+- [x] T052 [US5] Agregar `PATCH /api/v1/tickets/{id}` en `apps/api/src/droidesk_api/tickets/router.py` y `change_priority` en `apps/api/src/droidesk_api/tickets/service.py`:
   - recalcula el vencimiento desde la creación;
   - registra el evento `priority_changed`;
   - responde 409 si el ticket está resuelto o en un estado final.
-- [ ] T053 [US5] Crear `apps/api/tests/api/test_us5_sla.py`, con reloj controlado:
+  - *Implementado*: la regla vive en `lifecycle.authorize_priority_change`, la misma que alimenta `allowed_actions`. El cambio es idempotente y condicional sobre el estado, la prioridad y los minutos de espera (ADL-009).
+- [x] T053 [US5] Crear `apps/api/tests/api/test_us5_sla.py`, con reloj controlado:
   - los ejemplos de creación del quickstart;
   - el cambio de prioridad;
   - la pausa y la reanudación;
   - una espera con el ticket ya vencido;
   - cumplido e incumplido;
   - el orden de la cola, con los `on_hold` al final.
-- [ ] T054 [US5] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
-- [ ] T055 [P] [US5] Agregar en `apps/web/src/features/requester/NewTicketForm.tsx` el selector de prioridad, con las descripciones de `/sla-policies` y Media preseleccionada; ampliar su test.
-- [ ] T056 [P] [US5] Crear `apps/web/src/features/tickets/SlaLight.tsx` (estado del SLA con texto y vencimiento en hora local), usarlo en `MyTicketsPage.tsx`, `QueuePage.tsx` y `TicketDetailPage.tsx`, y crear su test `SlaLight.test.tsx`.
-- [ ] T057 [US5] Agregar el ajuste de prioridad del agente en `apps/web/src/features/tickets/TicketActions.tsx`, visible si `allowed_actions` incluye `change_priority`; ampliar su test.
+- [x] T054 [US5] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
+- [x] T055 [P] [US5] Agregar en `apps/web/src/features/requester/NewTicketForm.tsx` el selector de prioridad, con las descripciones de `/sla-policies` y Media preseleccionada; ampliar su test.
+- [x] T056 [P] [US5] Crear `apps/web/src/features/tickets/SlaLight.tsx` (estado del SLA con texto y vencimiento en hora local), usarlo en `MyTicketsPage.tsx`, `QueuePage.tsx` y `TicketDetailPage.tsx`, y crear su test `SlaLight.test.tsx`.
+  - *Verificado*: T055 ya estaba cumplida desde la Fase 4. Para T056, `SlaLight` se extrajo de `StatusLight.tsx`; lo usan `TicketList` (Mis tickets, Cola y Asignados) y `TicketDetailPage`.
+- [x] T057 [US5] Agregar el ajuste de prioridad del agente en `apps/web/src/features/tickets/TicketActions.tsx`, visible si `allowed_actions` incluye `change_priority`; ampliar su test.
+  - *Revisión del usuario*: filtros por prioridad y estado del SLA y orden por vencimiento, prioridad o más recientes en los tres listados (FR-024a), aplicados en la web y guardados en la URL.
 
 **Checkpoint**: escenarios 5 y 13 y los bordes del SLA en verde; gates de cobertura.
 
@@ -295,6 +298,6 @@ Cada requisito funcional tiene al menos una tarea, y ninguna tarea queda sin req
 | FR-008 a FR-012 (cola y ciclo de vida) | T015, T030, T036, T037 a T039, T041, T042 |
 | FR-013 a FR-015 (historial) | T020, T030, T037, T043 a T045 |
 | FR-016 a FR-018, FR-017a y FR-017b (comentarios, contador y respuestas) | T046 a T049, T051 |
-| FR-019 a FR-025 (SLA) | T016, T017, T022, T024, T037, T052, T053, T055 a T057 |
+| FR-019 a FR-025 y FR-024a (SLA, filtros y orden) | T016, T017, T022, T024, T037, T052, T053, T055 a T057 |
 | Edge cases (sesión vencida, textos al límite, texto plano, cola vacía, fuera de jornada) | T025, T032, T049, T051, T028, T041, T016 |
 | SM-06 (puesta en marcha en menos de 5 minutos) | T059, T061 |

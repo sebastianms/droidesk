@@ -155,7 +155,17 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Ticket
+         * @description Ajusta la prioridad de un ticket y devuelve su detalle actualizado.
+         *
+         *     Solo un agente, y con el ticket sin resolver ni finalizado. El vencimiento se recalcula desde
+         *     la creación con el plazo de la nueva prioridad y el cambio queda en el historial; pedir la
+         *     prioridad que el ticket ya tiene responde 200 sin cambios. 403 si el perfil no puede ajustarla
+         *     y 409 `action_not_allowed` si el ticket está Resuelto, Cerrado o Cancelado, o cambió mientras
+         *     tanto; un ticket ajeno responde 404.
+         */
+        patch: operations["update_ticket"];
         trace?: never;
     };
     "/api/v1/tickets/{ticket_id}/comments": {
@@ -447,6 +457,10 @@ export interface components {
             status: components["schemas"]["TicketStatus"];
             /** Title */
             title: string;
+        };
+        /** TicketUpdate */
+        TicketUpdate: {
+            priority: components["schemas"]["Priority"];
         };
         /**
          * TicketView
@@ -802,6 +816,77 @@ export interface operations {
             };
             /** @description No encontrado. Un ticket ajeno se informa igual que uno inexistente. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_ticket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ticket_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TicketUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketDetail"];
+                };
+            };
+            /** @description No autenticado: falta el token, es inválido o expiró. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description El perfil del usuario no permite la operación. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description No encontrado. Un ticket ajeno se informa igual que uno inexistente. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Conflicto: otro agente tomó el ticket, o la acción no está permitida en el estado actual. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

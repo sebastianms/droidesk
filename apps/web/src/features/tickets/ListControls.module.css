@@ -1,0 +1,18 @@
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
+  align-items: end;
+  gap: var(--space-3) var(--space-4);
+}
+
+.clear {
+  justify-self: start;
+}
+
+.summary {
+  color: var(--color-ink-muted);
+}
+
+.summary:not(:empty) {
+  margin-top: var(--space-3);
+}

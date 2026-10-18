@@ -36,3 +36,14 @@ export function refreshTicketLists(queryClient: QueryClient): Promise<void> {
   const listKey = $api.queryOptions('get', LIST_PATH).queryKey
   return queryClient.invalidateQueries({ queryKey: listKey, refetchType: 'all' })
 }
+
+/** Qué hacer al terminar un cambio al ticket: con éxito, guardar su detalle y actualizar los listados; si la API lo rechaza, la pantalla está desactualizada y se vuelve a pedir todo. */
+export function ticketChangeHandlers(queryClient: QueryClient, ticketId: number) {
+  return {
+    onSuccess: (updated: TicketDetail) => {
+      storeTicketDetail(queryClient, updated)
+      return refreshTicketLists(queryClient)
+    },
+    onError: () => Promise.all([refreshTicketDetail(queryClient, ticketId), refreshTicketLists(queryClient)]),
+  }
+}

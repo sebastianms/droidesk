@@ -8,7 +8,7 @@ import { MyTicketsPage } from './MyTicketsPage'
 
 const TICKETS = 'GET /api/v1/tickets'
 
-function renderMyTickets() {
+function renderMyTickets(entry = '/requester') {
   signInAs(requesterAna)
   return renderRoutes(
     [
@@ -16,7 +16,7 @@ function renderMyTickets() {
       { path: '/requester/new', element: <p>Formulario de nuevo ticket</p> },
       { path: '/tickets/:ticketId', element: <p>Detalle del ticket</p> },
     ],
-    '/requester',
+    entry,
   )
 }
 
@@ -182,5 +182,62 @@ describe('MyTicketsPage', () => {
     renderMyTickets()
 
     expect(await screen.findByRole('alert')).toHaveTextContent('No puedes ver esta vista.')
+  })
+
+  describe('the filters and the sort order', () => {
+    const tickets = [
+      ticketSummary({ id: 3, title: 'El más reciente', priority: 'low', created_at: '2026-10-19T15:00:00Z' }),
+      ticketSummary({ id: 2, title: 'El crítico', priority: 'critical', created_at: '2026-10-19T14:00:00Z' }),
+      ticketSummary({ id: 1, title: 'El más antiguo', priority: 'high', created_at: '2026-10-19T13:00:00Z' }),
+    ]
+
+    async function shownTitles() {
+      const items = await screen.findAllByRole('listitem')
+      return items.map((item) => within(item).getByRole('link').textContent)
+    }
+
+    it('are offered over the tickets of the requester', async () => {
+      stubApi({ [TICKETS]: () => jsonResponse(tickets) })
+
+      renderMyTickets()
+      await screen.findAllByRole('listitem')
+
+      expect(screen.getByLabelText('Prioridad')).toHaveDisplayValue('Todas')
+      expect(screen.getByLabelText('SLA')).toHaveDisplayValue('Todos')
+      expect(screen.getByLabelText('Ordenar por')).toHaveDisplayValue('Predeterminado')
+    })
+
+    it('filter and sort the tickets, and write the choice in the address', async () => {
+      stubApi({ [TICKETS]: () => jsonResponse(tickets) })
+      const { router } = renderMyTickets()
+      await screen.findAllByRole('listitem')
+
+      await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'Prioridad')
+      expect(await shownTitles()).toEqual(['El crítico', 'El más antiguo', 'El más reciente'])
+
+      await userEvent.selectOptions(screen.getByLabelText('Prioridad'), 'Alta')
+      expect(await shownTitles()).toEqual(['El más antiguo'])
+      expect(screen.getByText('Mostrando 1 de 3 tickets')).toBeVisible()
+      expect(router.state.location.search).toBe('?sort=priority&priority=high')
+    })
+
+    it('are read from the address, and "Limpiar filtros" brings the newest-first order back', async () => {
+      stubApi({ [TICKETS]: () => jsonResponse(tickets) })
+      renderMyTickets('/requester?priority=critical&sort=due')
+      expect(await shownTitles()).toEqual(['El crítico'])
+
+      await userEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
+
+      expect(await shownTitles()).toEqual(['El más reciente', 'El crítico', 'El más antiguo'])
+    })
+
+    it('are not offered before the first ticket, when the page invites to create one', async () => {
+      stubApi({ [TICKETS]: () => jsonResponse([]) })
+
+      renderMyTickets()
+
+      expect(await screen.findByText(/todavía no hay tickets/)).toBeVisible()
+      expect(screen.queryByLabelText('Prioridad')).not.toBeInTheDocument()
+    })
   })
 })

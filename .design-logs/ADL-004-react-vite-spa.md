@@ -112,3 +112,12 @@ Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
 - **Contador en los listados**: un globo de diálogo decorativo más el texto ("Sin comentarios", "1 comentario", "N comentarios"). Con cero se muestra tenue en vez de ocultarse, porque le sirve al agente para priorizar. El panel del detalle se titula "Comentarios (N)".
 - **Respuesta citada**: el estado de "a quién se responde" vive en `Conversation`, que agrupa la lista y la caja. La cita es un `<blockquote>` de un solo nivel con el autor y un extracto de 120 puntos de código, más un enlace al ancla `#comment-<id>`, que `:target` resalta con un contorno.
 - **El campo se vacía al publicar**, en el mismo render en que aparece el comentario. El refresco de los listados corre en segundo plano.
+
+---
+
+## Extensión 2026-10-18 · Filtros y orden de los listados (Fase 8)
+
+- **En la web, sobre el listado completo**: sin paginación, la API ya entrega todo. Filtrar y ordenar en el cliente evita ampliar el contrato. Junto con la paginación pasarán a ser parámetros de la API (deuda en DECISIONS).
+- **Estado en la URL** (`priority`, `sla`, `sort`, combinables con `view`), con `replace` para no llenar el historial. Los valores desconocidos se ignoran, y al cambiar de pestaña los filtros se conservan.
+- **"Predeterminado" respeta el orden de la API**: más recientes en Mis tickets, urgencia en la cola. "Vencimiento" deja al final los tickets sin vencimiento (en pausa o cancelados), y "Prioridad" desempata por vencimiento. El orden es estable.
+- **Lógica pura en `listFilters.ts`**, con rangos atados al contrato por `satisfies`. El componente solo conecta. "Mostrando N de M" vive en una región `aria-live` siempre montada, y el vacío por filtros tiene su propio mensaje.

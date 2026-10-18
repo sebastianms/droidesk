@@ -62,7 +62,7 @@ Los largos se validan después de recortar los espacios.
 | `POST /api/v1/tickets` | solicitante | `TicketCreate` | `201 TicketDetail` | 401, 403, 422 (también si la categoría no existe, con `loc` en `category_id`) |
 | `GET /api/v1/tickets` | ambos | `?view=` (ver abajo) | `200 TicketSummary[]` | 401, 403 |
 | `GET /api/v1/tickets/{id}` | ambos | — | `200 TicketDetail` | 401, 404 |
-| `PATCH /api/v1/tickets/{id}` | agente | `TicketUpdate` | `200 TicketDetail` | 401, 403, 404, 409, 422 |
+| `PATCH /api/v1/tickets/{id}` | agente | `TicketUpdate` | `200 TicketDetail`; con la prioridad actual responde sin cambios ni evento | 401, 403, 404, 409, 422 |
 | `POST /api/v1/tickets/{id}/transitions` | según la acción | `TransitionRequest` | `200 TicketDetail` | 401, 403, 404, 409, 422 |
 | `POST /api/v1/tickets/{id}/comments` | ambos | `CommentCreate` | `201 TicketDetail` | 401, 404, 409, 422 |
 

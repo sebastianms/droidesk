@@ -31,7 +31,7 @@ from droidesk_api.tickets.comments import (
     ensure_reply_target,
     list_comments,
 )
-from droidesk_api.tickets.enums import TicketStatus
+from droidesk_api.tickets.enums import Priority, TicketStatus
 from droidesk_api.tickets.lifecycle import (
     ACTION_LABELS,
     FINAL_STATUSES,
@@ -40,6 +40,7 @@ from droidesk_api.tickets.lifecycle import (
     Viewer,
     allowed_actions,
     authorize_comment,
+    authorize_priority_change,
     authorize_transition,
     automatic_resume,
     comment_resumes_hold,
@@ -55,6 +56,10 @@ Assignee = aliased(User)
 
 COMMENT_RACE_MESSAGE = (
     "El ticket cambió mientras escribías tu comentario. "
+    "Revisa su estado e intenta de nuevo."
+)
+PRIORITY_RACE_MESSAGE = (
+    "El ticket cambió mientras ajustabas su prioridad. "
     "Revisa su estado e intenta de nuevo."
 )
 DEFAULT_VIEWS = {
@@ -79,6 +84,16 @@ class Change:
     """Una transición autorizada, con quién la aplica y cuándo."""
 
     transition: Transition
+    actor: User
+    now: datetime
+
+
+@dataclass(frozen=True)
+class PriorityChange:
+    """Un ajuste de prioridad: de cuál a cuál, quién lo hace y cuándo."""
+
+    source: Priority
+    target: Priority
     actor: User
     now: datetime
 
@@ -184,6 +199,20 @@ class TicketService:
         self._session.commit()
         return self.get_ticket_for(user, ticket_id)
 
+    def change_priority(
+        self, user: User, ticket_id: int, data: schemas.TicketUpdate
+    ) -> schemas.TicketDetail:
+        """Pedir la prioridad que el ticket ya tiene no cambia nada ni deja evento."""
+        ticket = self._visible_row(user, ticket_id).ticket
+        authorize_priority_change(ticket.status, _viewer_of(user, ticket))
+        if data.priority != ticket.priority:
+            change = PriorityChange(
+                ticket.priority, data.priority, user, self._clock.now()
+            )
+            self._reprioritize(ticket, change)
+            self._session.commit()
+        return self.get_ticket_for(user, ticket_id)
+
     def add_comment(
         self, user: User, ticket_id: int, data: schemas.CommentCreate
     ) -> schemas.TicketDetail:
@@ -265,6 +294,34 @@ class TicketService:
             _while_in_status(persisted_id(ticket), transition.source)
             .values(status=transition.target, updated_at=change.now)
             .values(self._effects_of(ticket, change))
+        )
+        return self._session.exec(statement).rowcount > 0
+
+    def _reprioritize(self, ticket: Ticket, change: PriorityChange) -> None:
+        if not self._try_reprioritize(ticket, change):
+            raise ActionNotAllowedError(PRIORITY_RACE_MESSAGE)
+        record_event(
+            self._session,
+            NewEvent(
+                ticket_id=persisted_id(ticket),
+                actor_id=persisted_id(change.actor),
+                kind=EventKind.PRIORITY_CHANGED,
+                created_at=change.now,
+                from_value=change.source.value,
+                to_value=change.target.value,
+            ),
+        )
+
+    def _try_reprioritize(self, ticket: Ticket, change: PriorityChange) -> bool:
+        """Condicionada al estado, la prioridad y las esperas leídos: el vencimiento nuevo sale de ellos, y si cambiaron no se pisa."""
+        statement = (
+            _while_in_status(persisted_id(ticket), ticket.status)
+            .where(
+                col(Ticket.priority) == change.source,
+                col(Ticket.sla_paused_minutes) == ticket.sla_paused_minutes,
+            )
+            .values(updated_at=change.now)
+            .values(self._sla.priority_values(ticket, change.target))
         )
         return self._session.exec(statement).rowcount > 0
 

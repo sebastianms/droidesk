@@ -80,3 +80,12 @@ Dos funciones puras sin dependencias son fáciles de leer y de probar en forma e
   - la propiedad `between(s, add(s, m)) == m`;
   - una espera que empieza con el ticket ya vencido.
 - Para agregar feriados, extiende `BusinessCalendar` con un conjunto de fechas (por ejemplo, desde la librería `holidays`), sin cambiar la firma de las funciones.
+
+---
+
+## Extensión 2026-10-18 · Ajuste de prioridad (Fase 8)
+
+- **`PATCH /tickets/{id}` con `{priority}`**: solo agentes (un solicitante recibe 403) y mientras el ticket no esté Resuelto ni final (si no, 409). El vencimiento se recalcula desde la creación con el plazo nuevo más los minutos de espera ya acumulados, y se registra `priority_changed` con los valores anterior y nuevo, en la misma transacción.
+- **Idempotente**: pedir la prioridad actual responde 200, sin cambios ni evento.
+- **Condicional sobre estado, prioridad y minutos de espera**: si entre la lectura y la escritura alguien deja el ticket en espera y lo retoma, el estado queda igual pero las pausas cambian. Sin esa guarda, el vencimiento se calcularía con minutos desactualizados. Si se pierde la carrera, el 409 dice "El ticket cambió mientras ajustabas su prioridad".
+- **Consecuencia de las reglas vigentes**: si se sube la prioridad de un ticket En espera y el nuevo vencimiento cae antes del inicio de la espera, el SLA pasa de "En pausa" a "Vencido", y al retomar esa espera no suma minutos. Es la misma regla de "una espera que empieza con el ticket vencido no corre el vencimiento".

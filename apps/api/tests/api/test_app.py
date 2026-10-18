@@ -30,6 +30,7 @@ EXPECTED_OPERATION_IDS = {
     "create_ticket",
     "list_tickets",
     "read_ticket",
+    "update_ticket",
     "transition_ticket",
     "add_comment",
 }

@@ -6,11 +6,15 @@ import { ErrorNotice, LoadingNotice } from '../../ui/Notice'
 import { CommentCount } from './CommentCount'
 import { DateTime } from './DateTime'
 import { Fact, Facts } from './Facts'
+import { ListControls } from './ListControls'
 import { assigneeName, PRIORITY_LABEL } from './labels'
+import { applyListFilters } from './listFilters'
 import { ticketPath } from './paths'
-import { SlaInfo, StatusLight } from './StatusLight'
+import { SlaLight } from './SlaLight'
+import { StatusLight } from './StatusLight'
 import styles from './TicketList.module.css'
 import type { TicketSummary } from './types'
+import { useListFilters } from './useListFilters'
 
 export interface TicketListMessages {
   loading: string
@@ -25,16 +29,40 @@ interface TicketListProps {
   showRequester?: boolean
 }
 
-/** Los tickets de un listado en tarjetas, en el orden en que llegan, con sus estados de carga, error y vacío. */
+const NO_MATCH = {
+  title: 'Bip-bup: ningún ticket coincide con los filtros',
+  description: 'Prueba con otra prioridad o estado de SLA, o limpia los filtros para ver todos los tickets.',
+}
+
+/** Los tickets de un listado en tarjetas, con sus estados de carga, error y vacío. Se pueden filtrar y ordenar; sin orden elegido salen como llegan. */
 export function TicketList({ query, messages, showRequester = false }: TicketListProps) {
   return (
     <>
       {query.isError && <ErrorNotice message={serverMessage(query.error) ?? messages.failure} />}
       {query.isPending && <LoadingNotice message={messages.loading} />}
       {query.data?.length === 0 && <EmptyState {...messages.empty} />}
-      {query.data && query.data.length > 0 && (
+      {query.data && query.data.length > 0 && <FilterableTickets tickets={query.data} showRequester={showRequester} />}
+    </>
+  )
+}
+
+function FilterableTickets({ tickets, showRequester }: { tickets: TicketSummary[]; showRequester: boolean }) {
+  const { filters, setFilter, clear } = useListFilters()
+  const visible = applyListFilters(tickets, filters)
+
+  return (
+    <>
+      <ListControls
+        filters={filters}
+        shown={visible.length}
+        total={tickets.length}
+        onChange={setFilter}
+        onClear={clear}
+      />
+      {visible.length === 0 && <EmptyState {...NO_MATCH} />}
+      {visible.length > 0 && (
         <ul className={styles.list}>
-          {query.data.map((ticket) => (
+          {visible.map((ticket) => (
             <TicketCard key={ticket.id} ticket={ticket} showRequester={showRequester} />
           ))}
         </ul>
@@ -64,7 +92,7 @@ function TicketCard({ ticket, showRequester }: { ticket: TicketSummary; showRequ
           <DateTime value={ticket.created_at} />
         </Fact>
         <Fact term="SLA">
-          <SlaInfo sla={ticket.sla} />
+          <SlaLight sla={ticket.sla} />
         </Fact>
       </Facts>
     </li>

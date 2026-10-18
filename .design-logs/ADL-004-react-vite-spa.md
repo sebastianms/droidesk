@@ -83,3 +83,15 @@ Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
 - **Etiquetas atadas al contrato**: `PRIORITY_LABEL` y `ROLE_LABEL` usan `satisfies Record<…>` sobre los tipos generados, así que un valor nuevo en la API rompe la compilación. Los estados y las acciones se atarán cuando el contrato los exponga (Fase 4).
 - **Guardas**: `requireSession` va en el layout y `requireRole` en cada ruta hija. Un perfil que entra a la ruta del otro termina en su propio inicio.
 - **Deuda menor**: `api/client.ts` importa la sesión desde `features/auth`. Moverla a un módulo neutral desacoplaría las capas, pero la sacaría del gate de cobertura del flujo crítico.
+
+---
+
+## Extensión 2026-10-18 · Tickets del solicitante (Fase 4)
+
+- **Etiquetas completas**: estados, acciones, prioridades y estados del SLA usan `satisfies Record<…>` sobre los enums del contrato. Así se cierra lo pendiente de la Fase 3.
+- **Formularios**: `Field` reúne la etiqueta, la pista y el error de cualquier control; `TextField`, `TextArea` y `Select` se apoyan en él.
+  - Se valida en español antes de enviar, contando el largo en puntos de código igual que la API.
+  - El foco va al primer campo con error, y un 422 del servidor se asigna al campo que indica su `loc`.
+- **Confirmaciones**: `<dialog>` nativo con `showModal()`. El navegador atrapa el foco, Escape cancela y el foco vuelve al botón, sin librería de modales.
+- **Acciones**: los botones salen solo de `allowed_actions`, filtrados por un mapa de las acciones de transición atado al contrato. La web no repite la máquina de estados.
+- **Listados en tarjetas**, no en tablas, para que se lean en móvil sin scroll horizontal. Las fechas se muestran en es-CL con la zona del navegador.

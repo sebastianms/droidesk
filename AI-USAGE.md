@@ -54,6 +54,9 @@ flowchart LR
 | 3 · Foundational | API: configuración, base de datos, modelos, migración 0001, el dominio en TDD (ciclo de vida, calendario hábil y SLA), JWT, autorización, historial, catálogos y datos de demo. Web: design system del droide, cliente tipado, ingreso simulado, guardas por rol y vistas vacías | Sonnet 5.5 xHigh |
 | 3 · Checkpoints | Revisión de deckard por bloque y corrección de sus hallazgos, incluidos 2 de criticidad 8 (el dominio acoplado a SQLModel y FastAPI) | Sonnet 5.5 xHigh (deckard) |
 | 3 · Orquestación | Revisión del código entregado, prueba de punta a punta del stack Docker, extensiones de ADL-002, ADL-004, ADL-005 y ADL-006, y actualización de los artefactos de SDD | Opus 5.5 Max |
+| 4 · US1 | API: esquemas, `TicketService` con transiciones condicionales, endpoints y tests. Web: formulario de nuevo ticket, "Mis tickets", detalle con acciones y confirmación, y componentes de formulario. Un subagente por app, en secuencia, unidos por el contrato regenerado | Sonnet 5.5 xHigh |
+| 4 · Checkpoint | Revisión de deckard sobre la API y luego sobre el diff completo, sin hallazgos de criticidad ≥ 8; se aplicaron 4 refactors menores en la API | Sonnet 5.5 xHigh (deckard) |
+| 4 · Orquestación | Prueba en navegador de los escenarios 1, 2, 4 y 12 contra un stack Docker aislado, corrección del escenario 14 del quickstart, y extensiones de ADL-002, ADL-004 y ADL-008 | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 

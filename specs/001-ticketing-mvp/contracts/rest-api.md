@@ -59,7 +59,7 @@ Los largos se validan después de recortar los espacios.
 | `GET /api/v1/me` | ambos | — | `200 User` | 401 |
 | `GET /api/v1/categories` | ambos | — | `200 Category[]` | 401 |
 | `GET /api/v1/sla-policies` | ambos | — | `200 SlaPolicy[]`, ordenadas por `rank` | 401 |
-| `POST /api/v1/tickets` | solicitante | `TicketCreate` | `201 TicketDetail` | 401, 403, 422 |
+| `POST /api/v1/tickets` | solicitante | `TicketCreate` | `201 TicketDetail` | 401, 403, 422 (también si la categoría no existe, con `loc` en `category_id`) |
 | `GET /api/v1/tickets` | ambos | `?view=` (ver abajo) | `200 TicketSummary[]` | 401, 403 |
 | `GET /api/v1/tickets/{id}` | ambos | — | `200 TicketDetail` | 401, 404 |
 | `PATCH /api/v1/tickets/{id}` | agente | `TicketUpdate` | `200 TicketDetail` | 401, 403, 404, 409, 422 |
@@ -70,7 +70,7 @@ Los largos se validan después de recortar los espacios.
 
 | Rol | `view` | Contenido | Orden |
 |---|---|---|---|
-| Solicitante | `mine` (por defecto; otro valor responde 403) | Sus tickets, en todos los estados | `created_at` descendente |
+| Solicitante | `mine` (por defecto; `queue` o `assigned` responden 403 y un valor desconocido, 422) | Sus tickets, en todos los estados | `created_at` descendente |
 | Agente | `queue` (por defecto) | Todos los tickets en estados no finales | Reloj corriendo por `sla_due_at` ascendente, luego los `on_hold`, y a igual criterio por `created_at` |
 | Agente | `assigned` | Los no finales asignados a quien consulta | El mismo de `queue` |
 
@@ -78,7 +78,7 @@ Sin paginación en el MVP: el volumen lo permite. Queda como deuda técnica para
 
 ### Ciclo de vida: `POST /api/v1/tickets/{id}/transitions`
 
-Un solo endpoint para todas las acciones de estado, de modo que `allowed_actions` y las transiciones se correspondan 1:1 ([ADL-008](../../../.design-logs/ADL-008-ticket-lifecycle-six-states.md)). La API valida el estado actual, el rol y la relación con el ticket. `take` y `cancel` son actualizaciones condicionales: si otro las ganó antes, responden `already_taken` o `action_not_allowed`.
+Un solo endpoint para todas las acciones de estado, de modo que `allowed_actions` y las transiciones se correspondan 1:1 ([ADL-008](../../../.design-logs/ADL-008-ticket-lifecycle-six-states.md)). La API valida el estado actual, el rol y la relación con el ticket. Toda transición es una actualización condicional sobre el estado de origen (`WHERE id = ? AND status = <origen>`): si otro cambió el ticket antes, responde `already_taken` (en `take`) o `action_not_allowed`. Un rol que nunca puede hacer la acción recibe 403 `forbidden`; el rol correcto en un estado o con una relación que no corresponde recibe 409 `action_not_allowed`.
 
 ### Comentarios: `POST /api/v1/tickets/{id}/comments`
 

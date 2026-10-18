@@ -117,24 +117,25 @@
 **Objetivo**: el solicitante crea, lista, ve y cancela sus tickets.
 **Test independiente**: escenarios 1, 2, 4 y 12 del quickstart.
 
-- [ ] T029 [US1] Crear `apps/api/src/droidesk_api/tickets/schemas.py`: `TicketCreate`, `TicketSummary`, `TicketDetail`, `Sla`, `UserRef` y `TransitionRequest`, con largos validados después de recortar espacios.
-- [ ] T030 [US1] Crear `apps/api/src/droidesk_api/tickets/service.py` con:
+- [x] T029 [US1] Crear `apps/api/src/droidesk_api/tickets/schemas.py`: `TicketCreate`, `TicketSummary`, `TicketDetail`, `Sla`, `UserRef` y `TransitionRequest`, con largos validados después de recortar espacios.
+- [x] T030 [US1] Crear `apps/api/src/droidesk_api/tickets/service.py` con:
   - `create_ticket`: prioridad por defecto `medium`, vencimiento con `sla/status.py` y evento `created`, en una transacción;
   - `list_my_tickets` y `get_ticket_for` (un ticket ajeno responde 404);
   - `apply_transition` genérico sobre `lifecycle.py`, con `cancel` como actualización condicional.
-- [ ] T031 [US1] Agregar a `apps/api/src/droidesk_api/tickets/router.py`:
+  - *Implementado*: el servicio es la clase `TicketService(session, clock, calendar)`, con la presentación en `tickets/presenter.py`. Todas las transiciones son condicionales, no solo `cancel`. Una categoría inexistente responde 422 con `loc` en `category_id`. `take` y `resume` responden 409 hasta US2 (T037).
+- [x] T031 [US1] Agregar a `apps/api/src/droidesk_api/tickets/router.py`:
   - `POST /api/v1/tickets`, `GET /api/v1/tickets` (`view=mine`) y `GET /api/v1/tickets/{id}`;
   - `POST /api/v1/tickets/{id}/transitions`;
   - las respuestas 4xx declaradas para el OpenAPI.
-- [ ] T032 [US1] Crear `apps/api/tests/api/test_us1_requester_tickets.py`:
+- [x] T032 [US1] Crear `apps/api/tests/api/test_us1_requester_tickets.py`:
   - crear con datos válidos, con campos vacíos y con los bordes 120/121 y 5.000/5.001;
   - solo los propios en el listado; un ticket ajeno responde 404;
   - un agente no puede crear;
   - cancelar un ticket abierto, y cancelar uno no abierto responde 409.
-- [ ] T033 [US1] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
-- [ ] T034 [P] [US1] Crear `apps/web/src/features/requester/NewTicketForm.tsx` (validación en español antes de enviar) y su test `NewTicketForm.test.tsx`.
-- [ ] T035 [P] [US1] Completar `apps/web/src/features/requester/MyTicketsPage.tsx` (estado con luz, "sin asignar", orden por fecha) y su test `MyTicketsPage.test.tsx`.
-- [ ] T036 [US1] Crear el detalle y las acciones:
+- [x] T033 [US1] Regenerar `contracts/openapi.json` y `apps/web/src/api/schema.d.ts`.
+- [x] T034 [P] [US1] Crear `apps/web/src/features/requester/NewTicketForm.tsx` (validación en español antes de enviar) y su test `NewTicketForm.test.tsx`.
+- [x] T035 [P] [US1] Completar `apps/web/src/features/requester/MyTicketsPage.tsx` (estado con luz, "sin asignar", orden por fecha) y su test `MyTicketsPage.test.tsx`.
+- [x] T036 [US1] Crear el detalle y las acciones:
   - `apps/web/src/features/tickets/TicketDetailPage.tsx`;
   - `apps/web/src/features/tickets/TicketActions.tsx`, con botones que salen de `allowed_actions` y confirmación al cancelar;
   - sus tests.

@@ -30,21 +30,29 @@ La pantalla de ingreso lista los usuarios de demo: 4 solicitantes y 3 agentes. P
 | 11 | Reabrir | El solicitante reabre un ticket Resuelto | Vuelve a En progreso con el mismo vencimiento | FR-011, edge case de reapertura |
 | 12 | Cancelar | El solicitante cancela un ticket Abierto; luego intenta cancelar uno tomado | El primero queda Cancelado y sale de la cola; el segundo no ofrece la acción | FR-011, edge case de cancelación |
 | 13 | Ajustar prioridad | El agente cambia un ticket de Crítica a Baja | El vencimiento se recalcula desde la creación; el historial muestra el valor anterior y el nuevo | FR-019, FR-022 |
-| 14 | Transición inválida | Por API, pedir `close` sobre un ticket En progreso | 409 `action_not_allowed` con un mensaje claro | FR-011, SC-006 |
+| 14 | Transición inválida | Por API, como solicitante dueño, pedir `close` sobre un ticket que no está Resuelto; después, pedirlo como agente | El dueño recibe 409 `action_not_allowed` con un mensaje claro; el agente, 403 `forbidden`, porque su perfil no puede cerrar | FR-011, SC-006 |
 | 15 | Historial inmutable | Revisar el detalle de un ticket con varios cambios | Historial cronológico con autor, fecha y hora, sin opciones de editar ni borrar | US3, FR-013 a FR-015, SC-003 |
 | 16 | Ingreso simulado | Abrir la ayuda "?" del login, elegir `elena.vidal` y escribir cualquier contraseña; después, intentar con un usuario inexistente | Elena entra a la cola como agente; el usuario inexistente recibe un mensaje que remite a la ayuda y no se crea | FR-001, edge case de usuario inexistente |
 
 ## Verificación rápida por API
 
 ```bash
-TOKEN=$(curl -s -X POST localhost:8080/api/v1/auth/login \
-  -H 'Content-Type: application/json' -d '{"username": "elena.vidal", "password": "demo"}' | jq -r .access_token)
+login() {
+  curl -s -X POST localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' \
+    -d "{\"username\": \"$1\", \"password\": \"demo\"}" | jq -r .access_token
+}
+ANA=$(login ana.rojas)
+ELENA=$(login elena.vidal)
 
-curl -s localhost:8080/api/v1/tickets?view=queue -H "Authorization: Bearer $TOKEN" | jq '.[0]'
+ID=$(curl -s -X POST localhost:8080/api/v1/tickets -H "Authorization: Bearer $ANA" \
+  -H 'Content-Type: application/json' \
+  -d '{"title": "No enciende el monitor", "description": "Pantalla negra", "category_id": 1}' | jq .id)
 
-curl -s -X POST localhost:8080/api/v1/tickets/1/transitions \
-  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"action": "close"}'   # esperado: 409 action_not_allowed
+curl -s localhost:8080/api/v1/tickets?view=queue -H "Authorization: Bearer $ELENA" | jq '.[0]'
+
+curl -s -X POST localhost:8080/api/v1/tickets/$ID/transitions \
+  -H "Authorization: Bearer $ANA" -H 'Content-Type: application/json' \
+  -d '{"action": "close"}'   # esperado: 409 action_not_allowed (el ticket no está Resuelto)
 ```
 
 ## Bordes del SLA (tests automáticos con reloj controlado)

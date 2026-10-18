@@ -96,3 +96,11 @@ La decisión de fondo no cambia. Se fijaron estos detalles al implementarla:
   - el login valida el patrón y el largo del `username` y el largo del `password` ([ADL-005](ADL-005-simulated-auth-signed-token.md));
   - un handler global de `RequestValidationError` conserva el formato estándar del 422, pero le quita la clave `input`. `SecretStr` no basta, porque FastAPI devuelve el valor crudo en `input`, y con un campo faltante devuelve el body completo;
   - la configuración oculta el valor de entrada en sus errores, para que un secreto inválido no termine en los logs.
+
+---
+
+## Extensión 2026-10-18 · Tickets del solicitante (Fase 4)
+
+- **Servicio con colaboradores inyectados**: `TicketService(session, clock, calendar)`, con la presentación en `tickets/presenter.py` y la regla de visibilidad en `tickets/access.py`, que no depende de FastAPI. `identity/authorization.py` queda solo con dependencias HTTP.
+- **Un dato inválido que solo conoce la base**, como una categoría inexistente, responde 422 con el mismo formato que la validación de FastAPI (`loc` en el campo). El servicio lanza `InvalidFieldError`, una excepción sin framework fuera de la jerarquía `DomainError`, porque no es un `{code, message}`. La web trata ambos 422 igual.
+- **Listados con una sola consulta**: JOIN con alias para el solicitante y el asignado, sin `Relationship` de SQLModel.

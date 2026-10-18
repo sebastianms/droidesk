@@ -68,3 +68,10 @@ Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
 - **Fechas**: SQLModel ≥ 0.0.45 mapea `datetime` a `UTCDateTime`, que exige fechas con zona y devuelve UTC; esto cumple esta decisión por diseño.
 - **Esquema**: `SQLModel.metadata` lleva una naming convention (ix, uq, ck, fk, pk), para que las migraciones sean deterministas en SQLite y en PostgreSQL. Los enums se guardan como texto, sin tipos nativos.
 - **Camino a PostgreSQL**: con SQLAlchemy 2.1, `postgresql://` usa psycopg 3 por defecto. Hay que considerarlo en el plan de escalamiento.
+
+---
+
+## Extensión 2026-10-18 · Primera migración sobre datos existentes (Fase 7)
+
+- `0002_comments` crea `comments` y agrega `ticket_events.comment_id` con `batch_alter_table`: SQLite no admite agregar una FK con `ALTER TABLE`, así que Alembic recrea la tabla y copia sus filas. Se probó `upgrade` y `downgrade` conservando las FK, los índices y las filas de `ticket_events`.
+- Las migraciones publicadas no se editan; cada cambio de esquema es una migración nueva. En PostgreSQL el modo batch no es necesario, pero el mismo archivo funciona en los dos motores.

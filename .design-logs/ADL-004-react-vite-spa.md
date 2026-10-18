@@ -104,3 +104,11 @@ Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
 - **Un solo componente de listado**: `TicketList` encapsula carga, error, vacío y tarjetas para "Mis tickets", la cola y los asignados. Cada página aporta solo sus mensajes y si muestra al solicitante.
 - **Tras un 409 se refrescan el detalle y los listados**: con caché de 30 s, la cola podía seguir mostrando libre un ticket que otro ya tomó.
 - **Solo cancelar pide confirmación**: resolver es reversible (el solicitante reabre), y cerrar ya es la confirmación del solicitante ("Confirmar cierre").
+
+---
+
+## Extensión 2026-10-18 · Comentarios (Fase 7)
+
+- **Contador en los listados**: un globo de diálogo decorativo más el texto ("Sin comentarios", "1 comentario", "N comentarios"). Con cero se muestra tenue en vez de ocultarse, porque le sirve al agente para priorizar. El panel del detalle se titula "Comentarios (N)".
+- **Respuesta citada**: el estado de "a quién se responde" vive en `Conversation`, que agrupa la lista y la caja. La cita es un `<blockquote>` de un solo nivel con el autor y un extracto de 120 puntos de código, más un enlace al ancla `#comment-<id>`, que `:target` resalta con un contorno.
+- **El campo se vacía al publicar**, en el mismo render en que aparece el comentario. El refresco de los listados corre en segundo plano.

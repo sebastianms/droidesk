@@ -63,6 +63,10 @@ flowchart LR
 | 6 · US3 | Historial en el detalle (API, contrato y línea de tiempo en la web), con un solo subagente para todo el bloque | Sonnet 5.5 xHigh |
 | 6 · Checkpoint | deckard detectó una función con 4 argumentos (criticidad 8): se corrigió y se activó la regla `PLR0913` de ruff para que no se repita | Sonnet 5.5 xHigh (deckard) |
 | 6 · Orquestación | Prueba en navegador del escenario 15 contra un stack aislado y extensión de ADL-002 | Opus 5.5 Max |
+| 7 · US4 | Comentarios de punta a punta: modelo, migración 0002, retomar automático, endpoint, tests, contrato y la caja de comentarios en la web | Sonnet 5.5 xHigh |
+| 7 · Correcciones | Un test de inmutabilidad de la US3 que pasaba sin comprobar nada (FastAPI 0.143 ya no expone las rutas en `app.routes`) y el mensaje del 409 al comentar durante una carrera | Sonnet 5.5 xHigh |
+| 7 · Revisión del usuario | Contador de comentarios (FR-017a) y respuesta citada (FR-017b, migración 0003), cada uno con su revisión de deckard sin hallazgos ≥ 8 | Sonnet 5.5 xHigh |
+| 7 · Orquestación | Prueba en navegador de los escenarios 8 y 9, del contador y de la respuesta citada contra un stack aislado, migración de la base local con datos (0001 → 0003), y extensiones de ADL-002, ADL-003, ADL-004 y ADL-008 | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 
@@ -77,6 +81,9 @@ flowchart LR
 | Fase 3 · Foundational | Detuvo al subagente de la API antes de que entregara su reporte | El orquestador verificó el estado en que quedó el código, completó el checkpoint y delegó las correcciones en un subagente nuevo |
 | Fase 3 · Revisión de la app | Revisó el ambiente Docker y pidió un login real: la autenticación simulada debe responder OK con cualquier usuario y contraseña. Eligió el selector de perfil entre 3 opciones | FR-001 revisado, [ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md) enmendado, contrato sin `GET /auth/users` y login reimplementado en la API y la web |
 | Fase 3 · Revisión del login | Pidió no crear usuarios sin límite: usuarios precreados por perfil y un ícono "?" en el login que los liste, para la demo. Luego pidió que el "?" explique que son usuarios de demo | Login solo para usuarios existentes, sin selector de perfil, con `GET /auth/users` público y reducido para alimentar la ayuda ([ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md)) |
+| Fase 7 · Revisión de comentarios | Pidió un contador de comentarios o un indicador de que el ticket tiene comentarios | FR-017a nuevo: los listados muestran cuántos comentarios tiene cada ticket (`TicketSummary.comment_count`, calculado sin N+1) y el detalle muestra el total |
+| Fase 7 · Revisión de comentarios | Pidió poder citar un comentario como respuesta a otro | FR-017b nuevo: `Comment.reply_to_id` (migración 0003), botón "Responder" y la cita con autor y extracto enlazada al original |
+| Fase 7 · Revisión de comentarios | Pidió una explicación del 500 con ids mayores que 2^63 y decidió corregirlo en esta fase, en vez de dejarlo para el empaquetamiento | Tipo de id acotado y compartido en la API: un id fuera de rango responde 422, y el contrato publica el mínimo y el máximo |
 
 ## 5. Qué salidas del agente se rechazaron
 

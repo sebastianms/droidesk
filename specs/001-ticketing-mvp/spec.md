@@ -22,6 +22,11 @@ Las user stories US1 a US5 se implementan en las fases 4 a 8 del [roadmap](../ro
 - Q: ¿Cómo se ingresa? → A: Con un formulario de login de usuario y contraseña que siempre responde OK, sin importar los valores, más un selector de perfil. Reemplaza la primera versión, en la que se elegía un usuario de una lista. Un usuario nuevo se crea con el perfil elegido; uno existente conserva el suyo, para que el rol de alguien que ya existe nunca lo decida el cliente (FR-001).
 - Q: ¿Se pueden crear usuarios desde el login? → A (segunda revisión del usuario): No, para no crear usuarios sin límite. Los usuarios vienen precreados por perfil y el login solo acepta a los existentes, con cualquier contraseña. El selector de perfil se elimina, y un ícono "?" muestra los usuarios de demo y su perfil (FR-001).
 
+### Session 2026-10-18 · Revisión del usuario
+
+- Q: ¿Cómo se sabe que un ticket tiene conversación sin abrirlo? → A: Los listados (Mis tickets, Cola y Asignados a mí) muestran cuántos comentarios tiene cada ticket, y el panel de comentarios del detalle muestra el total (FR-017a).
+- Q: ¿Se puede responder a un comentario puntual? → A: Sí. Un comentario puede citar a otro del mismo ticket como respuesta: se muestra con el autor y un extracto del original, enlazado a él. La cita es de un solo nivel (FR-017b).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Crear y seguir mis tickets (Priority: P1)
@@ -174,6 +179,8 @@ Como agente, quiero saber cuánto plazo le queda a cada ticket según su priorid
 **Comentarios (US4)**
 - **FR-016**: El solicitante del ticket y cualquier agente MUST poder comentar un ticket que no esté en un estado final (texto obligatorio, máximo 2.000 caracteres).
 - **FR-017**: Los comentarios MUST mostrarse en orden cronológico, con autor, fecha y hora, como texto sin interpretar, y quedar en el historial.
+- **FR-017a**: Los listados de tickets MUST mostrar cuántos comentarios tiene cada ticket, y el detalle MUST mostrar el total en su sección de comentarios.
+- **FR-017b**: Un comentario MAY citar a otro comentario del mismo ticket como respuesta; la cita MUST mostrar el autor y un extracto del original y llevar a él. Citar un comentario de otro ticket MUST rechazarse.
 - **FR-018**: Un comentario del solicitante sobre un ticket En espera MUST devolverlo automáticamente a En progreso; el cambio de estado queda en el historial a nombre del solicitante y el plazo del SLA se reanuda.
 
 **SLA (US5)**

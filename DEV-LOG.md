@@ -4696,3 +4696,759 @@ Reading service.py and audit models
 ### #30 · 🧑 Usuario
 > revisado, aprobado
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 15s
+- **Herramientas:** Bash ×2
+- **Git:** `dff9fb4` docs: extiende ADL-002 y actualiza SDD y AI-USAGE · PR https://github.com/sebastianms/droidesk/pull/6
+- **Tokens:** entrada 4 · cache leída 531k · cache escrita 1.1k · salida 2k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #6 de la Fase 6: https://github.com/sebastianms/droidesk/pull/6
+
+- Antes de commitear marqué T043–T045 como hechas en `tasks.md` y la Fase 6 como `[DONE · PR #6]` en el roadmap.
+- Después hice los 4 commits y el push a `phase/06-ticket-history`; el árbol quedó limpio.
+- El CI de GitHub pasó en los dos jobs, `api` y `web`.
+
+Cuando hagas el squash and merge, creo `phase/07-comments` desde `main` actualizado y arranco la US4, los comentarios. Si el solicitante comenta un ticket En espera, este vuelve solo a En progreso.
+
+</details>
+
+### #31 · 🧑 Usuario
+> mezclado
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 33m 41s
+- **Herramientas:** Bash ×127 · Agent ×5 · SubagentHandback ×5 · Read ×3 · Write ×2
+- **Archivos modificados:** `apps/api/tests/api/test_us4_comments.py`, `/tmp/claude-1000/-home-seba-Apps-droidesk/2680e3d9-8a04-4c9b-80ba-f0d66c3200d8/scratchpad/e2e/us4.mjs`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 12m 48s · 8.8M tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 2m 7s · 827k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 1m 38s · 457.4k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 4m 26s · 1.4M tokens
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 41s · 230.9k tokens
+- **Tokens:** entrada 38 · cache leída 5.5M · cache escrita 41k · salida 19.2k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Terminé la US4 de la Fase 7, rama `phase/07-comments`, sin commitear. Solicitante y agentes ya pueden conversar dentro del ticket, y si el solicitante responde un ticket En espera, este vuelve solo a En progreso. Falta tu aprobación para el commit y el push.
+
+**Pruebas**
+- **En el navegador**, contra un stack aislado que ya borré, pasan los escenarios 8 y 9. Los repetí después de las correcciones y siguieron pasando:
+  - Elena pregunta y deja el ticket en espera, y los dos perfiles ven el SLA "En pausa".
+  - Ana responde y el ticket vuelve solo a En progreso. El historial registra "Ana Rojas cambió el estado de En espera a En progreso".
+  - Un comentario de un agente no cambia el estado.
+  - Un comentario vacío no se envía, y un `<b>` se muestra como texto, nunca como HTML.
+  - En un ticket cerrado desaparece la caja de comentarios.
+- **API:** 880 tests, 99,90 % de cobertura total y 100 % en el flujo crítico. `alembic check` no muestra diferencias y la migración se revierte sin perder datos.
+- **Web:** 414 tests y 100 % de líneas. Lint, typecheck y build pasan, y el contrato está al día.
+- **Migración sobre tus datos:** esta es la primera vez que una migración corre sobre una base con datos. Tu base pasó a la versión 0002 y conserva sus 2 tickets y 9 eventos.
+
+**Correcciones de esta fase**
+- **Un test de la US3 no verificaba nada:** con FastAPI 0.143, `app.routes` ya no lista las rutas, así que el test de inmutabilidad pasaba sin revisar nada. Ahora lee el contrato, y comprobé que falla si se agrega una ruta para borrar eventos.
+- **Carrera al comentar:** un comentario podía quedar en un ticket que se cancelaba o cerraba en el mismo instante. Ahora el comentario solo se guarda si el ticket sigue en el estado que se leyó. Si no, el 409 dice "El ticket cambió mientras escribías tu comentario".
+- **Regla de 3 argumentos:** también se aplica ahora a la validación de la web.
+- **deckard:** sin hallazgos de criticidad ≥ 8, ni en la revisión ni en la re-revisión.
+
+**Documentos:** T046–T051 en curso en `tasks.md` y la Fase 7 aparece EN CURSO en el roadmap. Extendí ADL-003 (la migración en modo batch de SQLite) y ADL-008 (el retomar automático y los comentarios condicionales). También actualicé data-model y AI-USAGE.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión.
+
+Commits propuestos:
+1. `feat(api): agrega comentarios con retomar automático y la migración 0002`
+2. `test(api): verifica la inmutabilidad del historial sobre el contrato publicado`
+3. `feat(contracts): publica los comentarios en el contrato y los tipos de la web`
+4. `feat(web): agrega la caja y la lista de comentarios en el detalle del ticket`
+5. `docs: extiende ADL-003 y ADL-008 y actualiza SDD, data-model y AI-USAGE`
+
+¿Apruebas el commit y el push? Si apruebas, también abro el PR #7.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading tickets service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_ticket_service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Tracing DetailFacts and users_by_id usages
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Consultando docs de Alembic batch
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Validating 0002_comments migration
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Wiring add_comment into service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Sorting imports in conftest.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Formatting API test helpers
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing test_us4_comments.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restoring service.py after mutation
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Adding migration tests to test_migrations.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Simplifying test_migrations downgrade assertion
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_app.py contract tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading ticketForm.ts and fixtures.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading TicketDetailPage.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Planning CommentBox component design
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running vitest on web suite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading TicketActions.test.tsx patterns
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing CommentList.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running tickets feature tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking critical-flow coverage gate
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Regenerating schema.d.ts types
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing git status changes
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_ticket_service.py race tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Searching specs for PATCH routes
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Formatting service.py with ruff
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing add_comment in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking comment rules in spec.md
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing add_comment race in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_ticket_service.py race tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting comment rules in lifecycle.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting and typechecking service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Mutation-testing the comment guard
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Refactoring textError.ts callers
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting web with Biome
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running web coverage tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running API pytest checkpoint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking textError imports in ticketForm.ts
+
+</details>
+
+### #32 · 🧑 Usuario
+> Seria bueno agregar un contador de comentarios o un indicador que el ticket tiene comentarios
+
+### #33 · 🧑 Usuario
+> tambien seria bueno que se pudiera citar un comentario como si fuese una respuesta a otro.
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 13m 20s
+- **Herramientas:** Bash ×66 · Agent ×2 · Read ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 56s · 390.6k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 14 · cache leída 2.3M · cache escrita 20.8k · salida 11.8k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El subagente de la respuesta citada sigue trabajando. Me avisarán cuando termine.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing CommentCount.tsx and TicketList.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading comment test helpers
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Capturing baseline SQL for _row_statement
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Rewriting 0003_comment_replies.py migration
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Searching test_ticket_service.py comments
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running test_us4_comments.py tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking mypy on test_us4_comments.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Exporting openapi.json contract
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading CommentBox.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running tmp.repro.test.tsx repro
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking CommentBox field-clearing order
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading Field.tsx and Timeline.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting router.tsx and IconButton.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing excerpt.ts and its tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Wiring reply props into CommentBox.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing CommentList and excerpt.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing CommentBox reply flow
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Fixing TicketDetailPage.test.tsx listing expectations
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Probing flushSync ordering in CommentBox.tsx
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 9m 58s
+- **Herramientas:** Bash ×28 · Read ×6 · SubagentHandback ×2 · StructuredOutput ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 14m 5s · 8.4M tokens
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 1m 11s · 270.3k tokens
+- **Tokens:** entrada 18 · cache leída 2.8M · cache escrita 21.5k · salida 7.9k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Agregué tus dos pedidos a la Fase 7, rama `phase/07-comments`, y quedaron funcionando en el navegador. Todo sigue sin commitear y falta tu aprobación para el commit y el push.
+
+**Contador de comentarios** (FR-017a)
+- Cada tarjeta de Mis tickets, Cola y Asignados a mí muestra un globo de diálogo con "Sin comentarios", "1 comentario" o "N comentarios".
+- El cero se ve tenue en vez de ocultarse, porque le sirve al agente para priorizar la cola.
+- El detalle se titula "Comentarios (N)" y se actualiza al comentar.
+- El conteo sale en la misma consulta del listado: la cantidad de consultas no crece con más tickets ni más comentarios.
+
+**Responder citando** (FR-017b)
+- Cada comentario tiene un botón "Responder". Al pulsarlo aparece "Respondiendo a Elena Vidal: «…»" sobre la caja, con "Cancelar respuesta", y el foco pasa al campo.
+- La respuesta publicada muestra arriba la cita con el autor y un extracto, y un enlace "Ver comentario original" que salta al original y lo resalta.
+- La cita es de un solo nivel. Citar un comentario de otro ticket responde 422.
+- Necesitó una migración nueva, la 0003. No reescribí la 0002 porque tu base ya la había aplicado.
+
+**Pruebas**
+- **En el navegador**, contra un stack aislado que ya borré, pasan el contador, la respuesta, la cancelación, la vista móvil y otra vez los escenarios 8 y 9, sin errores de consola ni de CSP.
+- Ninguna de las dos fallas que aparecieron en las pruebas fue de la app; ambas eran de mi script. Una sí reveló un detalle de UX: el comentario aparecía en la lista antes de que la caja se vaciara. Lo corregí: ahora la caja se vacía en el mismo momento.
+- **API:** 918 tests, 99,90 % de cobertura total y 100 % en el flujo crítico. `alembic check` no muestra diferencias.
+- **Web:** 469 tests y 100 % de líneas. Lint, typecheck y build pasan, y el contrato está al día.
+- **deckard** revisó cada agregado por separado y no encontró nada de criticidad ≥ 8.
+- **Tu base** pasó de la versión 0002 a la 0003 sin perder datos: tiene 3 tickets y 3 comentarios.
+
+**Deuda nueva:** un subagente encontró que un id enorme, mayor que 2^63, responde 500 en vez de 422. El problema existe desde las primeras fases y afecta a todos los ids. Quedó registrado en DECISIONS y como T064 de la Fase 9.
+
+**Documentos:** spec (FR-017a y FR-017b), contrato REST, data-model, ADL-002 y ADL-004, `tasks.md` y AI-USAGE, donde registré tus dos pedidos como intervenciones.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión.
+
+Commits propuestos:
+1. `feat(api): agrega comentarios con retomar automático y la migración 0002`
+2. `feat(api): agrega el contador de comentarios y la respuesta citada con la migración 0003`
+3. `test(api): verifica la inmutabilidad del historial sobre el contrato publicado`
+4. `feat(contracts): publica los comentarios, su contador y las respuestas en el contrato`
+5. `feat(web): agrega la conversación del ticket con contador y respuestas citadas`
+6. `docs: agrega FR-017a y FR-017b, extiende ADL-002, ADL-003, ADL-004 y ADL-008 y actualiza SDD, DECISIONS y AI-USAGE`
+
+Separar los commits 1 a 3 obliga a dividir archivos de la API por partes. Si prefieres, los junto en uno solo de la API. ¿Apruebas el commit y el push? Si apruebas, también abro el PR #7.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Forcing sync notifications in TicketDetailPage.test
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Debugging flushSync ordering in CommentBox
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restoring CommentBox.tsx after test
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting CommentBox.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running tsc typecheck on web
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Building web with vite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking openapi.json determinism
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing CommentBox.tsx and comments.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking InvalidFieldError and providers.tsx router
+
+</details>
+
+### #34 · 🧑 Usuario
+> Me explicas el tema del ID mayor que 2^63?
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 23s
+- **Herramientas:** Bash ×1
+- **Tokens:** entrada 2 · cache leída 359.9k · cache escrita 1.5k · salida 857 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Lo confirmé contra tu ambiente local con una sola petición de lectura:
+
+| Petición | Respuesta |
+|---|---|
+| `GET /api/v1/tickets/9223372036854775807` (2^63 − 1) | 404, correcto: el ticket no existe |
+| `GET /api/v1/tickets/9223372036854775808` (2^63) | **500 Internal Server Error** |
+
+**Por qué pasa**
+- SQLite guarda los enteros en 64 bits con signo, así que el máximo es 9.223.372.036.854.775.807 (2^63 − 1).
+- Python no tiene ese límite, y Pydantic acepta el número porque es un entero válido.
+- La API valida el id, abre la consulta y le pasa el número al driver de SQLite. El driver no puede convertirlo y lanza `OverflowError: Python int too large to convert to SQLite INTEGER`.
+- Esa excepción no es un error de dominio que la API sepa traducir, así que FastAPI responde un 500 genérico.
+
+**Dónde aplica:** en cualquier id entero que llegue del cliente: el ticket en la ruta (`/tickets/{id}`, sus transiciones y comentarios), `category_id` al crear y `reply_to_id` al responder.
+
+**Impacto: bajo**
+- Desde la interfaz no se puede provocar; solo con una petición armada a mano.
+- No filtra datos: el cliente recibe solo "Internal Server Error", y el detalle técnico queda en el log del servidor.
+- Aun así es un error de contrato. Un dato inválido debería responder 422 (o 404), no 500. Además, un 500 ensucia el monitoreo, porque parece una falla del servidor cuando es una entrada mala.
+- En PostgreSQL pasaría lo mismo con columnas `bigint`, así que conviene resolverlo igual de cara al plan de escalabilidad.
+
+**Corrección:** es pequeña. Un tipo compartido `Id = Annotated[int, Field(ge=1, le=2**63 - 1)]` en los ids de la ruta y del cuerpo. FastAPI rechaza el valor con un 422 antes de tocar la base, y el contrato OpenAPI publica el mínimo y el máximo, así que la web también los conoce. De paso, un id 0 o negativo también responde 422 en vez de 404.
+
+Lo dejé como T064 en la Fase 9 porque el problema existe desde la Fase 3 y no es parte de los comentarios. Si prefieres, lo corrijo ahora en esta misma fase: es poco trabajo y el PR #7 quedaría sin esa deuda.
+
+</details>
+
+### #35 · 🧑 Usuario
+> arreglemoslo ahora
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 9m 49s
+- **Herramientas:** Bash ×31 · SubagentHandback ×3 · Agent ×2 · Write ×1 · Read ×1
+- **Archivos modificados:** `apps/api/tests/api/test_ids.py`
+- **Subagentes:**
+  - `deckard` · `claude-opus-5-5` · ⏱ 31s · 202.1k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 4m 49s · 1.8M tokens
+  - `subagente`
+  - `deckard` · `claude-opus-5-5` · ⏱ 34s · 227.6k tokens
+- **Tokens:** entrada 8 · cache leída 1.5M · cache escrita 12.6k · salida 4.9k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Ya está corregido. Probé contra tu ambiente las mismas peticiones que antes fallaban:
+
+| Petición | Antes | Ahora |
+|---|---|---|
+| `GET /api/v1/tickets/9223372036854775807` (2^63 − 1) | 404 | 404 |
+| `GET /api/v1/tickets/9223372036854775808` (2^63) | **500** | **422**, con `"loc": ["path","ticket_id"]` |
+| `GET /api/v1/tickets/0` y `/-5` | 404 | 422 |
+
+En el log de la API ya no aparece `OverflowError`.
+
+**Qué cambió**
+- Hay un tipo compartido `Id` en `apps/api/src/droidesk_api/core/ids.py` que acepta solo ids de 1 a 2^63 − 1. Lo usan el `ticket_id` de las tres rutas (detalle, transiciones y comentarios), `category_id` al crear y `reply_to_id` al responder. Ningún otro endpoint recibe ids.
+- Un id fuera de rango se rechaza antes de llegar a la base.
+- El contrato publica el mínimo y el máximo. En los campos del cuerpo, FastAPI escribe el máximo como decimal y lo redondea a 2^63, pero la validación sigue siendo exacta. No lo forcé, para no tener que retocar a mano el contrato generado.
+- `schema.d.ts` no cambia, porque el generador de tipos ignora los rangos.
+
+**Pruebas**
+- **API:** 953 tests (35 nuevos), 99,90 % de cobertura total y 100 % en el flujo crítico. Sin la corrección fallan 30 de los 35 tests nuevos. Los otros 5 son justo los del límite exacto, que deben seguir respondiendo igual.
+- **Web:** 469 tests, sin cambios.
+- **deckard:** sin hallazgos de criticidad ≥ 8.
+
+**Documentos:** quité la deuda de DECISIONS y la T064 de la Fase 9, registré la corrección en `tasks.md` (Fase 7) y en ADL-002, y anoté en AI-USAGE tu decisión de corregirlo ahora.
+
+**Tu ambiente** en http://localhost:8080 ya tiene esta versión.
+
+Commits propuestos:
+1. `feat(api): agrega comentarios con retomar automático, contador, respuestas citadas y las migraciones 0002 y 0003`
+2. `fix(api): acota los ids enteros para que un id fuera de rango responda 422 y no 500`
+3. `test(api): verifica la inmutabilidad del historial sobre el contrato publicado`
+4. `feat(contracts): publica los comentarios, su contador, las respuestas y los rangos de ids`
+5. `feat(web): agrega la conversación del ticket con contador y respuestas citadas`
+6. `docs: agrega FR-017a y FR-017b, extiende ADL-002, ADL-003, ADL-004 y ADL-008 y actualiza SDD, DECISIONS y AI-USAGE`
+
+Junté en uno solo los commits de comentarios de la API para no dividir archivos por partes. ¿Apruebas el commit y el push? Si apruebas, también abro el PR #7.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Querying FastAPI docs via ctx7
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting fastapi openapi/models.py floats
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Probing Parameter model int coercion
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_us4_comments.py conventions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking ruff config in pyproject.toml
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restoring ids.py after mutation check
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running ruff and mypy checks
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Regenerating schema.d.ts types
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking git status for strays
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking id params in router.py
+
+</details>
+
+### #36 · 🧑 Usuario
+> aprobado, abre el PR
+

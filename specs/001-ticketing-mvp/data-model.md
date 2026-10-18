@@ -123,9 +123,10 @@ Nunca se actualiza ni se borra. Índice: `(ticket_id, created_at)`.
 | `ticket_id` | FK a `tickets` | obligatorio |
 | `author_id` | FK a `users` | obligatorio |
 | `body` | texto (2.000) | obligatorio; se recortan espacios y no puede quedar vacío |
+| `reply_to_id` | FK a `comments`, opcional | comentario citado como respuesta; del mismo ticket (FR-017b) |
 | `created_at` | fecha y hora UTC | |
 
-Sin edición ni borrado, igual que el historial.
+Sin edición ni borrado, igual que el historial. Índice: `(ticket_id, created_at)`.
 
 ## Acciones y sus efectos
 

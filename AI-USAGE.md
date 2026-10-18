@@ -60,6 +60,9 @@ flowchart LR
 | 5 · US2 | API: vistas de la cola, `take` con carrera probada con hilos, efectos de cada transición y el colaborador `TicketSla`. Web: cola con pestañas, listado compartido y acciones por rol | Sonnet 5.5 xHigh |
 | 5 · Checkpoint | Revisión de deckard sobre la API y sobre el diff completo, sin hallazgos de criticidad ≥ 8; se aplicaron sus ajustes menores en la API | Sonnet 5.5 xHigh (deckard) |
 | 5 · Orquestación | Prueba en navegador de los escenarios 6, 7, 10, 11 y 14 con varios agentes a la vez, contra un stack aislado, y extensiones de ADL-004 y ADL-008 | Opus 5.5 Max |
+| 6 · US3 | Historial en el detalle (API, contrato y línea de tiempo en la web), con un solo subagente para todo el bloque | Sonnet 5.5 xHigh |
+| 6 · Checkpoint | deckard detectó una función con 4 argumentos (criticidad 8): se corrigió y se activó la regla `PLR0913` de ruff para que no se repita | Sonnet 5.5 xHigh (deckard) |
+| 6 · Orquestación | Prueba en navegador del escenario 15 contra un stack aislado y extensión de ADL-002 | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 

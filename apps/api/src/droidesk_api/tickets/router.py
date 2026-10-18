@@ -74,3 +74,23 @@ def transition_ticket(
     no la permiten.
     """
     return service.apply_transition(user, ticket_id, body.action)
+
+
+@router.post(
+    "/tickets/{ticket_id}/comments",
+    status_code=status.HTTP_201_CREATED,
+    responses=error_responses(401, 404, 409),
+)
+def add_comment(
+    ticket_id: int,
+    body: schemas.CommentCreate,
+    user: CurrentUser,
+    service: TicketServiceDep,
+) -> schemas.TicketDetail:
+    """Comenta un ticket que no está en un estado final y devuelve su detalle actualizado.
+
+    Si el solicitante comenta un ticket En espera, este vuelve a En progreso y su plazo se
+    reanuda. Un comentario del agente no cambia el estado. 409 `action_not_allowed` si el
+    ticket está Cerrado o Cancelado; un ticket ajeno responde 404.
+    """
+    return service.add_comment(user, ticket_id, body)

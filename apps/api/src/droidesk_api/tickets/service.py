@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar
 
+from sqlalchemy import Update
 from sqlalchemy.orm import Mapped, aliased
 from sqlmodel import Session, col, select, update
 from sqlmodel.sql.expression import Select
@@ -25,6 +26,11 @@ from droidesk_api.identity.service import users_by_id
 from droidesk_api.sla.calendar import BusinessCalendar
 from droidesk_api.tickets import presenter, schemas
 from droidesk_api.tickets.access import TICKET_NOT_FOUND_MESSAGE, ensure_can_view
+from droidesk_api.tickets.comments import (
+    comment_count,
+    ensure_reply_target,
+    list_comments,
+)
 from droidesk_api.tickets.enums import TicketStatus
 from droidesk_api.tickets.lifecycle import (
     ACTION_LABELS,
@@ -33,17 +39,24 @@ from droidesk_api.tickets.lifecycle import (
     Transition,
     Viewer,
     allowed_actions,
+    authorize_comment,
     authorize_transition,
+    automatic_resume,
+    comment_resumes_hold,
     relation_of,
 )
-from droidesk_api.tickets.models import Category, Ticket
+from droidesk_api.tickets.models import Category, Comment, Ticket
 from droidesk_api.tickets.presenter import DetailFacts, TicketRow
 from droidesk_api.tickets.ticket_sla import TicketSla
 
-RowStatement = Select[Ticket, Category, User, User | None]
+RowStatement = Select[Ticket, Category, User, User | None, int]
 Requester = aliased(User)
 Assignee = aliased(User)
 
+COMMENT_RACE_MESSAGE = (
+    "El ticket cambió mientras escribías tu comentario. "
+    "Revisa su estado e intenta de nuevo."
+)
 DEFAULT_VIEWS = {
     Role.REQUESTER: schemas.TicketView.MINE,
     Role.AGENT: schemas.TicketView.QUEUE,
@@ -68,6 +81,14 @@ class Change:
     transition: Transition
     actor: User
     now: datetime
+
+
+@dataclass(frozen=True)
+class Activity:
+    """Lo que ocurrió en un ticket, en orden cronológico."""
+
+    history: list[schemas.Event]
+    comments: list[schemas.Comment]
 
 
 class TicketService:
@@ -141,12 +162,14 @@ class TicketService:
 
     def get_ticket_for(self, user: User, ticket_id: int) -> schemas.TicketDetail:
         row = self._visible_row(user, ticket_id)
+        activity = self._activity_of(row.ticket)
         facts = DetailFacts(
             sla=self._sla.view_of(row.ticket, self._clock.now()),
             allowed_actions=allowed_actions(
                 row.ticket.status, _viewer_of(user, row.ticket)
             ),
-            history=self._history_of(row.ticket),
+            history=activity.history,
+            comments=activity.comments,
         )
         return presenter.to_detail(row, facts)
 
@@ -161,11 +184,61 @@ class TicketService:
         self._session.commit()
         return self.get_ticket_for(user, ticket_id)
 
-    def _history_of(self, ticket: Ticket) -> list[schemas.Event]:
-        """Las entradas en orden cronológico; los autores se leen en una sola consulta."""
-        events = list_events(self._session, persisted_id(ticket))
-        actors = users_by_id(self._session, {event.actor_id for event in events})
-        return [presenter.to_event(event, actors[event.actor_id]) for event in events]
+    def add_comment(
+        self, user: User, ticket_id: int, data: schemas.CommentCreate
+    ) -> schemas.TicketDetail:
+        ticket = self._visible_row(user, ticket_id).ticket
+        authorize_comment(ticket.status, _viewer_of(user, ticket))
+        ensure_reply_target(self._session, ticket_id, data.reply_to_id)
+        now = self._clock.now()
+        resume = self._touch_for_comment(ticket, user, now)
+        comment = Comment(
+            ticket_id=ticket_id,
+            author_id=persisted_id(user),
+            body=data.body,
+            created_at=now,
+            reply_to_id=data.reply_to_id,
+        )
+        self._session.add(comment)
+        self._session.flush()
+        for event in _comment_events(comment, resume):
+            record_event(self._session, event)
+        self._session.commit()
+        return self.get_ticket_for(user, ticket_id)
+
+    def _touch_for_comment(
+        self, ticket: Ticket, author: User, now: datetime
+    ) -> Change | None:
+        """Condiciona el comentario al estado leído; si el solicitante comenta un ticket En espera, además lo retoma (FR-018)."""
+        resume = None
+        if comment_resumes_hold(ticket.status, _viewer_of(author, ticket)):
+            resume = Change(automatic_resume(), author, now)
+            touched = self._try_move(ticket, resume)
+        else:
+            touched = self._touch(ticket, now)
+        if not touched:
+            raise ActionNotAllowedError(COMMENT_RACE_MESSAGE)
+        return resume
+
+    def _activity_of(self, ticket: Ticket) -> Activity:
+        """Historial y comentarios en orden cronológico; todos los autores se leen en una sola consulta."""
+        ticket_id = persisted_id(ticket)
+        events = list_events(self._session, ticket_id)
+        comments = list_comments(self._session, ticket_id)
+        people = users_by_id(
+            self._session,
+            {event.actor_id for event in events}
+            | {comment.author_id for comment in comments},
+        )
+        return Activity(
+            history=[
+                presenter.to_event(event, people[event.actor_id]) for event in events
+            ],
+            comments=[
+                presenter.to_comment(comment, people[comment.author_id])
+                for comment in comments
+            ],
+        )
 
     def _new_ticket(
         self, requester: User, data: schemas.TicketCreate, now: datetime
@@ -182,19 +255,25 @@ class TicketService:
         )
 
     def _move(self, ticket: Ticket, change: Change) -> None:
-        """Actualización condicional: si otro cambió el estado antes, no afecta filas y se rechaza."""
+        if not self._try_move(ticket, change):
+            raise self._lost_race(persisted_id(ticket), change.transition, change.actor)
+
+    def _try_move(self, ticket: Ticket, change: Change) -> bool:
+        """Actualización condicional: si otro cambió el estado antes, no afecta filas y devuelve falso."""
         transition = change.transition
         statement = (
-            update(Ticket)
-            .where(
-                col(Ticket.id) == persisted_id(ticket),
-                col(Ticket.status) == transition.source,
-            )
+            _while_in_status(persisted_id(ticket), transition.source)
             .values(status=transition.target, updated_at=change.now)
             .values(self._effects_of(ticket, change))
         )
-        if self._session.exec(statement).rowcount == 0:
-            raise self._lost_race(persisted_id(ticket), transition, change.actor)
+        return self._session.exec(statement).rowcount > 0
+
+    def _touch(self, ticket: Ticket, now: datetime) -> bool:
+        """Registra la actividad en el ticket sin cambiar su estado; falso si otro lo cambió antes."""
+        statement = _while_in_status(persisted_id(ticket), ticket.status).values(
+            updated_at=now
+        )
+        return self._session.exec(statement).rowcount > 0
 
     def _effects_of(self, ticket: Ticket, change: Change) -> ColumnValues:
         action = change.transition.action
@@ -244,8 +323,9 @@ class TicketService:
 
 
 def _row_statement() -> RowStatement:
+    # Se construye con la clase porque las sobrecargas tipadas de `sqlmodel.select` llegan solo a 4 entidades.
     return (
-        select(Ticket, Category, Requester, Assignee)
+        RowStatement(Ticket, Category, Requester, Assignee, comment_count())
         .join(Category, col(Category.id) == col(Ticket.category_id))
         .join(Requester, col(Ticket.requester_id) == Requester.id)
         .outerjoin(Assignee, col(Ticket.assignee_id) == Assignee.id)
@@ -254,6 +334,13 @@ def _row_statement() -> RowStatement:
 
 def _unfinished_statement() -> RowStatement:
     return _row_statement().where(col(Ticket.status).not_in(tuple(FINAL_STATUSES)))
+
+
+def _while_in_status(ticket_id: int, status: TicketStatus) -> Update:
+    """La base de toda escritura optimista sobre un ticket: solo afecta la fila si sigue en el estado leído."""
+    return update(Ticket).where(
+        col(Ticket.id) == ticket_id, col(Ticket.status) == status
+    )
 
 
 def _viewer_of(user: User, ticket: Ticket) -> Viewer:
@@ -307,4 +394,20 @@ def _transition_events(ticket_id: int, change: Change) -> list[NewEvent]:
             to_value=transition.target.value,
         )
     )
+    return events
+
+
+def _comment_events(comment: Comment, resume: Change | None) -> list[NewEvent]:
+    """El comentario va primero y, si retomó el ticket, el cambio de estado a nombre de quien comentó."""
+    events = [
+        NewEvent(
+            ticket_id=comment.ticket_id,
+            actor_id=comment.author_id,
+            kind=EventKind.COMMENTED,
+            created_at=comment.created_at,
+            comment_id=persisted_id(comment),
+        )
+    ]
+    if resume is not None:
+        events.extend(_transition_events(comment.ticket_id, resume))
     return events

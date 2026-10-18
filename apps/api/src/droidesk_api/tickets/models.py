@@ -9,6 +9,7 @@ from droidesk_api.tickets.enums import Priority, TicketStatus
 CATEGORY_NAME_MAX_LENGTH = 60
 TITLE_MAX_LENGTH = 120
 DESCRIPTION_MAX_LENGTH = 5000
+COMMENT_MAX_LENGTH = 2000
 
 
 class Category(SQLModel, table=True):
@@ -50,3 +51,19 @@ class Ticket(SQLModel, table=True):
     resolved_at: datetime | None = None
     closed_at: datetime | None = None
     cancelled_at: datetime | None = None
+
+
+class Comment(SQLModel, table=True):
+    """Un mensaje en el ticket; como el historial, no se edita ni se borra."""
+
+    __tablename__ = "comments"
+    __table_args__ = (
+        Index("ix_comments_ticket_id_created_at", "ticket_id", "created_at"),
+    )
+
+    id: int | None = Field(default=None, primary_key=True)
+    ticket_id: int = Field(foreign_key="tickets.id")
+    author_id: int = Field(foreign_key="users.id")
+    body: str = Field(sa_type=Text, max_length=COMMENT_MAX_LENGTH)
+    created_at: datetime
+    reply_to_id: int | None = Field(default=None, foreign_key="comments.id")

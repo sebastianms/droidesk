@@ -31,6 +31,7 @@ EXPECTED_OPERATION_IDS = {
     "list_tickets",
     "read_ticket",
     "transition_ticket",
+    "add_comment",
 }
 ERRORS: dict[str, Callable[[], DomainError]] = {
     "unauthenticated": NotAuthenticatedError,
@@ -182,6 +183,11 @@ class TestOpenApi:
                 "post",
                 {"200", "401", "403", "404", "409", "422"},
             ),
+            (
+                "/api/v1/tickets/{ticket_id}/comments",
+                "post",
+                {"201", "401", "404", "409", "422"},
+            ),
         ],
     )
     def test_ticket_operations_document_the_responses_of_the_contract(
@@ -197,6 +203,35 @@ class TestOpenApi:
             "$ref": "#/components/schemas/TicketDetail"
         }
 
+    def test_commenting_answers_201_with_the_detail(
+        self, schema: dict[str, Any]
+    ) -> None:
+        path = "/api/v1/tickets/{ticket_id}/comments"
+        created = schema["paths"][path]["post"]["responses"]["201"]
+        assert created["content"]["application/json"]["schema"] == {
+            "$ref": "#/components/schemas/TicketDetail"
+        }
+
+    def test_a_comment_declares_its_limits(self, schema: dict[str, Any]) -> None:
+        body = schema["components"]["schemas"]["CommentCreate"]["properties"]["body"]
+        assert (body["minLength"], body["maxLength"]) == (1, 2000)
+
+    def test_a_comment_is_shown_with_its_author(self, schema: dict[str, Any]) -> None:
+        comment = schema["components"]["schemas"]["Comment"]["properties"]
+        assert set(comment) == {"id", "author", "body", "created_at", "reply_to_id"}
+
+    def test_a_comment_always_declares_which_one_it_replies_to(
+        self, schema: dict[str, Any]
+    ) -> None:
+        comment = schema["components"]["schemas"]["Comment"]
+        assert "reply_to_id" in comment["required"]
+
+    def test_a_new_comment_may_omit_the_one_it_replies_to(
+        self, schema: dict[str, Any]
+    ) -> None:
+        creation = schema["components"]["schemas"]["CommentCreate"]
+        assert creation["required"] == ["body"]
+
     def test_ticket_schemas_use_the_names_of_the_contract(
         self, schema: dict[str, Any]
     ) -> None:
@@ -211,7 +246,18 @@ class TestOpenApi:
             "TicketAction",
             "Event",
             "EventKind",
+            "Comment",
+            "CommentCreate",
         } <= names
+
+    def test_the_summary_always_carries_the_comment_count(
+        self, schema: dict[str, Any]
+    ) -> None:
+        summary = schema["components"]["schemas"]["TicketSummary"]
+        assert (
+            "comment_count" in summary["required"],
+            summary["properties"]["comment_count"]["type"],
+        ) == (True, "integer")
 
     def test_ticket_detail_extends_the_summary(self, schema: dict[str, Any]) -> None:
         summary = schema["components"]["schemas"]["TicketSummary"]["properties"]
@@ -223,6 +269,7 @@ class TestOpenApi:
             "cancelled_at",
             "allowed_actions",
             "history",
+            "comments",
         }
 
     def test_new_tickets_declare_their_limits_and_default_priority(

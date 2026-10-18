@@ -32,12 +32,13 @@ La pantalla de ingreso lista los usuarios de demo: 4 solicitantes y 3 agentes. P
 | 13 | Ajustar prioridad | El agente cambia un ticket de Crítica a Baja | El vencimiento se recalcula desde la creación; el historial muestra el valor anterior y el nuevo | FR-019, FR-022 |
 | 14 | Transición inválida | Por API, pedir `close` sobre un ticket En progreso | 409 `action_not_allowed` con un mensaje claro | FR-011, SC-006 |
 | 15 | Historial inmutable | Revisar el detalle de un ticket con varios cambios | Historial cronológico con autor, fecha y hora, sin opciones de editar ni borrar | US3, FR-013 a FR-015, SC-003 |
+| 16 | Ingreso simulado | Abrir la ayuda "?" del login, elegir `elena.vidal` y escribir cualquier contraseña; después, intentar con un usuario inexistente | Elena entra a la cola como agente; el usuario inexistente recibe un mensaje que remite a la ayuda y no se crea | FR-001, edge case de usuario inexistente |
 
 ## Verificación rápida por API
 
 ```bash
 TOKEN=$(curl -s -X POST localhost:8080/api/v1/auth/login \
-  -H 'Content-Type: application/json' -d '{"user_id": 5}' | jq -r .access_token)
+  -H 'Content-Type: application/json' -d '{"username": "elena.vidal", "password": "demo"}' | jq -r .access_token)
 
 curl -s localhost:8080/api/v1/tickets?view=queue -H "Authorization: Bearer $TOKEN" | jq '.[0]'
 

@@ -56,6 +56,7 @@ erDiagram
 | Campo | Tipo | Reglas |
 |---|---|---|
 | `id` | entero, PK | |
+| `username` | texto (50) | obligatorio, único; en minúsculas, entre `a-z`, `0-9`, `.`, `_` y `-` |
 | `name` | texto (100) | obligatorio |
 | `email` | texto (254) | obligatorio, único |
 | `role` | `Role` | obligatorio |
@@ -108,7 +109,7 @@ El plazo se guarda en la unidad en que lo define el negocio ("1 día hábil", no
 | `ticket_id` | FK a `tickets` | obligatorio |
 | `actor_id` | FK a `users` | obligatorio: quién provocó el hecho |
 | `kind` | `EventKind` | obligatorio |
-| `from_value` / `to_value` | texto (40), opcional | estado o prioridad anterior y nueva; agente asignado en `assigned` |
+| `from_value` / `to_value` | texto (100, el largo de `User.name`), opcional | estado o prioridad anterior y nueva; agente asignado en `assigned` |
 | `comment_id` | FK a `comments`, opcional | solo en `commented` |
 | `created_at` | fecha y hora UTC | |
 

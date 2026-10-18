@@ -50,6 +50,10 @@ flowchart LR
 | 2 · Plan | Investigación del stack con 2 subagentes en paralelo (backend y frontend), que usaron context7 y prototipos descartables | Opus 5.5 Max (subagentes) |
 | 2 · Plan | `plan.md`, `research.md`, `data-model.md`, el contrato REST, `quickstart.md`, ADL-009 y las extensiones de ADL-002 a ADL-004 | Opus 5.5 Max |
 | 2 · Tasks | `tasks.md`: 63 tareas en bloques (Setup, Foundational, US1 a US5 y Polish), con trazabilidad de cada FR a sus tareas | Opus 5.5 Max |
+| 3 · Setup | Las dos apps (FastAPI y React con Vite), Dockerfiles, nginx, `docker-compose.yml`, CI por app y el contrato inicial, con 2 subagentes en paralelo y uno de integración | Sonnet 5.5 xHigh |
+| 3 · Foundational | API: configuración, base de datos, modelos, migración 0001, el dominio en TDD (ciclo de vida, calendario hábil y SLA), JWT, autorización, historial, catálogos y datos de demo. Web: design system del droide, cliente tipado, ingreso simulado, guardas por rol y vistas vacías | Sonnet 5.5 xHigh |
+| 3 · Checkpoints | Revisión de deckard por bloque y corrección de sus hallazgos, incluidos 2 de criticidad 8 (el dominio acoplado a SQLModel y FastAPI) | Sonnet 5.5 xHigh (deckard) |
+| 3 · Orquestación | Revisión del código entregado, prueba de punta a punta del stack Docker, extensiones de ADL-002, ADL-004, ADL-005 y ADL-006, y actualización de los artefactos de SDD | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 
@@ -60,12 +64,18 @@ flowchart LR
 | Constitución | Cambió la meta de cobertura propuesta (90 % en la API y 70 % en la web) por Pareto 80/20: 80 % total y 90 % en el flujo crítico | Nuevo [ADL-007](.design-logs/ADL-007-pareto-coverage-gates.md) y gates en `CLAUDE.md` y `tech-stack.md` |
 | Clarify de la feature 001 | Respondió las 5 preguntas: prioridad sugerida por el solicitante y ajustable por el agente, pausa del SLA en espera, reactivación al comentar, cancelación solo desde Abierto y plazos por prioridad | Spec sin ambigüedades y [ADL-008](.design-logs/ADL-008-ticket-lifecycle-six-states.md) con el ciclo de vida |
 | Revisión del SLA | Cambió de opinión sobre los plazos aceptados (4, 8, 24 y 72 h corridas): tiempo hábil de lunes a viernes, de 09:00 a 18:00, para un equipo chico. Lo urgente sigue corto (Crítica 4 h y Alta 1 día hábil) y Media y Baja se alargan a 3 y 5 días hábiles | Se reabrió la respuesta 5 de Clarify; spec, constitución y deuda técnica (feriados) actualizadas |
+| Fase 3 · Foundational | Recordó mantener actualizados los archivos de SDD durante la implementación | `tasks.md` marca `[/]` y `[x]` por bloque, y el roadmap y los pendientes de research se actualizan en cada checkpoint; quedó como regla en la memoria del agente |
+| Fase 3 · Foundational | Detuvo al subagente de la API antes de que entregara su reporte | El orquestador verificó el estado en que quedó el código, completó el checkpoint y delegó las correcciones en un subagente nuevo |
+| Fase 3 · Revisión de la app | Revisó el ambiente Docker y pidió un login real: la autenticación simulada debe responder OK con cualquier usuario y contraseña. Eligió el selector de perfil entre 3 opciones | FR-001 revisado, [ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md) enmendado, contrato sin `GET /auth/users` y login reimplementado en la API y la web |
+| Fase 3 · Revisión del login | Pidió no crear usuarios sin límite: usuarios precreados por perfil y un ícono "?" en el login que los liste, para la demo. Luego pidió que el "?" explique que son usuarios de demo | Login solo para usuarios existentes, sin selector de perfil, con `GET /auth/users` público y reducido para alimentar la ayuda ([ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md)) |
 
 ## 5. Qué salidas del agente se rechazaron
 
 | Salida | Motivo |
 |---|---|
 | Primer cuestionario de 4 preguntas | El usuario necesitaba aclarar las opcionales antes de responder |
+| Ingreso eligiendo un usuario de una lista, sin contraseña (Fase 3) | El usuario esperaba un login: "la autenticación simulada se refiere a que el proceso de autenticación debe retornar siempre OK, da igual el usuario y password" |
+| Login que crea usuarios nuevos con un selector de perfil (Fase 3) | El usuario no quería crear usuarios sin límite: "deberíamos tener usuarios ya creados por rol" |
 
 ## 6. graft, rtk, prompt-cache-control y context7 en la práctica
 

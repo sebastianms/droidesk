@@ -17,13 +17,13 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 - [x] Plan: `plan.md`, `research.md` (versiones verificadas con context7), `data-model.md`, `contracts/` y `quickstart.md`.
 - [x] Tasks: `tasks.md`, organizado por user story (63 tareas, con trazabilidad a los FR).
 
-## Phase 3: Foundational Elements — `phase/03-foundation`
+## Phase 3: Foundational Elements — `phase/03-foundation` [DONE · PR #3]
 
-- [ ] Esqueletos de `apps/api` y `apps/web`, cada uno con lint, tests y Dockerfile.
-- [ ] Base de datos, migraciones y datos de demo: usuarios, categorías y políticas de SLA.
-- [ ] Ingreso simulado con token y autorización por rol.
-- [ ] Contrato OpenAPI con tipos generados en la web y CI por app.
-- [ ] Layout por rol y tema visual del droide.
+- [x] Esqueletos de `apps/api` y `apps/web`, cada uno con lint, tests y Dockerfile.
+- [x] Base de datos, migraciones y datos de demo: usuarios, categorías y políticas de SLA.
+- [x] Ingreso simulado con token y autorización por rol.
+- [x] Contrato OpenAPI con tipos generados en la web y CI por app.
+- [x] Layout por rol y tema visual del droide.
 
 ## Phase 4: Crear y seguir tickets (solicitante) — `phase/04-requester-tickets`
 

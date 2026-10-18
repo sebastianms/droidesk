@@ -1589,3 +1589,1882 @@ Comparing openapi.json with generated schema
 ### #16 · 🧑 Usuario
 > si, de acuerdo
 
+### #17 · 🧑 Usuario
+> recuerda actualizar los archivos de SDD
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 52s
+- **Herramientas:** Bash ×24 · Read ×9 · Agent ×2 · Write ×1
+- **Archivos modificados:** `~/.claude/projects/-home-seba-Apps-droidesk/memory/update-sdd-artifacts-per-block.md`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 10 · cache leída 683.2k · cache escrita 20.3k · salida 9.8k · hit 97%
+
+<details><summary>Respuesta</summary>
+
+Actualicé los archivos de SDD con el avance del bloque Setup y lo dejé guardado como paso fijo del checkpoint de cada bloque:
+- **`tasks.md`**: T001–T009 marcadas `[x]`; T010–T028 en `[/]`, porque se están implementando ahora.
+- **`roadmap.md`**: la Fase 3 queda "EN CURSO · Setup listo", con los esqueletos de las dos apps y el contrato con CI marcados.
+- **`research.md`**: cerré dos pendientes que el Setup ya verificó: la CSP en un navegador real y la ejecución de los workflows en GitHub. Queda abierto el de validar la sesión contra `/me`, que corresponde a Foundational.
+
+El Setup ya está en GitHub con el CI en verde, y el bloque Foundational sigue en curso con dos subagentes:
+- **API (T010–T023)**: configuración, base de datos, errores, modelos, la migración inicial y el dominio en TDD (ciclo de vida, calendario hábil y estado del SLA). También el JWT, la autorización, el historial, los catálogos y los datos de demo.
+- **Web (T024–T028)**: el design system del droide, el cliente de la API, el ingreso simulado, las guardas por rol, el layout y las vistas vacías por rol.
+
+Cuando terminen, corro el checkpoint (lint, cobertura total y del flujo crítico, deckard, ADL y SDD) y te paso el resumen para que apruebes el commit.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading apps/api scaffolding files
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading boy-scout SKILL.md
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 14m 6s
+- **Herramientas:** Bash ×89 · Read ×3 · StructuredOutput ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 14m 40s · 6.3M tokens
+- **Tokens:** entrada 2 · cache leída 145.8k · cache escrita 1.5k · salida 521 · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El subagente web terminó: 49 tests en verde y 100 % de cobertura, también en `src/features/**`. Además regeneró `schema.d.ts` desde el contrato real. Sigo esperando a la API.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+ok, avísame cuando termine el bloque
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Searching ctx7 for openapi-fetch
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Querying context7 for library docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading SQLModel's bundled SKILL.md
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking react-router's dom-export.d.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Querying TanStack Query docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Consulting PyJWT and pydantic-settings docs
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading openapi-react-query typings
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Computing contrast.mjs token ratios
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing session.ts and roles.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Typechecking against provisional schema
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing LoginPage.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running LoginPage and session tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting LoginPage.tsx formatting
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading PyJWT api_jwt.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting built dist/index.html
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Viewing agent.png screenshot
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing core config and clock.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Re-reading LoginPage and guards.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing JWT TokenService in security.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying lint and coverage results
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading Alembic config.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying initial Alembic migration
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Cleaning 0001_initial.py comments
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing test_lifecycle.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing test_calendar.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing test_sla_status.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing business calendar functions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing identity router endpoints
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Fixing ruff errors in test_calendar.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting updated openapi.json contract
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing demo data in seed.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking CSP in Chrome
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 58s
+- **Herramientas:** Bash ×6 · StructuredOutput ×1 · Agent ×1 · Read ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 10 · cache leída 450.6k · cache escrita 5.4k · salida 1.2k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Lancé deckard sobre la web, que ya terminó (T024–T028). El subagente de la API (T010–T023) sigue trabajando; cuando termine, reviso su parte y cierro el checkpoint completo del bloque.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+[Silent]
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restoring test_health.py contents
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying test_health.py restoration diff
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×7 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+
+<details><summary>Respuesta</summary>
+
+No hay nada más que pueda adelantar ahora. La revisión de deckard sobre la API se lanza en cuanto termine el subagente que implementa T010–T023, que sigue trabajando. El aviso de que llegó su resultado me retoma automáticamente.
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 15s
+- **Herramientas:** Bash ×6 · StructuredOutput ×1 · ToolSearch ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 10 · cache leída 461.6k · cache escrita 3.6k · salida 659 · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que terminen dos subagentes: el que implementa la API (T010–T023) y deckard, que revisa la web. Por ahora no queda nada que pueda hacer en paralelo sin pisar su trabajo.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running tests in test_db.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+ok, avísame cuando termine el checkpoint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading research.md and tasks.md
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2m 35s
+- **Herramientas:** Bash ×15 · StructuredOutput ×1 · SubagentHandback ×1 · SendMessage ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 3m 2s · 443.3k tokens
+- **Tokens:** entrada 4 · cache leída 318.4k · cache escrita 5.4k · salida 1.4k · hit 98%
+
+<details><summary>Respuesta</summary>
+
+El subagente web está corrigiendo los hallazgos de deckard. El de la API (T010–T023) sigue trabajando.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+ok, avísame cuando termine el bloque
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Fixing PT022 in test_config.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading main.tsx and setup.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting Alembic Config signature
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running pytest coverage gates
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting schema.d.ts User type
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating docker-entrypoint.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Regenerating contracts/openapi.json
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×2 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+
+<details><summary>Respuesta</summary>
+
+Los dos subagentes siguen trabajando: el de la API (T010–T023) y el de la web, que está corrigiendo los hallazgos de deckard. Cuando la API termine, corro deckard sobre el diff completo y cierro el checkpoint del bloque.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+El subagente web está corrigiendo los hallazgos de deckard. El de la API (T010–T023) sigue trabajando.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking droidesk-api container logs
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 6s
+- **Herramientas:** Bash ×1 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 8 · cache leída 326.1k · cache escrita 331 · salida 172 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a los dos subagentes; me retomo cuando avisen que terminaron.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+ok, avísame cuando termine el bloque
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 8s
+- **Herramientas:** Bash ×7 · Read ×1 · StructuredOutput ×1 · Monitor ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 6 · cache leída 327.1k · cache escrita 896 · salida 583 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Dejé un monitor atento a que terminen los dos subagentes. Cuando ambos cierren, corro deckard sobre el diff completo.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Avísame cuando termine el bloque Foundational
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Rereading session.ts and LoginPage styles
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2s
+- **Herramientas:** Bash ×7 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 164.4k · cache escrita 209 · salida 39 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Estoy esperando el aviso del monitor o de los subagentes y no puedo adelantar más por ahora.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Removing droidesk-found-api-test container
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+ok, avísame cuando termine el bloque Foundational
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×7 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a los subagentes.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting session.test.ts role case
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+ok, avísame cuando tengas el resumen
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping schema.d.ts descriptions
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 27s
+- **Herramientas:** Bash ×7 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 164.6k · cache escrita 226 · salida 16 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Los dos subagentes siguen trabajando. El monitor me avisa cuando terminen, y ahí corro deckard sobre el diff completo.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cómo van los subagentes?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restoring LoginPage.tsx after mutation check
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 13s
+- **Herramientas:** Bash ×4 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 8 · cache leída 330k · cache escrita 450 · salida 67 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a los subagentes.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking create_app docs HTML
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cuánto le falta al subagente de la API?
+
+</details>
+
+### #18 · 🧑 Usuario
+> continua
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 2m 8s
+- **Herramientas:** Bash ×20 · Agent ×1 · Read ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 16 · cache leída 1.4M · cache escrita 18.7k · salida 5.6k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Bajé el stack y borré sus contenedores, el volumen, la red y las dos imágenes `droidesk-*`. No quedó ningún `.env` y no usé ningún prune. Espero la revisión de deckard sobre la API para corregir lo que encuentre, incluido el desacople del dominio.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading ADL-002 and ADL-005
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 5m 49s
+- **Herramientas:** Bash ×27 · Read ×2 · StructuredOutput ×1 · SubagentHandback ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 5m 33s · 1.8M tokens
+  - `subagente`
+- **Tokens:** entrada 16 · cache leída 1.4M · cache escrita 16.9k · salida 7.8k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Actualicé AI-USAGE.md. Espero que el subagente termine las correcciones de la API para verificar todo y cerrar el checkpoint.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_lifecycle.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_security.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing config.py secret leakage
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping test_calendar.py test names
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_calendar.py boundaries
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Listing importers of core/errors.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking data-model event lengths
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 7m 15s
+- **Herramientas:** Bash ×40 · Read ×4 · SubagentHandback ×2 · StructuredOutput ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 5m 26s · 3.4M tokens
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 56s · 326.5k tokens
+- **Tokens:** entrada 30 · cache leída 3M · cache escrita 21.2k · salida 10.1k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Terminé el **bloque Foundational de la Fase 3 (T010–T028)** y el checkpoint pasó completo. Falta tu aprobación para el commit y el push.
+
+Antes, una aclaración: el subagente de la API que detuviste ya había dejado el código completo y en verde. Lo verifiqué yo, corrí deckard sobre ese código y las correcciones las hizo un subagente nuevo.
+
+### Qué quedó listo
+**API**
+- Configuración con prefijo `DROIDESK_`, que valida la jornada y exige un secreto de al menos 32 bytes; un secreto inválido nunca queda impreso en los logs.
+- Base de datos con FK y WAL, migración `0001` con las 5 tablas y datos de demo que se cargan una sola vez (7 usuarios, 5 categorías y 4 políticas de SLA).
+- **Dominio en TDD**, sin frameworks y con un test que lo garantiza:
+  - ciclo de vida de 6 estados como tabla declarativa por rol y relación;
+  - calendario hábil de lunes a viernes, incluidos los cambios de horario del 2026-04-04 y el 2026-09-05;
+  - estado del SLA, con las pausas y el umbral de "por vencer".
+- JWT, autorización por rol leída de la base, historial y los endpoints de ingreso, `/me`, categorías y políticas de SLA.
+- Errores con formato `{code, message}` en español y documentación en `/api/docs`, accesible a través de nginx.
+
+**Web**
+- Design system del droide: tokens, Button, Panel, Light (siempre acompañada de texto), EmptyState y un logo SVG propio.
+- Cliente tipado generado desde el contrato. Ante un 401, cierra la sesión.
+- Ingreso simulado con los perfiles agrupados, guardas por rol, layout con "Salir" y vistas vacías ("Bip-bup: la cola está despejada").
+
+### Checkpoint
+| Paso | Resultado |
+|---|---|
+| Lint y tipos | ruff, mypy estricto, Biome y tsc: limpios |
+| Tests API | 402 en verde. Cobertura total 99,8 %; flujo crítico 100 % (el gate pide 90 %) |
+| Tests web | 64 en verde. 100 % total y 100 % en `src/features` |
+| Migración y contrato | `alembic check` sin diferencias; `openapi.json` y `schema.d.ts` sincronizados |
+| Docker | El stack completo levanta con migración y datos de demo. Probé por curl `/me`, catálogos, 401 y 404, y que los datos de demo no se duplican al reiniciar. En Chrome headless, el ingreso por perfil, la redirección por rol y "Salir" funcionan sin errores de CSP. Después borré solo lo `droidesk-*` |
+| deckard | La web no tuvo hallazgos de criticidad ≥ 8, pero corregí 8 menores, entre ellos la caché de un perfil que podía verse tras una sesión vencida y el contraste AA de los errores. En la API había **2 de criticidad 8**: el dominio importaba SQLModel y FastAPI a través de los enums y los errores. Los corregí, junto con 6 menores, y una segunda pasada de deckard lo aprobó |
+| ADL | Extensiones de ADL-002, ADL-004 y ADL-005 |
+| SDD | `tasks.md` (con una nota en T013), roadmap y research (cerré el pendiente de `/me`), además de data-model |
+
+### Una decisión que tomé y conviene que sepas
+data-model fijaba `from_value` y `to_value` en 40 caracteres, pero el evento `assigned` guarda el nombre del agente, que admite hasta 100. Lo subí a 100 en data-model, el modelo y la migración, porque con 40 PostgreSQL rechazaría los nombres largos. Como la migración no está publicada, se pudo corregir sin crear una nueva.
+
+### Deuda nueva (anotada en DECISIONS.md)
+- Las categorías y las políticas de SLA se cargan junto con los datos de demo.
+- En nginx, el proceso maestro corre como root.
+
+También actualicé AI-USAGE.md con lo delegado en la Fase 3 y tus dos intervenciones.
+
+### Commits propuestos
+1. `feat(api): agrega configuración, base de datos, errores, reloj y JWT`
+2. `feat(api): agrega modelos, enums y la migración inicial`
+3. `feat(api): implementa el ciclo de vida y el SLA en tiempo hábil (TDD)`
+4. `feat(api): agrega ingreso simulado, autorización, historial, catálogos y datos de demo`
+5. `feat(contracts): publica auth y catálogos en el contrato y los tipos de la web`
+6. `feat(web): agrega el design system del droide`
+7. `feat(web): agrega cliente, ingreso simulado, guardas por rol y vistas vacías`
+8. `docs: extiende ADL-002, 004 y 005, actualiza SDD, DECISIONS, AI-USAGE y DEV-LOG`
+
+Con esto la Fase 3 queda completa. ¿Apruebas el commit y el push? Si apruebas, después abro el PR #3.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_lifecycle.py comment tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading pyproject.toml and factories.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Restructuring ERRORS in test_app.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting BusinessCalendar test usages
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running the full API suite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Bounding user_id in schemas.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Tightening comment_resumes_hold in lifecycle.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting openapi.json LoginRequest bounds
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running web vitest suite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading 0001_initial.py migration
+
+</details>
+
+### #19 · 🧑 Usuario
+> quiero revisar como va la aplicacion, sube el ambiente docker local para revisarlo por mi cuenta
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 45s
+- **Herramientas:** Bash ×3
+- **Tokens:** entrada 10 · cache leída 1.1M · cache escrita 1.8k · salida 1.9k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+DroiDesk ya está corriendo en local para que lo revises: la web responde, la API está healthy y los 7 usuarios de demo están cargados.
+
+- **App**: http://localhost:8080
+- **Documentación de la API**: http://localhost:8080/api/docs
+
+**Qué puedes probar en esta fase**
+- Entrar sin contraseña eligiendo un perfil:
+  - Solicitantes: Ana Rojas, Bruno Castillo, Carla Mena o Diego Fuentes.
+  - Agentes: Elena Vidal, Felipe Araya o Gabriela Soto.
+- Cada perfil llega a su vista vacía: el solicitante a "Mis tickets" y el agente a "Cola de tickets".
+- Si un solicitante abre `/agent`, la app lo devuelve a su vista, y al revés.
+- "Salir" cierra la sesión.
+- En `/api/docs` están los endpoints de esta fase: ingreso, `/me`, categorías y políticas de SLA.
+
+Todavía no se pueden crear ni tomar tickets: eso llega en las Fases 4 y 5.
+
+**Cómo funciona el ambiente**
+- Para levantarlo creé un `.env` local con un secreto JWT generado. Git lo ignora, así que no entra en ningún commit.
+- La base SQLite vive en el volumen `droidesk_data` y sobrevive a reinicios.
+
+**Comandos útiles**
+- Ver logs: `docker compose logs -f`
+- Detenerlo: `docker compose down`
+- Detenerlo y borrar la base: `docker compose down -v`
+
+Los commits del bloque Foundational siguen pendientes de tu aprobación. Cuando termines la revisión, dime si apruebas o si quieres cambiar algo.
+
+</details>
+
+### #20 · 🧑 Usuario
+> debe existir un login, la autenticacion simulada se refiere a que el proceso de autenticacion debe retornar siempre OK, da igual el usuario y password.
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 3m 36s
+- **Herramientas:** Bash ×22 · AskUserQuestion ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 22 · cache leída 2.6M · cache escrita 24.9k · salida 17k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Los documentos quedaron coherentes con el nuevo login y no queda ninguna mención del diseño anterior. Espero a que el subagente termine la implementación.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading API auth tests and security
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading LoginPage UI components
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Probing username constraint ordering
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2s
+- **Herramientas:** Bash ×3 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 4 · cache leída 255k · cache escrita 187 · salida 45 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+El subagente del login sigue trabajando. Cuando entregue, corro el checkpoint con deckard sobre ese cambio.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avísame cuando el ambiente docker esté actualizado
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×4 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que entregue el subagente del login. Revisar ahora un diff que todavía está cambiando no serviría.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avísame cuando el login esté listo para probarlo
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 9s
+- **Herramientas:** Bash ×3 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 255.2k · cache escrita 231 · salida 45 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando al subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avísame cuando el login esté listo para probarlo
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking login_as usage in tests
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 25s
+- **Herramientas:** Bash ×3 · Read ×3 · Write ×1 · StructuredOutput ×1
+- **Archivos modificados:** `apps/api/tests/unit/test_identity_service.py`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 255.5k · cache escrita 190 · salida 16 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando al subagente; el aviso de que termina me retoma.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avisa cuando el login esté listo para probarlo
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Tidying test_identity_service.py
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 22s
+- **Herramientas:** Bash ×5 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 4 · cache leída 255.7k · cache escrita 204 · salida 27 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando al subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cuánto falta para que termine el login?
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 53s
+- **Herramientas:** Bash ×9 · StructuredOutput ×1 · Monitor ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 16 · cache leída 1.5M · cache escrita 3.2k · salida 1.7k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+El subagente sigue avanzando: escribió el servicio de login y el modelo hace un minuto, y ya agregó `username` a la migración. Todavía le faltan el contrato y la web. Espero su reporte.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cuánto le falta al subagente del login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting test_db.py user usage
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Splitting assertions in test_seed.py
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×9 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que el subagente del login termine; después corro deckard sobre el diff final.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avisame cuando el login esté listo para probarlo
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting test_auth.py password tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running full API test suite
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 10s
+- **Herramientas:** Bash ×2 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 8 · cache leída 518.7k · cache escrita 311 · salida 50 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando al subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avísame cuando el login esté listo en docker
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2s
+- **Herramientas:** Bash ×5 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 259.6k · cache escrita 272 · salida 16 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando al subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cómo va el subagente del login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting generated schema.d.ts types
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 7s
+- **Herramientas:** Bash ×4 · StructuredOutput ×1 · Monitor ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 6 · cache leída 520k · cache escrita 707 · salida 396 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Dejé un monitor atento a que el código deje de cambiar. Sigo esperando el reporte del subagente.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cuánto le falta al subagente del login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading vite.config.ts and guards.test.tsx
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×4 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que el código deje de cambiar; tengo un monitor atento a eso.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cómo va el subagente del login?
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 22s
+- **Herramientas:** Bash ×2 · Read ×1 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 260.7k · cache escrita 163 · salida 34 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando al subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading client.test.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿avanza el login?
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 27s
+- **Herramientas:** Bash ×6 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 260.9k · cache escrita 256 · salida 16 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cuánto le falta al subagente del login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Creating credentials.ts validation module
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 14s
+- **Herramientas:** Bash ×2 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 261.1k · cache escrita 254 · salida 20 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cómo va el login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating web tests for login
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 17s
+- **Herramientas:** Bash ×4 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 4 · cache leída 261.4k · cache escrita 198 · salida 20 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+cuando termine, sube de nuevo el ambiente docker
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 19s
+- **Herramientas:** Bash ×4 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 261.6k · cache escrita 311 · salida 20 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cómo va el login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Fixing lint error in RadioGroup.test.tsx
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 13s
+- **Herramientas:** Bash ×2 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 4 · cache leída 262k · cache escrita 172 · salida 20 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cuánto le falta al subagente del login?
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 20s
+- **Herramientas:** Bash ×5 · StructuredOutput ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 4 · cache leída 262.2k · cache escrita 129 · salida 20 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente del login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cuánto le falta al subagente del login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Regenerating OpenAPI contract types
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 4m 21s
+- **Herramientas:** Bash ×20 · Read ×4 · SubagentHandback ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 11m 22s · 6.4M tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 20 · cache leída 2.1M · cache escrita 12.7k · salida 6.2k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El formulario se ve bien, valida antes de enviar y no hay errores de consola ni de CSP.
+
+Mis pruebas crearon dos usuarios de prueba en tu base (`seba` y `prueba.agente`). Cuando termine deckard, recreo el stack limpio con el código final.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+¿cómo va el subagente del login?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Smoke-testing the login endpoint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking contrast of form controls
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reordering annotations in schemas.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running final verification gates
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading identity service and router
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading LoginPage.tsx and RadioGroup.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading LoginPage.test.tsx
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 53s
+- **Herramientas:** Bash ×3 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+
+<details><summary>Respuesta</summary>
+
+El monitor confirma que `apps/` ya no cambia. Sigo esperando la revisión de deckard sobre el login.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+El formulario se ve bien, valida antes de enviar y no hay errores de consola ni de CSP.
+
+Mis pruebas crearon dos usuarios de prueba en tu base (`seba` y `prueba.agente`). Cuando termine deckard, recreo el stack limpio con el código final.
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 21s
+- **Herramientas:** Bash ×5 · StructuredOutput ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 14m 3s · 972.8k tokens
+- **Tokens:** entrada 10 · cache leída 829.4k · cache escrita 4.8k · salida 1.8k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Ya está el login con usuario, contraseña y perfil, y el ambiente local quedó recreado con el código final en http://localhost:8080. La base arranca limpia, solo con los 7 usuarios de demo.
+
+**Cómo funciona el login**
+- Cualquier usuario y contraseña son válidos; siempre responde OK.
+- Si el usuario es nuevo, se crea con el perfil que elijas, Solicitante o Agente.
+- Si ya existe, entra con su perfil guardado, aunque elijas otro. Por ejemplo, `ana.rojas` siempre entra como solicitante y `elena.vidal` como agente, así el rol de alguien que ya existe nunca lo decide el cliente.
+- El usuario se recorta y pasa a minúsculas, y acepta letras, números, `.`, `_` y `-`.
+- La contraseña no se guarda, no se registra en ningún log y no aparece en ninguna respuesta. FastAPI la devolvía en crudo dentro de los errores 422, y un handler global ahora quita ese dato.
+- Se eliminó `GET /auth/users`: ya no hacía falta y exponía la lista de usuarios sin autenticación.
+
+**Lo verifiqué así**
+- **Gates**: API con 461 tests, 99,8 % de cobertura total y 100 % en el flujo crítico; web con 107 tests y 100 % de cobertura. Lint, tipos, `alembic check` y el contrato pasan.
+- **En el stack real, con Chrome headless**:
+  - el formulario vacío muestra los dos errores;
+  - `ana.rojas` eligiendo Agente entra como solicitante;
+  - un usuario nuevo entra como agente;
+  - no hay errores de consola ni de CSP.
+- **Por curl**: la contraseña no aparece ni en los 422 ni en los logs.
+- **deckard**: nada de criticidad ≥ 8. Dejé sin aplicar 6 observaciones menores, de criticidad 3 o 4; por ejemplo, separar la lógica del formulario de `LoginPage` en un hook.
+
+**Documentación actualizada**
+- Spec (FR-001, más una entrada en Clarifications y un caso borde), misión, tech-stack, contrato, data-model (nueva columna `username`) y un nuevo escenario 16 en el quickstart.
+- ADL-005 enmendado: la lista de usuarios queda como alternativa rechazada.
+- DECISIONS: una deuda nueva, porque el login crea usuarios sin límite.
+- AI-USAGE: tu intervención y la salida que rechazaste.
+
+La migración 0001 se corrigió en el mismo archivo porque todavía no estaba publicada; por eso tuve que recrear el volumen de tu stack.
+
+Cuando termines la revisión, dime si apruebas el commit y el push del bloque Foundational, que ahora incluye este cambio, o si quieres ajustar algo más.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avísame cuando el ambiente esté listo para revisarlo
+
+</details>
+
+### #21 · 🧑 Usuario
+> no deberiamos crear usuarios sin limites, deberiamos tener usuarios ya creados por rol y en la pantalla de login un icono de ? en donde diga los usuarios y sus roles pertinentes.
+
+### #22 · 🧑 Usuario
+> no deberiamos crear usuarios sin limites, deberiamos tener usuarios ya creados por rol y en la pantalla de login un icono de ? en donde diga los usuarios y sus roles pertinentes (para efectos de demo)
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 13s
+- **Herramientas:** Bash ×3 · SendMessage ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 12 · cache leída 1.7M · cache escrita 9.9k · salida 7.7k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+La documentación ya refleja la segunda revisión. Espero que el subagente termine la implementación para correr el checkpoint, que deckard la revise y recrear tu stack.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Delivering login handoff report
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 6m 43s
+- **Herramientas:** Bash ×25 · Read ×3 · StructuredOutput ×1 · SubagentHandback ×1 · Agent ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 34m 4s · 9.4M tokens
+  - `subagente`
+- **Tokens:** entrada 16 · cache leída 2.1M · cache escrita 10.8k · salida 4.5k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El flujo funciona en el navegador real:
+- un usuario inexistente recibe el mensaje que apunta al "?";
+- el "?" abre la lista agrupada por perfil y Escape la cierra, con el foco de vuelta en el botón;
+- al elegir a Elena se completa el campo y el foco pasa a Contraseña;
+- con cualquier contraseña entra como agente.
+
+Espero la revisión de deckard.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avísame cuando el ambiente esté listo para revisarlo
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Rewriting identity service and router
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Rewriting API tests in test_auth.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking useQuery signature types
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Regenerating schema.d.ts from openapi.json
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Rewriting LoginPage.tsx demo users
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Typechecking LoginPage.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running web coverage tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Simplifying Escape test in LoginPage.test.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Smoke-testing the login endpoint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading LoginPage.tsx and DemoUsersPanel
+
+</details>
+
+### #23 · 🧑 Usuario
+> el ? debe explicar que son usuarios demo
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 13s
+- **Herramientas:** SendMessage ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 4 · cache leída 603.7k · cache escrita 971 · salida 767 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Se lo pedí al subagente del login: el panel del "?" va a abrir con el título "Usuarios de demo" y una explicación breve de que son cuentas de demostración precargadas, una por perfil, con las que se entra escribiendo cualquier contraseña. Cuando termine, la verifico, reconstruyo tu stack y te aviso.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking openapi.json ValidationError schema
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 25s
+- **Herramientas:** Bash ×10 · StructuredOutput ×1 · SubagentHandback ×1 · Read ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 37m 34s · 10.2M tokens
+  - `subagente`
+  - `subagente`
+- **Tokens:** entrada 8 · cache leída 911.4k · cache escrita 3.4k · salida 988 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+El panel del "?" ya explica que son usuarios de demo y está publicado en tu stack local, en http://localhost:8080. Al abrirlo muestra el título **"Usuarios de demo"** y este texto, antes de la lista de solicitantes y agentes:
+
+> Son cuentas de demostración precargadas para probar DroiDesk: los solicitantes crean tickets y los agentes los atienden. Elige una y escribe cualquier contraseña.
+
+Lectores de pantalla lo anuncian como la región "Usuarios de demo". El subagente quitó "una por perfil" del texto que yo había propuesto, porque no era exacto: hay 4 solicitantes y 3 agentes.
+
+Lo comprobé así:
+- **Web**: lint, tipos y 145 tests pasan, con 100 % de cobertura de líneas.
+- **Navegador**: repetí la prueba contra tu stack y el recorrido sigue funcionando. Un usuario inexistente recibe el mensaje que apunta al "?", la ayuda se abre y se cierra con Escape, y al elegir un usuario se completa el campo y se puede entrar. No hay errores de consola ni de CSP.
+
+deckard sigue revisando esta versión del login; cuando termine, corrijo lo que marque de criticidad ≥ 8.
+
+¿Quieres ajustar algo más del login? Si no, el bloque Foundational, con el login incluido, queda listo para que apruebes el commit y el push.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+avísame cuando esté arriba para revisarlo
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Editing DemoUsersPanel.tsx heading
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping credentials.ts export usage
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking test_app.py 422 handler
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping ADL-004 for accessibility decisions
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 15s
+- **Herramientas:** Bash ×2 · StructuredOutput ×1 · SubagentHandback ×1 · SendMessage ×1
+- **Subagentes:**
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 3m 21s · 620k tokens
+- **Tokens:** entrada 6 · cache leída 616.4k · cache escrita 4.5k · salida 944 · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El subagente del login está aplicando esos cinco ajustes. Cuando termine, verifico los gates y reconstruyo la web en tu stack.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+si, aprobado
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×4 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que el subagente termine esos cinco ajustes.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+si, aprobado
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 19s
+- **Herramientas:** Bash ×3 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 8 · cache leída 622.7k · cache escrita 372 · salida 45 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating DemoUsersPanel.test.tsx coverage
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 2s
+- **Herramientas:** Bash ×2 · StructuredOutput ×1
+- **Tokens:** entrada 4 · cache leída 311.6k · cache escrita 257 · salida 18 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente.
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 0s
+- **Herramientas:** Bash ×3 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Wrapping setErrors in flushSync
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 15s
+- **Herramientas:** Bash ×2 · StructuredOutput ×1
+- **Tokens:** entrada 8 · cache leída 624k · cache escrita 420 · salida 36 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente.
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 1s
+- **Herramientas:** Bash ×2 · Read ×1 · StructuredOutput ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 40m 27s · 11.1M tokens
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running web quality gates
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 26s
+- **Herramientas:** Bash ×2 · Read ×1 · StructuredOutput ×1
+- **Tokens:** entrada 4 · cache leída 312.3k · cache escrita 193 · salida 18 · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Sigo esperando a que termine el subagente.
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 3m 36s
+- **Herramientas:** Read ×8 · Bash ×5 · Agent ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 37s · 179.2k tokens
+- **Tokens:** entrada 12 · cache leída 1.3M · cache escrita 6.7k · salida 2.7k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+El login quedó como lo pediste y tu stack en http://localhost:8080 ya tiene esta versión:
+
+- **Usuarios precreados**: 4 solicitantes y 3 agentes. Nunca se crean usuarios desde el login.
+- **Login**: usuario y contraseña. Cualquier contraseña sirve para un usuario existente, y uno inexistente recibe un mensaje que remite al "?".
+- **Ícono "?"**: abre el panel "Usuarios de demo" con la explicación y la lista por perfil. Al elegir uno se completa el campo y el foco pasa a Contraseña; Escape cierra el panel.
+- **La contraseña** no se guarda, no aparece en los logs y no vuelve en ninguna respuesta, tampoco en los errores.
+
+**Checkpoint**
+| Paso | Resultado |
+|---|---|
+| API | 455 tests, 99,8 % de cobertura total y 100 % en el flujo crítico; lint, mypy, `alembic check` y contrato en verde |
+| Web | 149 tests, 100 % de cobertura (total y en `features/`); lint, tipos y build en verde |
+| Navegador (stack real) | Un usuario inexistente recibe el mensaje, la ayuda abre y cierra, y elegir a Elena con cualquier contraseña entra como agente, sin errores de consola ni de CSP |
+| deckard | La versión final del login y los cinco ajustes de accesibilidad posteriores salieron sin hallazgos de criticidad ≥ 8 |
+| Documentos | Spec, misión, tech-stack, contrato, data-model, quickstart, tasks, ADL-005 (con las dos revisiones y las alternativas que rechazaste), ADL-002, research, DECISIONS y AI-USAGE |
+
+Un subagente corrió por error una vez `git rm --cached /dev/null`, un comando de git que tiene prohibido. El comando falló sin efecto, y verifiqué que el índice sigue vacío.
+
+**Commits propuestos para el bloque Foundational, con el login incluido**
+1. `feat(api): agrega configuración, base de datos, errores, reloj y JWT`
+2. `feat(api): agrega modelos, enums y la migración inicial`
+3. `feat(api): implementa el ciclo de vida y el SLA en tiempo hábil (TDD)`
+4. `feat(api): agrega login simulado, autorización, historial, catálogos y datos de demo`
+5. `feat(contracts): publica auth y catálogos en el contrato y los tipos de la web`
+6. `feat(web): agrega el design system del droide`
+7. `feat(web): agrega cliente, login simulado con ayuda de usuarios demo, guardas por rol y vistas vacías`
+8. `docs: revisa el ingreso (FR-001, ADL-005), extiende ADLs, actualiza SDD, DECISIONS, AI-USAGE y DEV-LOG`
+
+¿Apruebas el commit y el push? Si apruebas, también abro el PR #3 de la Fase 3.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping TextField usages across web
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 13s
+- **Herramientas:** Bash ×1 · Skill ×1 · StructuredOutput ×1 · Agent ×1 · Read ×1
+- **Tokens:** entrada 6 · cache leída 639.8k · cache escrita 2.8k · salida 1.1k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Está corriendo la pasada final de deckard sobre el diff completo. Cuando termine te paso el veredicto. Tu aprobación para el commit sigue pendiente.
+
+</details>
+
+#### 🤖 Claude · continuación · ⏱ 4m 21s
+- **Herramientas:** Bash ×28 · StructuredOutput ×1 · SubagentHandback ×1
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 4m 35s · 2.5M tokens
+
+<details><summary>Respuesta</summary>
+
+La pasada final de deckard sobre el diff completo no encontró nada de criticidad ≥ 8 en la API, la web ni el contrato. También confirmó que:
+
+- el contrato y `schema.d.ts` coinciden exactamente con lo que se genera desde la API;
+- no quedan restos de las versiones anteriores del login;
+- no hay ciclos de imports en runtime;
+- no hay tests huérfanos.
+
+Encontró código que todavía no usa nada. Es la base que preparé en este bloque para las fases siguientes: las guardas por rol, las transiciones del ticket y el cálculo del SLA. Por eso no lo marca como problema.
+
+El checkpoint del bloque Foundational está cerrado. ¿Apruebas el commit (los 8 commits que te propuse) y el push? Si apruebas, también abro el PR #3 de la Fase 3.
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading seed.py and migrations
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking tasks.md for authorization.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading web client.ts sources
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting web test helpers.tsx
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_app.py health tests
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading ui component files
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running ruff, mypy, biome checks
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking CSS against CSP
+
+</details>
+
+*Sesión finalizada (prompt_input_exit)*
+
+## 🛰️ Sesión `2680e3d9` · resume
+
+- **Cache:** probablemente expirado · inactivo 12h 6m · contexto 13.9k tokens · re-escritura estimada US$0.11
+
+### #24 · 🧑 Usuario
+> haz el PR
+

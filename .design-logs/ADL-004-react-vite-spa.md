@@ -73,3 +73,13 @@ Verificado en [research.md](../specs/001-ticketing-mvp/research.md):
 - **`openapi-react-query`** integra el cliente tipado con TanStack Query.
 - **Cliente HTTP**: `baseUrl` es el origen, porque las rutas del contrato ya incluyen `/api`.
 - **Sesión**: vive en `sessionStorage`. Al cerrar sesión, también se limpia la caché de consultas.
+
+---
+
+## Extensión 2026-10-17 · Fundaciones (Fase 3)
+
+- **Estilos**: CSS Modules por componente, más `tokens.css` y `base.css` globales, sin estilos inline, para cumplir la CSP de nginx. El foco es un anillo azul de 2 px con un halo holo, porque el holo solo no alcanza contraste AA.
+- **El rojo no se usa como color de texto**, porque `--light-alert` sobre el casco no cumple AA. Los errores van en texto `--color-ink` con una `Light` roja.
+- **Etiquetas atadas al contrato**: `PRIORITY_LABEL` y `ROLE_LABEL` usan `satisfies Record<…>` sobre los tipos generados, así que un valor nuevo en la API rompe la compilación. Los estados y las acciones se atarán cuando el contrato los exponga (Fase 4).
+- **Guardas**: `requireSession` va en el layout y `requireRole` en cada ruta hija. Un perfil que entra a la ruta del otro termina en su propio inicio.
+- **Deuda menor**: `api/client.ts` importa la sesión desde `features/auth`. Moverla a un módulo neutral desacoplaría las capas, pero la sacaría del gate de cobertura del flujo crítico.

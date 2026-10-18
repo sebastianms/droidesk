@@ -99,7 +99,7 @@ El esquema completo y el núcleo del dominio (la tabla de transiciones y el cale
 
 | Fase del roadmap | Bloques de `tasks.md` | Entregable verificable | Quickstart |
 |---|---|---|---|
-| 3 · Foundation | Setup + Foundational | Ingreso simulado y vistas vacías por rol, con CI verde en ambas apps | 3 |
+| 3 · Foundation | Setup + Foundational | Login simulado y vistas vacías por rol, con CI verde en ambas apps | 3, 16 |
 | 4 · US1 | Crear, listar y cancelar mis tickets | El solicitante crea un ticket y lo sigue | 1, 2, 4, 12 |
 | 5 · US2 | Cola, tomar y transiciones | El agente toma, deja en espera, resuelve; el solicitante cierra o reabre | 6, 7, 10, 11, 14 |
 | 6 · US3 | Historial en el detalle | La línea de tiempo completa e inmutable | 15 |

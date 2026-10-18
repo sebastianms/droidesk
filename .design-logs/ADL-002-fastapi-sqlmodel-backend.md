@@ -76,3 +76,23 @@ Verificado en [research.md](../specs/001-ticketing-mvp/research.md); la decisió
 - **Errores**: una jerarquía `DomainError` con un solo handler que responde `{code, message}`. Las rutas declaran sus respuestas 4xx para que el OpenAPI las tipifique. El 422 de validación conserva el formato estándar de FastAPI.
 - **Enums**: `StrEnum` con valores en minúscula, guardados como texto (`native_enum=False`).
 - **Contrato**: `scripts/export_openapi.py` lo regenera; importar la app no debe exigir secretos ni tocar la base.
+
+---
+
+## Extensión 2026-10-17 · Fundaciones (Fase 3)
+
+La decisión de fondo no cambia. Se fijaron estos detalles al implementarla:
+- **Dominio sin framework, verificado con un test**:
+  - los enums viven en módulos `enums.py` con solo stdlib (`identity`, `tickets`, `sla` y `audit`), y los modelos los importan desde ahí;
+  - `core/errors.py` contiene solo la jerarquía `DomainError`, y la parte HTTP (`ErrorBody`, `error_responses` y el handler) vive en `core/http_errors.py`;
+  - un test importa `lifecycle`, `status` y `calendar` en un subproceso y falla si se carga FastAPI, Starlette, SQLModel, SQLAlchemy o pydantic.
+
+  Deckard lo detectó como criticidad 8: la primera versión importaba los enums desde los modelos SQLModel. Esto corrige la indicación de T013 de poner los enums en `models.py`.
+- **App sin efectos al crearse**:
+  - `create_app()` no lee secretos ni abre la base: la configuración se resuelve como dependencia cacheada (`get_settings`) y el engine se crea en el lifespan;
+  - las migraciones usan `DatabaseSettings`, que no exige el secreto.
+- **Contrato legible**: el `operationId` es el nombre de la ruta (`login`, `read_me`, `list_categories`, etc.). La documentación se sirve en `/api/docs` y `/api/openapi.json`, para que nginx la exponga en el mismo origen.
+- **Entrada acotada y sin eco**:
+  - el login valida el patrón y el largo del `username` y el largo del `password` ([ADL-005](ADL-005-simulated-auth-signed-token.md));
+  - un handler global de `RequestValidationError` conserva el formato estándar del 422, pero le quita la clave `input`. `SecretStr` no basta, porque FastAPI devuelve el valor crudo en `input`, y con un campo faltante devuelve el body completo;
+  - la configuración oculta el valor de entrada en sus errores, para que un secreto inválido no termine en los logs.

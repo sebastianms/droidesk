@@ -17,6 +17,11 @@ Las user stories US1 a US5 se implementan en las fases 4 a 8 del [roadmap](../ro
 - Q: ¿Puede el solicitante cancelar un ticket? → A: Sí, solo mientras está Abierto. Cancelado es un estado final, sale de la cola y no cuenta para el SLA (FR-011, FR-023, US1).
 - Q: ¿Qué plazos tiene cada prioridad y desde cuándo un ticket está "Por vencer"? → A (revisada por el usuario para un equipo chico): el plazo corre en tiempo hábil, de lunes a viernes de 09:00 a 18:00 en la zona horaria de la organización. Crítica 4 horas hábiles, Alta 1 día hábil, Media 3 días hábiles y Baja 5 días hábiles: lo urgente sigue corto, porque es lo que más afecta al usuario, y lo demás se alarga. "Por vencer" cuando queda menos del 25 % del plazo. Plazos, jornada y zona horaria son configuración, no comportamiento (FR-020, FR-021, FR-023).
 
+### Session 2026-10-17 · Revisión del usuario
+
+- Q: ¿Cómo se ingresa? → A: Con un formulario de login de usuario y contraseña que siempre responde OK, sin importar los valores, más un selector de perfil. Reemplaza la primera versión, en la que se elegía un usuario de una lista. Un usuario nuevo se crea con el perfil elegido; uno existente conserva el suyo, para que el rol de alguien que ya existe nunca lo decida el cliente (FR-001).
+- Q: ¿Se pueden crear usuarios desde el login? → A (segunda revisión del usuario): No, para no crear usuarios sin límite. Los usuarios vienen precreados por perfil y el login solo acepta a los existentes, con cualquier contraseña. El selector de perfil se elimina, y un ícono "?" muestra los usuarios de demo y su perfil (FR-001).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Crear y seguir mis tickets (Priority: P1)
@@ -122,6 +127,7 @@ Como agente, quiero saber cuánto plazo le queda a cada ticket según su priorid
 - **Resuelto sin confirmación**: si el solicitante nunca confirma, el ticket queda Resuelto y cuenta como resuelto para el SLA.
 - **Textos al límite**: título de 120 caracteres, descripción de 5.000 y comentario de 2.000 se aceptan; un carácter más se rechaza.
 - **Contenido con formato**: descripciones y comentarios con etiquetas o símbolos se muestran tal cual se escribieron, sin interpretarse.
+- **Usuario inexistente**: el ingreso lo rechaza con un mensaje que remite a la ayuda de usuarios de demo. Nunca se crean usuarios desde el login.
 - **Sesión vencida**: si la sesión del usuario expira, vuelve a la pantalla de ingreso sin perder datos ya guardados.
 - **Cola vacía**: si no hay tickets por atender, la cola lo indica con un mensaje claro.
 
@@ -130,7 +136,7 @@ Como agente, quiero saber cuánto plazo le queda a cada ticket según su priorid
 ### Functional Requirements
 
 **Perfiles y acceso**
-- **FR-001**: El sistema MUST permitir ingresar eligiendo un usuario precargado, sin contraseña (ingreso simulado).
+- **FR-001**: El sistema MUST permitir ingresar con un formulario de usuario y contraseña. El ingreso es simulado: los usuarios vienen precreados por perfil y cualquier contraseña es válida. La pantalla ofrece una ayuda (ícono "?") con los usuarios de demo y su perfil.
 - **FR-002**: El sistema MUST ofrecer dos perfiles, solicitante y agente, cada uno con su propia vista.
 - **FR-003**: El sistema MUST impedir que un solicitante acceda a la vista o a las acciones de agente.
 - **FR-004**: El sistema MUST mostrar a cada solicitante solo sus propios tickets, con su historial y comentarios.
@@ -203,7 +209,7 @@ Como agente, quiero saber cuánto plazo le queda a cada ticket según su priorid
 
 ## Assumptions
 
-- Usuarios, categorías y plazos de SLA vienen precargados; el MVP no tiene pantallas de administración.
+- Categorías, plazos de SLA y usuarios de demo vienen precargados, y la app no crea usuarios. El MVP no tiene pantallas de administración.
 - Categorías iniciales: Hardware, Software, Accesos y cuentas, Red y conectividad, y Otro.
 - La jornada hábil por defecto es de lunes a viernes, de 09:00 a 18:00, y la zona horaria de la organización se define al instalar. Los feriados no se consideran en el MVP.
 - Los plazos por prioridad, el umbral de "Por vencer", la jornada y la zona horaria son configuración: cambiarlos no requiere cambiar el comportamiento del sistema.

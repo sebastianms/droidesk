@@ -3,6 +3,7 @@ from sqlmodel import col, select
 
 from droidesk_api.core.db import SessionDep
 from droidesk_api.core.http_errors import error_responses
+from droidesk_api.core.ids import Id
 from droidesk_api.identity.authorization import (
     CurrentUser,
     RequesterUser,
@@ -53,7 +54,7 @@ def list_tickets(
 
 @router.get("/tickets/{ticket_id}", responses=error_responses(401, 404))
 def read_ticket(
-    ticket_id: int, user: CurrentUser, service: TicketServiceDep
+    ticket_id: Id, user: CurrentUser, service: TicketServiceDep
 ) -> schemas.TicketDetail:
     return service.get_ticket_for(user, ticket_id)
 
@@ -62,7 +63,7 @@ def read_ticket(
     "/tickets/{ticket_id}/transitions", responses=error_responses(401, 403, 404, 409)
 )
 def transition_ticket(
-    ticket_id: int,
+    ticket_id: Id,
     body: schemas.TransitionRequest,
     user: CurrentUser,
     service: TicketServiceDep,
@@ -82,7 +83,7 @@ def transition_ticket(
     responses=error_responses(401, 404, 409),
 )
 def add_comment(
-    ticket_id: int,
+    ticket_id: Id,
     body: schemas.CommentCreate,
     user: CurrentUser,
     service: TicketServiceDep,

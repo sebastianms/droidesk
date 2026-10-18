@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
 from droidesk_api.audit.enums import EventKind
+from droidesk_api.core.ids import Id
 from droidesk_api.sla.status import SlaState
 from droidesk_api.tickets.enums import Priority, TicketStatus
 from droidesk_api.tickets.lifecycle import TicketAction
@@ -117,7 +118,7 @@ class TicketDetail(TicketSummary):
 class TicketCreate(BaseModel):
     title: Title
     description: Description
-    category_id: int
+    category_id: Id
     priority: Priority = Priority.MEDIUM
 
 
@@ -127,4 +128,4 @@ class TransitionRequest(BaseModel):
 
 class CommentCreate(BaseModel):
     body: CommentBody
-    reply_to_id: int | None = None
+    reply_to_id: Id | None = None

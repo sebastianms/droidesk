@@ -80,7 +80,7 @@ stateDiagram-v2
 
 | Capacidad | Destino |
 |---|---|
-| Adjuntos, notificaciones, reasignación, dashboard de métricas, búsqueda y filtros, categorización automática | Descartadas del alcance opcional ([criterio](../DECISIONS.md#alcance-opcional)) |
+| Adjuntos, notificaciones, reasignación, dashboard de métricas, búsqueda, categorización automática | Descartadas del alcance opcional ([criterio](../DECISIONS.md#alcance-opcional)). Los filtros por prioridad y estado del SLA se sumaron como complemento del SLA (FR-024a) |
 | Autenticación real, varias áreas de soporte, feriados en el calendario del SLA, cierre automático de tickets resueltos | Plan de escalabilidad ([roadmap](roadmap.md), fase 10) |
 
 ## Success Metrics

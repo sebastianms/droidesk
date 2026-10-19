@@ -172,6 +172,6 @@ Las acciones permitidas para quien consulta (`allowed_actions`) salen de esta ta
 | Usuarios | 4 solicitantes y 3 agentes, con nombres genéricos y correo `@droidesk.local` |
 | Categorías | Hardware, Software, Accesos y cuentas, Red y conectividad, Otro |
 | Políticas de SLA | Crítica 4 h, Alta 1 día, Media 3 días y Baja 5 días hábiles, cada una con su descripción guía |
-| Tickets | ~8 tickets en distintos estados y prioridades, con su historial, fechados relativos al momento de la carga para que se vean todos los estados del SLA |
+| Tickets de ejemplo | 9 tickets en los seis estados y las cuatro prioridades, con comentarios, una respuesta citada y un ajuste de prioridad. Se reproducen con `TicketService` y quedan fechados en relación con el momento de la carga, así que se ven los estados del SLA en plazo, vencido, en pausa y cumplido |
 
-Se cargan solo si `DROIDESK_SEED_DEMO_DATA=true` y la base está vacía.
+Los usuarios, las categorías y las políticas se cargan siempre que la base está vacía. Los tickets de ejemplo se cargan solo en el modo de arranque Demo (`DROIDESK_MODE=demo`, el valor por defecto) y si todavía no hay ningún ticket; el modo Vacío (`empty`) deja solo la base ([ADL-005](../../.design-logs/ADL-005-simulated-auth-signed-token.md)).

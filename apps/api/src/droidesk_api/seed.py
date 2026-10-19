@@ -2,14 +2,17 @@ import logging
 
 from sqlmodel import Session, select
 
-from droidesk_api.core.config import get_settings
+from droidesk_api.core.clock import Clock, SystemClock
+from droidesk_api.core.config import AppMode, Settings, get_settings
 from droidesk_api.core.db import build_engine
+from droidesk_api.demo_tickets import load_demo_tickets
 from droidesk_api.identity.enums import Role
 from droidesk_api.identity.models import User
+from droidesk_api.sla.calendar import BusinessCalendar
 from droidesk_api.sla.enums import TargetUnit
 from droidesk_api.sla.models import SlaPolicy
 from droidesk_api.tickets.enums import Priority
-from droidesk_api.tickets.models import Category
+from droidesk_api.tickets.models import Category, Ticket
 
 logger = logging.getLogger(__name__)
 
@@ -79,14 +82,24 @@ def sla_policies() -> list[SlaPolicy]:
     ]
 
 
-def seed_demo_data(session: Session) -> bool:
-    """Carga usuarios, categorías y políticas si la base está vacía; devuelve si cargó."""
+def seed_base_data(session: Session) -> bool:
+    """Carga usuarios, categorías y políticas si la base está vacía; sin ellos la app no sirve. Devuelve si cargó."""
     if not _is_empty(session):
         return False
     session.add_all(demo_users())
     session.add_all(Category(name=name) for name in CATEGORY_NAMES)
     session.add_all(sla_policies())
     session.commit()
+    return True
+
+
+def seed_demo_tickets(
+    session: Session, calendar: BusinessCalendar, clock: Clock
+) -> bool:
+    """Carga los tickets de ejemplo, fechados hacia atrás desde ahora, si aún no hay ninguno. Devuelve si cargó."""
+    if session.exec(select(Ticket).limit(1)).first() is not None:
+        return False
+    load_demo_tickets(session, calendar, clock.now())
     return True
 
 
@@ -97,21 +110,34 @@ def _is_empty(session: Session) -> bool:
     )
 
 
+def _seed(session: Session, settings: Settings) -> None:
+    base_loaded = seed_base_data(session)
+    logger.info(
+        "Base cargada: usuarios, categorías y políticas de SLA."
+        if base_loaded
+        else "Base omitida: la base de datos ya tiene datos."
+    )
+    if settings.mode is not AppMode.DEMO:
+        logger.info("Modo vacío: sin tickets de ejemplo.")
+        return
+    calendar = BusinessCalendar(settings.timezone, settings.business_hours)
+    tickets_loaded = seed_demo_tickets(session, calendar, SystemClock())
+    logger.info(
+        "Modo demo: tickets de ejemplo cargados."
+        if tickets_loaded
+        else "Modo demo: tickets de ejemplo omitidos, ya existen tickets."
+    )
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     settings = get_settings()
-    if not settings.seed_demo_data:
-        logger.info("Seed omitido: DROIDESK_SEED_DEMO_DATA no está activo.")
-        return
     engine = build_engine(settings.database_url)
     try:
         with Session(engine) as session:
-            loaded = seed_demo_data(session)
+            _seed(session, settings)
     finally:
         engine.dispose()
-    logger.info(
-        "Datos de demo cargados." if loaded else "Seed omitido: la base ya tiene datos."
-    )
 
 
 if __name__ == "__main__":

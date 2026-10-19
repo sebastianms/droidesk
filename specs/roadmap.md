@@ -45,12 +45,12 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 
 - [x] Prioridad con plazo comprometido en tiempo hábil (lunes a viernes, jornada laboral), vencimiento visible, luces de estado del SLA y cola ordenada por urgencia.
 
-## Phase 9: Packaging & Initial Setup — `phase/09-packaging`
+## Phase 9: Packaging & Initial Setup — `phase/09-packaging` [DONE · PR #9]
 
-- [ ] `setup.sh`: un comando que verifica Docker, pide la configuración, genera el secreto, levanta todo y muestra las URLs y los usuarios de demo.
-- [ ] `README.md` con diagramas Mermaid del flujo y de la arquitectura.
-- [ ] Smoke test end-to-end del recorrido principal.
-- [ ] Versión final de `DECISIONS.md`, `AI-USAGE.md` y de la estrategia de calidad.
+- [x] `setup.sh`: un comando que verifica Docker, pide la configuración y el modo de arranque (Demo o Vacío), genera el secreto, levanta todo y muestra las URLs y los usuarios de demo.
+- [x] `README.md` con diagramas Mermaid del flujo y de la arquitectura.
+- [x] Smoke test end-to-end del recorrido principal.
+- [x] Versión final de `DECISIONS.md`, `AI-USAGE.md` y de la estrategia de calidad.
 
 ## Phase 10: Scalability — `phase/10-scalability`
 

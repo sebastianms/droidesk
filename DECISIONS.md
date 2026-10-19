@@ -13,6 +13,7 @@ Decisiones de producto y arquitectura del MVP, en versión breve. El detalle té
 | Ingreso | Simulado: un login de usuarios precreados por perfil que acepta cualquier contraseña, con un ícono "?" que lista los usuarios de demo; la API emite un token firmado y el rol se lee de la base de datos | [ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md) |
 | Despliegue | Docker Compose, nginx como proxy de mismo origen y `./setup.sh` como único comando | [ADL-006](.design-logs/ADL-006-docker-compose-same-origin.md) |
 | SLA en tiempo hábil | Calendario propio de funciones puras: el vencimiento se guarda para ordenar la cola y el estado se deriva al leer | [ADL-009](.design-logs/ADL-009-sla-business-time.md) |
+| Smoke end-to-end | Playwright Test en un módulo `e2e/` propio: el recorrido principal con dos perfiles contra el stack Docker, también en CI | [ADL-010](.design-logs/ADL-010-playwright-e2e-smoke.md) |
 
 La visión del sistema completo está en [`specs/tech-stack.md`](specs/tech-stack.md).
 
@@ -88,12 +89,55 @@ El alcance mínimo ya responde "¿quién la tiene?" (un agente toma el ticket) y
 | Notificaciones | Requiere infraestructura de correo y procesos asíncronos. En el MVP, el solicitante ve el estado y los comentarios nuevos al entrar a sus tickets. |
 | Reasignación | Tomar un ticket cubre la asignación básica. Reasignar entre agentes agrega flujo y permisos que no atacan el problema declarado. |
 | Dashboard de métricas | La cola ya muestra cuántos tickets hay abiertos, quién los tiene y su estado de SLA. Un dashboard agregado gana valor con volumen y con varias áreas. |
-| Búsqueda y filtros | Con el volumen del MVP basta la cola ordenada por vencimiento. Se vuelve necesaria a escala. |
+| Búsqueda y filtros | Con el volumen del MVP basta la cola ordenada por vencimiento, y buscar texto exige índices y parámetros nuevos en la API. Al revisar el SLA, el usuario pidió filtrar y ordenar por prioridad y estado del SLA: se agregó como complemento del SLA (FR-024a), en la web y sin ampliar el contrato. La búsqueda de texto y los filtros por categoría, persona o fecha siguen descartados y se vuelven necesarios a escala. |
 | Categorización automática | Depende de un servicio externo (un LLM con API key), suma costo y vuelve no deterministas los tests. El solicitante elige la categoría al crear el ticket. |
 
 ## Estrategia de calidad
 
-Pareto 80/20: cada app debe tener al menos 80 % de cobertura total y el flujo crítico al menos 90 %. El flujo crítico es el ciclo de vida del ticket (crear → tomar → cambiar estado → historial), con sus reglas de SLA y la autorización por rol. El esfuerzo va donde un error rompe la promesa central de DroiDesk; la configuración, el arranque y los componentes visuales quedan cubiertos por el piso del 80 % ([ADL-007](.design-logs/ADL-007-pareto-coverage-gates.md), [detalle](specs/tech-stack.md#quality-strategy)). El balance de qué se probó y qué no se completa en la fase de empaquetamiento.
+Pareto 80/20: cada app debe tener al menos 80 % de cobertura total y el flujo crítico al menos 90 % ([ADL-007](.design-logs/ADL-007-pareto-coverage-gates.md), [detalle](specs/tech-stack.md#quality-strategy)).
+- **Flujo crítico**: el ciclo de vida del ticket (crear → tomar → cambiar estado → historial), con sus reglas de SLA y la autorización por rol.
+- **Por qué ahí**: un error en esa parte rompe la promesa central de DroiDesk, que es saber quién tiene cada ticket, qué pasó y si se cumple el plazo.
+- Los gates corren en cada checkpoint y en CI; un PR no se integra si alguno falla.
+
+### Qué se probó
+
+| Capa | Qué | Cómo |
+|---|---|---|
+| Dominio | La tabla completa de transiciones por estado, rol y relación con el ticket; el calendario hábil con sus bordes (fuera de jornada, cruces de cierre y de fin de semana, pausas); el estado del SLA | pytest unitario, con reloj controlado |
+| API | Cada endpoint: autorización por rol (403), tickets ajenos (404), validación (422, ids fuera de rango incluidos), transiciones inválidas (409) y el historial escrito en la misma transacción | pytest con TestClient y SQLite temporal |
+| Concurrencia | Dos agentes toman el mismo ticket, o se cruzan una transición y un comentario: gana uno y el otro recibe un 409 claro | Tests con hilos sobre SQLite real |
+| Datos | Las migraciones coinciden con los modelos; el seed es idempotente y deja los mismos estados de SLA en 6 momentos de la semana | `alembic check` en CI y tests del seed |
+| Contrato | El OpenAPI versionado coincide con el que genera la API, y los tipos de la web con el OpenAPI | CI de cada app |
+| Web | Guardas por rol, sesión vencida, formularios con sus límites, listados con filtros y orden, acciones según lo que permite la API, avisos de conflicto, comentarios y respuestas citadas, luces de estado y SLA | Vitest y Testing Library, con la API simulada |
+| Integración | Crear → tomar → en espera → comentar → resolver → cerrar, con dos perfiles en el navegador, sin errores de consola ni de CSP | Playwright contra el stack Docker, en CI ([ADL-010](.design-logs/ADL-010-playwright-e2e-smoke.md)) |
+| Arranque | `setup.sh`: respuestas inválidas, reutilización de `.env`, modo `--yes`, fallas de Docker y bash 3.2 | shellcheck en CI, `./setup.sh --yes` en el job e2e y pruebas manuales en stacks aislados |
+
+Además, al cerrar cada fase se recorrieron en el navegador los escenarios del [quickstart](specs/001-ticketing-mvp/quickstart.md) correspondientes, con varios perfiles a la vez y en ancho móvil, contra un stack Docker aislado.
+
+**Cobertura obtenida**
+
+| App | Tests | Total (líneas) | Flujo crítico |
+|---|---|---|---|
+| API | 1114 | 99,9 % | 100 % (`tickets/`, `sla/`, `audit/` e `identity/authorization.py`) |
+| Web | 589 | 100 % | 100 % (`src/features/`) |
+
+La cobertura supera la meta porque los tests se escribieron junto con cada tarea. El gate no exige el 100 %: exige el 80 % y el 90 %.
+
+### Qué no se probó y por qué
+
+| Fuera de alcance | Por qué |
+|---|---|
+| Carga y rendimiento | 800 personas generan un volumen bajo; el límite real, el de un escritor en SQLite, ya está asumido como deuda y se resuelve con PostgreSQL |
+| Accesibilidad automatizada | Los componentes usan roles y nombres accesibles, que los tests consultan, pero no hay una auditoría con axe ni con lectores de pantalla |
+| Navegadores distintos de Chromium y dispositivos reales | El smoke corre solo en Chromium; el ancho móvil se revisó a mano |
+| `setup.sh` en macOS y WSL reales | Se probó en Linux y con bash 3.2 en un contenedor, no en esos sistemas |
+| Bajar migraciones (`downgrade`) | El MVP solo avanza: las migraciones publicadas no se editan y una corrección es siempre una migración nueva |
+| Seguridad ofensiva (pentest, fuzzing) | La frontera de autorización está probada endpoint por endpoint; el ingreso simulado es, por diseño, la mayor debilidad y está declarado como deuda |
+| Estilos y componentes puramente visuales | No tienen lógica; los cubre el piso del 80 % y la revisión en el navegador |
+
+## Escalar a 50.000 tickets al mes y 5 áreas
+
+Se define en la Fase 10 del [roadmap](specs/roadmap.md). `SCALABILITY.md` va a comparar tres estrategias, todas con PostgreSQL, con sus pros, contras, riesgos y mitigaciones. Esta sección se completa con la estrategia que elija el usuario: qué se rompe, qué se rediseña y qué se conserva.
 
 ## Deuda técnica asumida
 
@@ -106,5 +150,6 @@ Pareto 80/20: cada app debe tener al menos 80 % de cobertura total y el flujo cr
 | Los listados no se paginan | El volumen del MVP lo permite ([contrato](specs/001-ticketing-mvp/contracts/rest-api.md)) | Antes de crecer en volumen o en áreas (plan de escalabilidad) |
 | Los mensajes del 422 de validación vienen en inglés, con el formato estándar de FastAPI | La web valida en español antes de enviar; el 422 es solo una red de seguridad y viene tipado sin código extra | Si se abre la API a otros clientes |
 | El calendario del SLA no considera feriados | Un feriado entre semana cuenta como día hábil: el error es acotado y evita mantener un calendario de feriados en el MVP | Al cargar el calendario de feriados de la organización (plan de escalabilidad) |
-| Las categorías y las políticas de SLA se cargan junto con los datos de demo (`DROIDESK_SEED_DEMO_DATA`) | En el MVP, sin datos de demo tampoco hay usuarios con quienes ingresar, así que separar ambas cargas no aporta | Al integrar el proveedor de identidad: los catálogos pasan a ser datos de referencia que se cargan siempre |
+| Los usuarios de demo se cargan junto con los catálogos cada vez que la base está vacía, en los dos modos de arranque (Demo y Vacío) | Con el ingreso simulado y sin administración, la app no sirve sin usuarios ([ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md)) | Al integrar el proveedor de identidad: los usuarios vienen de ahí y los catálogos quedan como datos de referencia, administrables |
 | nginx corre con el proceso maestro como root (los workers no) | Es la imagen oficial sin cambios; correr todo como no root exige cambiar el puerto interno ([ADL-006](.design-logs/ADL-006-docker-compose-same-origin.md)) | Al endurecer las imágenes para un entorno compartido |
+| El smoke end-to-end cubre un solo recorrido, solo en Chromium | Las reglas y sus bordes están probados en cada app; el smoke solo confirma la integración ([ADL-010](.design-logs/ADL-010-playwright-e2e-smoke.md)) | Si aparecen fallas de integración que los tests de cada app no detecten |

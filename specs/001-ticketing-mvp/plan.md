@@ -68,7 +68,8 @@ apps/api/
 ├── src/droidesk_api/
 │   ├── main.py                        # crea la app: routers, handler de errores, lifespan
 │   ├── models.py                      # importa todos los modelos (para Alembic)
-│   ├── seed.py                        # datos de demo
+│   ├── seed.py                        # base (usuarios, catálogos) y tickets de ejemplo
+│   ├── demo_tickets.py                # escenarios de ejemplo reproducidos con TicketService
 │   ├── core/                          # config.py, db.py, errors.py, clock.py, security.py (JWT)
 │   ├── identity/                      # models.py, router.py (users, login, me), authorization.py
 │   ├── tickets/                       # models.py (Ticket, Category, Comment), lifecycle.py (dominio),
@@ -90,7 +91,10 @@ apps/web/
     │   └── tickets/                   # TicketDetailPage, TicketActions, Timeline, CommentBox, luces
     ├── ui/                            # tokens.css, Button, Panel, Light, EmptyState, DroidLogo
     └── test/setup.ts
-docker-compose.yml · setup.sh · .github/workflows/{api,web}.yml
+e2e/                                   # Playwright Test: smoke del recorrido principal (ADL-010)
+├── package.json · playwright.config.ts · tsconfig.json
+└── tests/                             # fixtures.ts, main-flow.spec.ts
+docker-compose.yml · setup.sh · .env.example · .github/workflows/{api,web,e2e}.yml
 ```
 
 ## Implementation Strategy

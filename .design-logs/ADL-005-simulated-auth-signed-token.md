@@ -72,7 +72,7 @@ El token Bearer tiene la misma forma que tendrá con SSO u OIDC: al escalar solo
 - **Validación de la sesión en la web**: no se consulta `/me` en cada navegación. El middleware valida `expires_at` en el cliente, y el cliente HTTP, ante un 401, borra la sesión y recarga en `/login`, salvo que ya esté ahí, para no entrar en un bucle. Así se cierra el pendiente de research.
 - **Caché acotada a la sesión**: el ingreso y la salida llaman a `queryClient.clear()`, para que un perfil nunca vea datos en caché del anterior en la misma pestaña.
 - **Leer la sesión no tiene efectos**: una sesión vencida se ignora al leerla y se borra solo al salir, al recibir un 401 o al ingresar con otro perfil.
-- **Datos de demo**: 7 usuarios (4 solicitantes y 3 agentes, con `username` como `ana.rojas` o `elena.vidal`), 5 categorías y las 4 políticas de SLA. Se cargan una sola vez, si `DROIDESK_SEED_DEMO_DATA=true` y la base está vacía.
+- **Datos de demo**: 7 usuarios (4 solicitantes y 3 agentes, con `username` como `ana.rojas` o `elena.vidal`), 5 categorías y las 4 políticas de SLA. Se cargan una sola vez (en la Fase 9 el flag pasó a ser `DROIDESK_MODE`; ver la extensión del 2026-10-19), si `DROIDESK_SEED_DEMO_DATA=true` y la base está vacía.
 
 ---
 
@@ -94,3 +94,17 @@ Al revisar la primera revisión, el usuario pidió no crear usuarios sin límite
 - `GET /api/v1/auth/users` vuelve como endpoint público, pero solo con `username`, nombre y perfil (`DemoUser`, sin email ni id). Alimenta la ayuda, así la web no duplica los datos del seed.
 - Al elegir un usuario en la ayuda, se completa el campo Usuario.
 - Siguen vigentes la normalización del `username`, la columna `username` única y el 422 sin `input`.
+
+---
+
+## Extensión 2026-10-19 · Modos de arranque Demo y Vacío (Fase 9, a pedido del usuario)
+
+Al sumar los tickets de ejemplo (T058), responder "no" a los datos de demo dejaba una app sin usuarios con quienes ingresar. Al revisarlo, el usuario pidió dos modos: uno Demo, con datos para recorrer las funcionalidades, y otro vacío, solo con los usuarios.
+- **Base**: los 7 usuarios de demo, las 5 categorías y las 4 políticas de SLA se cargan **siempre** que la base de datos está vacía. Con el ingreso simulado y sin administración, sin ellos la app no sirve.
+- **`DROIDESK_MODE`** reemplaza al booleano `DROIDESK_SEED_DEMO_DATA`:
+  - `demo`, el valor por defecto, carga además 9 tickets de ejemplo en distintos estados, con comentarios, una respuesta citada, un ajuste de prioridad y su historial;
+  - `empty` deja la base solo con los usuarios y los catálogos;
+  - un valor inválido impide que la API arranque.
+- **El modo no borra datos**: los tickets de ejemplo se cargan solo mientras no exista ningún ticket. Pasar de Vacío a Demo los agrega si todavía no se creó ninguno, y pasar de Demo a Vacío conserva lo que hay. `setup.sh` avisa si el volumen ya existe y explica cómo empezar de cero (`docker compose down -v`).
+- **Los tickets se reproducen con `TicketService`** y un reloj del seed que se coloca en el pasado y avanza paso a paso (`demo_tickets.py`). Así, el historial, el SLA y los contadores son los mismos que dejaría una persona real.
+  - Cada ticket tiene una antigüedad relativa a la carga, elegida para que su estado de SLA no dependa del día ni de la hora: el vencido tiene 6 días corridos, y ninguno queda "por vencer".

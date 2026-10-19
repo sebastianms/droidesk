@@ -50,6 +50,7 @@ droidesk/
 │           ├── features/     # auth/, requester/, agent/, tickets/
 │           └── ui/           # design system del droide
 ├── contracts/openapi.json
+├── e2e/                      # Playwright: smoke del recorrido principal
 ├── specs/                    # SDD
 ├── .design-logs/             # ADLs
 ├── docker-compose.yml
@@ -80,7 +81,7 @@ droidesk/
 | Estilos | CSS Modules + tokens CSS | Tema del droide sin librerías de componentes |
 | Calidad de la web | Biome (lint y formato), `tsc -b`, Vitest + Testing Library | Gates del checkpoint de bloque; versiones exactas en el [research de la feature 001](001-ticketing-mvp/research.md) |
 | Contenedores | Docker Compose: `api` (uvicorn) y `web` (nginx con la SPA y proxy de `/api`) | Mismo origen en el navegador, sin CORS ([ADL-006](../.design-logs/ADL-006-docker-compose-same-origin.md)) |
-| CI | GitHub Actions: un workflow por app, con filtro de rutas, más un chequeo del contrato | Las apps también son independientes en CI |
+| CI | GitHub Actions: un workflow por app, con filtro de rutas, más un chequeo del contrato, y un workflow `e2e` que levanta el stack con `./setup.sh --yes` y corre el smoke | Las apps también son independientes en CI |
 
 ### Configuración
 
@@ -88,7 +89,7 @@ droidesk/
 |---|---|---|---|
 | `DROIDESK_JWT_SECRET` | api | — | Lo genera automáticamente |
 | `DROIDESK_DATABASE_URL` | api | `sqlite:////data/droidesk.db` | No lo pide |
-| `DROIDESK_SEED_DEMO_DATA` | api | `true` | Pregunta si cargar datos de demo |
+| `DROIDESK_MODE` | api | `demo` | Pregunta el modo de arranque: `demo` (usuarios y tickets de ejemplo) o `empty` (solo usuarios); los usuarios de demo y los catálogos se cargan siempre |
 | `DROIDESK_TIMEZONE` | api | `America/Santiago` | Pregunta la zona horaria de la organización, que define el calendario del SLA |
 | `DROIDESK_BUSINESS_HOURS` | api | `09:00-18:00` | Pregunta la jornada hábil, de lunes a viernes |
 | `DROIDESK_WEB_PORT` | compose | `8080` | Pregunta el puerto |
@@ -180,7 +181,7 @@ El esfuerzo de testing sigue la ley de Pareto: el 20 % del código que concentra
 | API | Cada endpoint: autorización por rol, validación, historial escrito y conflicto al tomar | pytest + TestClient con SQLite temporal |
 | Web | Guardas por rol, formulario de creación, cola y toma de tickets, acciones según lo que permite la API, luces de estado y SLA | Vitest + Testing Library |
 | Contrato | El OpenAPI versionado coincide con el que genera la API | CI |
-| End-to-end | El recorrido principal sobre el stack Docker | Un smoke test; la herramienta se define en la fase de empaquetamiento |
+| End-to-end | El recorrido principal (crear → tomar → en espera → comentar → resolver → cerrar) sobre el stack Docker, con dos perfiles a la vez | Playwright Test en `e2e/` ([ADL-010](../.design-logs/ADL-010-playwright-e2e-smoke.md)) |
 
 ### Coverage gates
 

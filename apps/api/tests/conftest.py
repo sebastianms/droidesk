@@ -12,10 +12,10 @@ from sqlmodel import Session, SQLModel
 
 import droidesk_api.models  # noqa: F401  (registra las tablas en la metadata)
 from droidesk_api.core.clock import get_clock
-from droidesk_api.core.config import Settings, get_settings
+from droidesk_api.core.config import AppMode, Settings, get_settings
 from droidesk_api.core.db import build_engine, get_session
 from droidesk_api.main import create_app
-from droidesk_api.seed import seed_demo_data
+from droidesk_api.seed import seed_base_data
 from tests.factories import ANY_PASSWORD
 from tests.fakes import FakeClock
 
@@ -27,7 +27,7 @@ def settings(tmp_path: Path) -> Settings:
     return Settings(
         jwt_secret=SecretStr(secrets.token_hex(32)),
         database_url=f"sqlite:///{tmp_path / 'test.db'}",
-        seed_demo_data=False,
+        mode=AppMode.EMPTY,
     )
 
 
@@ -52,7 +52,7 @@ def session(engine: Engine) -> Iterator[Session]:
 
 @pytest.fixture
 def demo_data(session: Session) -> None:
-    seed_demo_data(session)
+    seed_base_data(session)
 
 
 @pytest.fixture

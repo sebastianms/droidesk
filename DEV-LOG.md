@@ -5954,3 +5954,564 @@ Running lint and typecheck
 ### #39 · 🧑 Usuario
 > si, aprobado
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 2m 34s
+- **Herramientas:** Bash ×4
+- **Git:** `ba81e8a` docs: agrega FR-024a, extiende ADL-004 y ADL-009 y actualiza SDD, contrato REST, DECISIONS y AI-USAGE · PR https://github.com/sebastianms/droidesk/pull/8
+- **Tokens:** entrada 10 · cache leída 2.3M · cache escrita 5.5k · salida 4.1k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #8 de la Fase 8: https://github.com/sebastianms/droidesk/pull/8
+
+- Antes de commitear marqué T052–T057 como hechas en `tasks.md` y la Fase 8 como `[DONE · PR #8]` en el roadmap.
+- Hice el push a `phase/08-sla` y el árbol quedó limpio.
+- El CI pasó en las cuatro corridas: `api` y `web`, tanto por el push como por el PR.
+- **Un cambio respecto de lo que te propuse:** quedaron 4 commits, no 5. El ajuste de prioridad y los filtros comparten archivos de la web (`TicketList.tsx` y `labels.ts`), y separarlos dejaba un commit intermedio que no compilaba, así que van juntos en `feat(web): agrega el ajuste de prioridad, SlaLight y los filtros y el orden por SLA y prioridad`. Con el squash and merge en `main` queda igual un solo commit por fase.
+
+Cuando hagas el squash and merge, arranco la Fase 9, de empaquetamiento y setup inicial:
+- tickets de demo en distintos estados;
+- `setup.sh` como único comando, que levanta todo con Docker y pide la configuración necesaria;
+- un smoke de punta a punta;
+- el `README.md` con diagramas Mermaid del flujo y de la arquitectura;
+- el cierre de DECISIONS y AI-USAGE.
+
+</details>
+
+*Sesión finalizada (prompt_input_exit)*
+
+## 🛰️ Sesión `2680e3d9` · resume
+
+- **Cache:** probablemente expirado · inactivo 20h 3m · contexto 15.4k tokens · re-escritura estimada US$0.12
+
+### #40 · 🧑 Usuario
+> mezclado
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 29m 27s
+- **Herramientas:** Bash ×144 · Read ×8 · Write ×6 · Agent ×5 · SubagentHandback ×5
+- **Archivos modificados:** `README.md`, `setup.sh`, `.env.example`, `apps/api/src/droidesk_api/demo_tickets.py`, `apps/api/tests/unit/test_demo_tickets.py`, `.design-logs/ADL-010-playwright-e2e-smoke.md`
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 9m 26s · 2.9M tokens
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 10m 11s · 5M tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 4m 41s · 1.6M tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 1m 37s · 396.9k tokens
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 49s · 242.9k tokens
+- **Tokens:** entrada 84 · cache leída 6M · cache escrita 182k · salida 46.4k · hit 97%
+
+<details><summary>Respuesta</summary>
+
+Terminé la Fase 9 (empaquetamiento y setup inicial). Los checks pasan, deckard no encontró hallazgos de criticidad 8 o más, y queda esperando tu aprobación para hacer commit y push. Falta ver correr el workflow nuevo del smoke en GitHub: se ejecuta recién con el push.
+
+**Qué se hizo**
+- **`./setup.sh`**:
+  - Verifica Docker y pregunta el puerto, la zona horaria, la jornada y si cargar tickets de ejemplo; repregunta cuando un valor no es válido.
+  - Genera el secreto en un `.env` de solo lectura para el dueño, que nunca se muestra. Si `.env` ya existe, ofrece reutilizarlo.
+  - Levanta todo, espera a que responda y muestra la URL y los usuarios de demo.
+  - Con `--yes` corre sin preguntas, que es como lo usa CI.
+  - Desde cero tardó **8 segundos** con las imágenes base ya descargadas. La primera descarga depende de la red y no la medí.
+- **Tickets de ejemplo**: son 9, en los seis estados y las cuatro prioridades. Incluyen uno vencido, uno en pausa, uno cumplido, una respuesta citada y un ajuste de prioridad. Se crean con el mismo servicio que usa la app y con fechas relativas al momento de la carga, así que el historial es consistente.
+- **Smoke de punta a punta con Playwright**: es un módulo propio en `e2e/`. Recorre crear → tomar → en espera → comentar → resolver → cerrar con los dos perfiles a la vez, y falla ante cualquier error de consola o de CSP. Tiene un workflow propio, `e2e.yml`, que levanta el stack con `./setup.sh --yes`, así que también prueba el script.
+- **`README.md`** con diagramas Mermaid del flujo y de la arquitectura, `./setup.sh` como único comando, los usuarios de demo y los enlaces a la documentación.
+- **Documentación**:
+  - ADL-010 explica por qué elegí Playwright.
+  - ADL-005 y ADL-006 suman lo nuevo del seed y del setup.
+  - DECISIONS tiene la estrategia de calidad final (qué se probó, qué no y por qué, con la cobertura obtenida) y la deuda técnica actualizada.
+  - AI-USAGE suma las filas de la Fase 9.
+  - Specs, plan, quickstart y tech-stack quedaron coherentes con el código.
+
+**Verificación**
+- API: 1114 tests, 99,9 % de cobertura total y 100 % en el flujo crítico; el contrato no cambió.
+- Web: 589 tests y 100 % de cobertura.
+- `setup.sh` pasa shellcheck sin hallazgos.
+- En un stack aislado y desde cero, el smoke pasó y revisé en el navegador la cola y el detalle con los tickets de ejemplo.
+- Tu stack en el puerto 8080 ya corre la última versión.
+
+**Tres cosas para que decidas**
+1. **Cambié qué controla el flag del seed.** Antes, responder "no" a los datos de demo dejaba la app sin usuarios con los que ingresar. Ahora los usuarios, las categorías y las políticas se cargan siempre que la base está vacía, y `DROIDESK_SEED_DEMO_DATA` controla solo los tickets de ejemplo.
+2. **Los filtros pueden chocar con el límite de "a lo más dos" opcionales.** "Búsqueda y filtros" es uno de los opcionales del enunciado. En DECISIONS dejé escrito que los filtros por prioridad y por SLA que pediste en la Fase 8 son un complemento del SLA, y que la búsqueda de texto sigue descartada. Dime si prefieres otro planteamiento.
+3. **Tu base local no va a mostrar los tickets de ejemplo**, porque el seed no los carga si ya hay tickets. Para verlos, `docker compose down -v && ./setup.sh` funciona, pero borra los datos que tienes hoy.
+
+**Commits propuestos**
+1. `feat(api): carga siempre la base y agrega tickets de ejemplo al seed`
+2. `feat(setup): agrega setup.sh como único comando de arranque`
+3. `test(e2e): agrega el smoke de punta a punta con Playwright y su workflow`
+4. `docs: agrega README, ADL-010, la estrategia de calidad final y actualiza SDD, DECISIONS y AI-USAGE`
+
+¿Apruebas el commit, el push y el PR?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Resolving Playwright docs via ctx7
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading status.py, recorder.py, db.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading config.py settings
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading seed.py demo users
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_ticket_service.py fixtures
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking UTCDateTime columns in migrations
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating .env.example comments
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running baseline pytest suite
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Simplifying parse_args in setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading test_domain_purity.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Tearing down droidesk-test stack
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Moving load_demo_tickets in demo_tickets.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing invalid values in setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Mapping Playwright versions to chromium builds
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Inspecting seeded tickets in seed-check.db
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading ticket detail components
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Timing the seed.py run
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading Panel.tsx and labels.ts
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating test_seed.py assertions
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Writing fixtures.ts for Playwright
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking types in test_demo_tickets.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running tmp-check.spec.ts CSP check
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Mutating demo_tickets.py scenarios
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Resolving upload-artifact SHA pins
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Linting e2e.yml with actionlint
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying seed.py on temp databases
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing setup.sh under bash 3.2
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running main-flow.spec.ts smoke
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Cleaning up demo_tickets.py leftovers
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking setup.sh executable bit
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading tickets/service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading seed.py and fakes.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking pyproject.toml ruff rules
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Exercising setup.sh validators
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking business hours parsing in config.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying pinned SHAs in e2e.yml
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Editing _seed in seed.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Validating seed flag in setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing setup.sh with docker stub
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking seed.py and test_seed.py
+
+</details>
+
+### #41 · 🧑 Usuario
+> me gustaria que tuvieramos 2 modos, un modo "Demo" con usuarios, y data de prueba en la app (en distintos estados, comentarios, etc), con el fin de que el usuario que va a ejecutar el setup pueda ver las funcionalidades de la app.... y otro modo que este vacio solo con los usuarios ya creados.
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 22m 5s
+- **Herramientas:** Bash ×79 · Agent ×4 · SubagentHandback ×4 · Read ×4
+- **Subagentes:**
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 5m 50s · 2.4M tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 3m 12s · 977k tokens
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `subagente`
+  - `general-purpose` · `claude-sonnet-5-5` · ⏱ 2m 19s · 751.3k tokens
+  - `subagente`
+  - `deckard` · `claude-sonnet-5-5` · ⏱ 52s · 374.5k tokens
+- **Tokens:** entrada 32 · cache leída 3.7M · cache escrita 40.7k · salida 18k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Quedaron listos los dos modos de arranque. Corrí el setup desde cero en una copia aislada con cada modo, y en ambos casos el smoke de Playwright pasó.
+
+**Cómo funciona**
+- `./setup.sh` ahora pregunta:
+  ```
+  Modo de arranque:
+    1) Demo: usuarios y tickets de ejemplo en distintos estados, con comentarios e historial, para recorrer las funcionalidades.
+    2) Vacío: solo los usuarios de demo, sin tickets, para empezar de cero.
+  Elige un modo [1]:
+  ```
+  Acepta `1`/`2` o `demo`/`vacío`, y si la respuesta no es válida vuelve a preguntar. Al final muestra con qué modo quedó, por ejemplo "Modo: Vacío (solo usuarios)".
+- **Demo** carga los 9 tickets de ejemplo: los seis estados, uno vencido, uno en pausa, comentarios, una respuesta citada y un ajuste de prioridad. **Vacío** deja solo los 7 usuarios y los catálogos.
+- La configuración pasa a ser `DROIDESK_MODE=demo|empty` y reemplaza al antiguo `DROIDESK_SEED_DEMO_DATA`. Para CI se usa `./setup.sh --yes` y el modo sale de esa variable; con un valor inválido, el setup falla sin escribir `.env`.
+- **Cambiar de modo no borra datos.** Si la base ya existe, el setup avisa y explica que `docker compose down -v` la borra para empezar de cero. Los tickets de ejemplo solo se cargan mientras no haya ningún ticket.
+
+**Verificación**
+- API: 1119 tests, 99,9 % de cobertura total y 100 % en el flujo crítico. El contrato no cambió.
+- shellcheck no reporta hallazgos.
+- deckard no encontró nada de criticidad 8 o más en dos rondas; apliqué igual sus ajustes menores.
+- README, ADL-005, ADL-006, DECISIONS, tech-stack, data-model, quickstart y tasks hablan ahora de los dos modos. Tu pedido quedó registrado en AI-USAGE, en las intervenciones del usuario.
+
+**Tu stack en el 8080** ya corre esta versión, con tus datos intactos. Tu `.env` todavía tiene `DROIDESK_SEED_DEMO_DATA=true`; la API ignora esa variable y arranca en modo Demo, así que no rompe nada. Si quieres dejarlo limpio, cámbiala por `DROIDESK_MODE=demo`.
+
+Siguen abiertas dos preguntas del resumen anterior: si te parece bien cómo dejé explicados los filtros frente al límite de dos opcionales en DECISIONS, y que tu base local no muestra los tickets de ejemplo porque ya tiene tickets.
+
+**Commits propuestos**
+1. `feat(api): agrega los modos de arranque Demo y Vacío con tickets de ejemplo en el seed`
+2. `feat(setup): agrega setup.sh como único comando de arranque, con elección de modo`
+3. `test(e2e): agrega el smoke de punta a punta con Playwright y su workflow`
+4. `docs: agrega README, ADL-010, la estrategia de calidad final y actualiza SDD, DECISIONS y AI-USAGE`
+
+¿Apruebas el commit, el push y el PR?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Editing AppMode in config.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Updating _seed logging in seed.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Checking openapi.json contract hash
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping apps for SEED_DEMO_DATA
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying .env.example mode block
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Counting tickets via count_tickets.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Filtering reuse.log from setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Debugging port prompt in setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Verifying empty mode in setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing setup.sh help text
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping docs for SEED_DEMO_DATA
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reading setup.sh and seed.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Grepping commits in service.py
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing print_mode in setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Counting demo_data fixture usages
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Editing setup.sh mode handling
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing test_seed.py diff
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Running pytest and coverage checks
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Testing mode_from_answer in setup.sh
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+Reviewing seed.py and setup.sh
+
+</details>
+
+### #42 · 🧑 Usuario
+> Si, aprobado
+
+### #43 · 🧑 Usuario
+> Si, aprobado
+

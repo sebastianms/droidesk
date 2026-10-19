@@ -11,7 +11,14 @@ Escenarios para comprobar a mano, o con el smoke end-to-end, que la feature cump
 open http://localhost:8080 # o el puerto elegido en el setup
 ```
 
-La pantalla de ingreso lista los usuarios de demo: 4 solicitantes y 3 agentes. Para probar dos perfiles a la vez, usa dos navegadores o una ventana privada.
+La ayuda "?" de la pantalla de ingreso lista los usuarios de demo: 4 solicitantes y 3 agentes. Para probar dos perfiles a la vez, usa dos navegadores o una ventana privada. En el modo Demo, la cola ya trae 9 tickets en distintos estados, incluido uno vencido y uno en pausa.
+
+El recorrido de los escenarios 1, 6, 8, 9 y 10 está automatizado en el smoke ([ADL-010](../../.design-logs/ADL-010-playwright-e2e-smoke.md)):
+
+```bash
+cd e2e && npm ci && npx playwright install chromium
+DROIDESK_BASE_URL=http://localhost:8080 npm test
+```
 
 ## Escenarios
 

@@ -15,7 +15,7 @@ El setup debe ser un solo comando que levante todo con Docker y le pida al usuar
 
 ## Decisión
 
-Docker Compose con dos servicios. `api` corre uvicorn y, al iniciar, aplica las migraciones y carga los datos de demo si están habilitados. `web` es nginx: sirve el build de la SPA y hace de proxy de `/api` hacia `api`. SQLite vive en un volumen nombrado. `setup.sh` verifica Docker, pregunta la configuración, genera el secreto en `.env`, levanta todo y muestra las URLs y los usuarios de demo.
+Docker Compose con dos servicios. `api` corre uvicorn y, al iniciar, aplica las migraciones y carga los datos de demo según el modo de arranque. `web` es nginx: sirve el build de la SPA y hace de proxy de `/api` hacia `api`. SQLite vive en un volumen nombrado. `setup.sh` verifica Docker, pregunta la configuración, genera el secreto en `.env`, levanta todo y muestra las URLs y los usuarios de demo.
 
 ---
 
@@ -84,3 +84,19 @@ La decisión de fondo no cambia. Se fijaron estos detalles al implementarla:
 - **CI**:
   - un workflow por app con filtro de rutas, runner `ubuntu-24.04` y acciones fijadas por SHA;
   - el gate del flujo crítico y `alembic check` se saltan (`if: hashFiles(...)`) mientras no existan sus archivos, y se activan solos cuando aparecen.
+
+---
+
+## Extensión 2026-10-19 · `setup.sh` (Fase 9)
+
+- **Un solo comando**: `./setup.sh` verifica Docker, el daemon y Compose v2, y hace lo siguiente:
+  - pregunta el puerto, la zona horaria, la jornada y el modo de arranque (Demo o Vacío, [ADL-005](ADL-005-simulated-auth-signed-token.md)), con un valor por defecto y validando cada respuesta;
+  - avisa si el volumen de datos ya existe, porque cambiar de modo no borra los datos;
+  - genera el secreto (`openssl rand -hex 32`, con respaldo en `/dev/urandom`) en un `.env` con permisos 600, sin mostrarlo nunca;
+  - corre `docker compose up -d --build --wait`; si falla, muestra el log de la API;
+  - muestra la URL, el modo y los usuarios de demo, que consulta a la API desde dentro del contenedor, así el host no necesita `curl` ni `jq`.
+- **`.env` existente**: el script ofrece reutilizarlo, y en ese caso no regenera el secreto ni vuelve a preguntar.
+- **`--yes`**: modo no interactivo para CI. Toma los valores de las variables de entorno o los de por defecto, y falla sin escribir `.env` si alguno es inválido.
+- **Portabilidad**: bash 3.2 (macOS) y shellcheck sin hallazgos; CI corre shellcheck antes de levantar el stack.
+- **SM-06**: con las imágenes base ya descargadas, el arranque desde cero toma unos 20 segundos. La descarga de las imágenes base depende de la red y no se midió.
+- `COMPOSE_PROJECT_NAME` permite levantar un stack aislado (por ejemplo, `droidesk-test`) sin tocar el del usuario.

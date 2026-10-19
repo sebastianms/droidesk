@@ -70,6 +70,10 @@ flowchart LR
 | 8 · US5 | Ajuste de prioridad del agente (API, contrato y control en la web), tests de los bordes del SLA a través de la API y extracción de `SlaLight` | Sonnet 5.5 xHigh |
 | 8 · Checkpoint | deckard sin hallazgos de criticidad ≥ 8; se corrigió un aviso de error que desaparecía al refrescar el detalle (criticidad 7) | Sonnet 5.5 xHigh (deckard) |
 | 8 · Orquestación | Prueba en navegador de los escenarios 5 y 13 contra un stack aislado y extensión de ADL-009 | Opus 5.5 Max |
+| 9 · Empaquetamiento | Tickets de ejemplo: 9 escenarios declarados como datos y reproducidos con `TicketService` y un reloj del seed, con tests en 6 momentos de la semana | Sonnet 5.5 xHigh |
+| 9 · Empaquetamiento | `setup.sh` (interactivo y `--yes`, compatible con bash 3.2 y sin hallazgos de shellcheck), el smoke con Playwright en `e2e/` y el workflow `e2e.yml`, probados en copias del repo con stacks aislados | Sonnet 5.5 xHigh |
+| 9 · Checkpoint | deckard sin hallazgos de criticidad ≥ 8, antes y después de los modos de arranque. Se aplicaron sus ajustes menores: un efecto oculto dentro de un log, el seed acoplado a una dependencia de FastAPI, valores por defecto sin validar en `setup.sh` y un test que dependía del entorno | Sonnet 5.5 xHigh (deckard) |
+| 9 · Orquestación | Elección de la herramienta del smoke (ADL-010), la base de datos de demo que se carga siempre (extensión de ADL-005), `README.md` con los diagramas, la estrategia de calidad final, el replanning y la prueba del stack desde cero | Opus 5.5 Max |
 
 ## 4. Dónde intervino el humano y por qué
 
@@ -88,6 +92,7 @@ flowchart LR
 | Fase 7 · Revisión de comentarios | Pidió poder citar un comentario como respuesta a otro | FR-017b nuevo: `Comment.reply_to_id` (migración 0003), botón "Responder" y la cita con autor y extracto enlazada al original |
 | Fase 7 · Revisión de comentarios | Pidió una explicación del 500 con ids mayores que 2^63 y decidió corregirlo en esta fase, en vez de dejarlo para el empaquetamiento | Tipo de id acotado y compartido en la API: un id fuera de rango responde 422, y el contrato publica el mínimo y el máximo |
 | Fase 8 · Revisión del SLA | Pidió filtrar y ordenar por SLA y por prioridad | FR-024a nuevo: filtros por prioridad y estado del SLA y orden por vencimiento, prioridad o más recientes en los tres listados, aplicados en la web y guardados en la URL; queda como deuda moverlos a la API junto con la paginación |
+| Fase 9 · Revisión del empaquetamiento | Pidió dos modos de arranque: uno Demo, con usuarios y datos de prueba en distintos estados para ver las funcionalidades, y otro vacío, solo con los usuarios | `DROIDESK_MODE` (`demo` o `empty`) reemplaza al booleano de los datos de demo, y `setup.sh` pregunta el modo y avisa si la base ya existe ([ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md)) |
 
 ## 5. Qué salidas del agente se rechazaron
 

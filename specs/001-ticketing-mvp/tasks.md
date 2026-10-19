@@ -88,7 +88,7 @@
   - `GET /api/v1/sla-policies` en `apps/api/src/droidesk_api/sla/router.py`;
   - `GET /api/v1/categories` en `apps/api/src/droidesk_api/tickets/router.py`;
   - test `apps/api/tests/api/test_catalogs.py`.
-- [x] T022 Crear `apps/api/src/droidesk_api/seed.py`, que carga usuarios, categorías y políticas de demo si `DROIDESK_SEED_DEMO_DATA=true` y la base está vacía, e invocarlo desde `apps/api/docker-entrypoint.sh`.
+- [x] T022 Crear `apps/api/src/droidesk_api/seed.py`, que carga usuarios, categorías y políticas de demo si `DROIDESK_SEED_DEMO_DATA=true` (en la Fase 9 pasó a `DROIDESK_MODE`, ver T059) y la base está vacía, e invocarlo desde `apps/api/docker-entrypoint.sh`.
 - [x] T023 Conectar en `apps/api/src/droidesk_api/main.py` los routers, el handler de errores y el lifespan; regenerar `contracts/openapi.json`.
 
 ### Web
@@ -247,21 +247,21 @@
 
 ## Phase 9 · Polish: Empaquetamiento y setup inicial
 
-**Objetivo**: un comando levanta todo con datos de demo, y la documentación final queda lista.
+**Objetivo**: un comando levanta todo, en modo Demo o Vacío, y la documentación final queda lista.
 
-- [ ] T058 Agregar en `apps/api/src/droidesk_api/seed.py` unos 8 tickets de demo en distintos estados y prioridades, creados con los servicios para que su historial sea consistente y fechados relativos a la carga.
-- [ ] T059 Crear `setup.sh` y `.env.example`. El script:
+- [x] T058 Agregar en `apps/api/src/droidesk_api/seed.py` (con los escenarios en `demo_tickets.py`) unos 8 tickets de demo en distintos estados y prioridades, creados con los servicios para que su historial sea consistente y fechados relativos a la carga.
+- [x] T059 Crear `setup.sh` y `.env.example`. El script:
   - verifica Docker y Compose v2;
-  - pregunta el puerto, la zona horaria, la jornada y si cargar datos de demo;
+  - pregunta el puerto, la zona horaria, la jornada y el modo de arranque: Demo (usuarios y tickets de ejemplo) o Vacío (solo usuarios), a pedido del usuario;
   - genera el secreto con `openssl rand -hex 32`;
   - escribe `.env`;
   - corre `docker compose up -d --build`;
   - espera el healthcheck;
   - muestra la URL y los usuarios de demo.
-- [ ] T060 Elegir la herramienta del smoke end-to-end (con su ADL) e implementar el recorrido crear → tomar → en espera → comentar → resolver → cerrar contra el stack Docker.
-- [ ] T061 Crear `README.md`: diagramas Mermaid del flujo y de la arquitectura, `./setup.sh` como único comando, usuarios de demo y enlaces a la documentación.
-- [ ] T062 Completar `DECISIONS.md` (deuda técnica final y estrategia de calidad: qué se probó, qué no y la cobertura obtenida) y `AI-USAGE.md`.
-- [ ] T063 Replanning (SDD Phase 5.5): auditar que `specs/`, `tasks.md`, el código y `roadmap.md` coincidan antes de la fase de escalabilidad.
+- [x] T060 Elegir la herramienta del smoke end-to-end (Playwright Test en `e2e/`, ADL-010) e implementar el recorrido crear → tomar → en espera → comentar → resolver → cerrar contra el stack Docker.
+- [x] T061 Crear `README.md`: diagramas Mermaid del flujo y de la arquitectura, `./setup.sh` como único comando, usuarios de demo y enlaces a la documentación.
+- [x] T062 Completar `DECISIONS.md` (deuda técnica final y estrategia de calidad: qué se probó, qué no y la cobertura obtenida) y `AI-USAGE.md`.
+- [x] T063 Replanning (SDD Phase 5.5): auditar que `specs/`, `tasks.md`, el código y `roadmap.md` coincidan antes de la fase de escalabilidad.
 
 **Checkpoint**: `./setup.sh` levanta todo desde cero en menos de 5 minutos (SM-06); el smoke pasa; la documentación queda completa.
 

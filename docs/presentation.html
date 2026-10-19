@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo construí DroiDesk</title>
+<style>
+  :root {
+    --bg: #070d18;
+    --bg-glow: #0d1a33;
+    --panel: #101a2d;
+    --panel-2: #15223a;
+    --plate: #263655;
+    --plate-strong: #34496f;
+    --ink: #e7edf6;
+    --ink-muted: #93a3bb;
+    --astro-blue: #5b8fe6;
+    --astro-blue-deep: #1d4e9e;
+    --astro-blue-soft: #16294d;
+    --light-ok: #3fbf85;
+    --light-warn: #f0b429;
+    --light-alert: #ef6b6b;
+    --light-holo: #4cc3e8;
+    --radius: 14px;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --tracking: 0.14em;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 0%, var(--bg-glow), var(--bg) 70%);
+    color: var(--ink);
+    font: 18px/1.45 var(--font);
+    overflow: hidden;
+  }
+  .viewport { position: fixed; inset: 0; display: grid; place-items: center; }
+  .stage {
+    position: relative; width: 1280px; height: 720px; flex: none;
+    transform-origin: center center;
+  }
+  .slide {
+    position: absolute; inset: 0; padding: 48px 64px 72px;
+    display: flex; flex-direction: column; gap: 22px;
+    background: linear-gradient(180deg, rgba(16, 26, 45, 0.92), rgba(9, 16, 30, 0.96));
+    border: 1px solid var(--plate); border-radius: 22px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    opacity: 0; visibility: hidden; transition: opacity 0.35s ease, visibility 0.35s;
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+  .slide::before {
+    content: ""; position: absolute; left: 64px; right: 64px; top: 30px; height: 2px;
+    background: linear-gradient(90deg, var(--astro-blue-deep), var(--light-holo) 40%, transparent);
+    opacity: 0.6;
+  }
+  .kicker { color: var(--light-holo); font-size: 14px; font-weight: 700; letter-spacing: var(--tracking); text-transform: uppercase; }
+  h1, h2 { text-transform: uppercase; letter-spacing: var(--tracking); color: var(--ink); line-height: 1.15; }
+  h1 { font-size: 72px; }
+  h2 { font-size: 34px; }
+  h3 { font-size: 17px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--astro-blue); margin-bottom: 10px; }
+  p, li { color: var(--ink); }
+  .muted { color: var(--ink-muted); }
+  .small { font-size: 15px; }
+  ul.clean { list-style: none; padding: 0; display: grid; gap: 8px; }
+  ul.clean li { padding-left: 20px; position: relative; font-size: 16.5px; }
+  ul.clean li::before {
+    content: ""; position: absolute; left: 2px; top: 0.55em; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--light-holo); box-shadow: 0 0 8px var(--light-holo);
+  }
+  code { font-family: var(--mono); font-size: 0.88em; color: var(--light-holo); background: rgba(76, 195, 232, 0.08); padding: 1px 5px; border-radius: 5px; }
+  .grid { display: grid; gap: 18px; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .panel {
+    background: var(--panel); border: 1px solid var(--plate); border-radius: var(--radius);
+    padding: 18px 20px; position: relative;
+  }
+  .panel.accent { border-color: var(--astro-blue); box-shadow: 0 0 0 1px rgba(91, 143, 230, 0.25), 0 0 28px rgba(76, 195, 232, 0.12); }
+  .panel .tag { position: absolute; top: -11px; right: 16px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px;
+    background: var(--astro-blue-soft); border: 1px solid var(--plate-strong); color: var(--ink); font-size: 14px; font-weight: 600;
+  }
+  .light { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
+  .light.ok { background: var(--light-ok); box-shadow: 0 0 10px var(--light-ok); }
+  .light.warn { background: var(--light-warn); box-shadow: 0 0 10px var(--light-warn); }
+  .light.alert { background: var(--light-alert); box-shadow: 0 0 10px var(--light-alert); }
+  .light.holo { background: var(--light-holo); box-shadow: 0 0 10px var(--light-holo); }
+  .light.blue { background: var(--astro-blue); box-shadow: 0 0 10px var(--astro-blue); }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .term {
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.55; background: #050a13; border: 1px solid var(--plate);
+    border-radius: 12px; padding: 14px 16px; color: #c9d4e5; white-space: pre;
+  }
+  .term .p { color: var(--light-ok); }
+  .term .h { color: var(--light-holo); }
+  .term .d { color: var(--ink-muted); }
+
+  /* SDD flow */
+  .flow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; position: relative; margin-top: 30px; }
+  .step {
+    background: var(--panel); border: 1px solid var(--plate); border-radius: 12px; padding: 14px 12px 12px;
+    position: relative; min-height: 150px;
+  }
+  .step + .step::before {
+    content: ""; position: absolute; left: -15px; top: 30px; width: 16px; height: 2px; background: var(--astro-blue);
+  }
+  .step + .step::after {
+    content: ""; position: absolute; left: -5px; top: 26px; border: 5px solid transparent; border-left-color: var(--astro-blue);
+  }
+  .step .n { font-family: var(--mono); font-size: 12px; color: var(--ink-muted); }
+  .step .t { font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin: 2px 0 8px; }
+  .step .a { font-size: 13.5px; color: var(--ink-muted); line-height: 1.4; }
+  .step.ask { border-color: var(--light-warn); box-shadow: 0 0 20px rgba(240, 180, 41, 0.12); }
+  .ask-badge {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--light-warn); color: #1b1300; font-weight: 900; font-size: 16px; box-shadow: 0 0 14px var(--light-warn);
+  }
+  .loop {
+    margin: 10px 0 0 calc((100% - 6 * 14px) / 7 * 1 + 14px); width: calc((100% - 6 * 14px) / 7 * 5 + 4 * 14px);
+    border: 2px dashed var(--light-warn); border-top: 0; height: 26px; border-radius: 0 0 14px 14px; position: relative;
+  }
+  .loop span {
+    position: absolute; left: 50%; bottom: -14px; transform: translateX(-50%); background: var(--bg);
+    padding: 0 10px; font-size: 13.5px; color: var(--light-warn); white-space: nowrap;
+  }
+
+  /* Timeline */
+  .tl { display: grid; gap: 12px; }
+  .tl .it { display: grid; grid-template-columns: 112px 1fr; gap: 12px; align-items: baseline; font-size: 15px; }
+  .tl .ph { font-family: var(--mono); font-size: 12.5px; color: var(--light-holo); text-transform: uppercase; }
+
+  /* Feature tiles */
+  .tile { background: var(--panel); border: 1px solid var(--plate); border-radius: 12px; padding: 12px 14px; }
+  .tile b { display: flex; align-items: center; gap: 8px; font-size: 15.5px; margin-bottom: 3px; }
+  .tile span { font-size: 13.5px; color: var(--ink-muted); line-height: 1.35; display: block; }
+
+  /* Backbone skills */
+  .backbone { display: grid; gap: 9px; padding: 20px 20px 14px; }
+  .backbone h3 { margin-bottom: 2px; }
+  .bb-item { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+  .bb-item b { display: block; font-size: 16px; font-family: var(--mono); color: var(--light-holo); }
+  .bb-item div span { display: block; font-size: 13.5px; color: var(--ink-muted); line-height: 1.35; }
+  .bb-n {
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 15px;
+    background: var(--astro-blue-deep); color: var(--ink); border: 1px solid var(--light-holo); box-shadow: 0 0 12px rgba(76, 195, 232, 0.35);
+  }
+  .tile.sm { padding: 10px 12px; }
+  .tile.sm b { font-size: 14px; }
+  .tile.sm span { font-size: 12.5px; }
+
+  /* Strategy cards */
+  .strat .letter { font-size: 44px; font-weight: 900; color: var(--plate-strong); line-height: 1; }
+  .strat.accent .letter { color: var(--light-holo); text-shadow: 0 0 18px rgba(76, 195, 232, 0.5); }
+  .strat h3 { margin: 6px 0 6px; color: var(--ink); }
+  .meter { display: grid; grid-template-columns: 92px 1fr; gap: 4px 10px; font-size: 13.5px; margin-top: 10px; }
+  .meter .bar { height: 8px; border-radius: 4px; background: var(--panel-2); align-self: center; overflow: hidden; }
+  .meter .bar i { display: block; height: 100%; background: var(--astro-blue); border-radius: 4px; }
+  .steps { display: flex; flex-wrap: wrap; gap: 8px; counter-reset: s; }
+  .steps .chip::before { counter-increment: s; content: counter(s); font-family: var(--mono); color: var(--light-holo); }
+
+  /* Big numbers */
+  .num { font-size: 44px; font-weight: 900; color: var(--ink); line-height: 1; }
+  .num small { font-size: 18px; color: var(--light-holo); font-weight: 700; }
+
+  .doc-link { color: var(--light-holo); text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
+  .doc-link:hover { color: var(--ink); }
+  .doc-link:focus-visible { outline: 2px solid var(--light-holo); outline-offset: 3px; border-radius: 4px; }
+  .doc-link code { text-decoration: none; }
+
+  /* Chrome */
+  .chrome {
+    position: absolute; left: 64px; right: 64px; bottom: 22px; display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: var(--ink-muted); letter-spacing: 0.12em; text-transform: uppercase; pointer-events: none;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--astro-blue); }
+  .dots { display: flex; gap: 8px; pointer-events: auto; }
+  .dots button {
+    width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--plate-strong); background: var(--panel-2); padding: 0; cursor: pointer;
+  }
+  .dots button[aria-current="true"] { background: var(--light-holo); border-color: var(--light-holo); box-shadow: 0 0 10px var(--light-holo); }
+  .dots button:focus-visible, .nav button:focus-visible { outline: 2px solid var(--light-holo); outline-offset: 3px; }
+  .nav { display: flex; gap: 8px; pointer-events: auto; }
+  .nav button {
+    background: var(--panel); color: var(--ink); border: 1px solid var(--plate-strong); border-radius: 10px;
+    width: 34px; height: 30px; font-size: 17px; line-height: 1; cursor: pointer;
+  }
+  .nav button:hover { border-color: var(--light-holo); }
+  .hull { fill: #dfe6f1; } .acc { fill: var(--astro-blue); } .holo { fill: var(--light-holo); } .lens { fill: #0f1b2d; }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    body { overflow: visible; background: var(--bg); }
+    .viewport { position: static; display: block; }
+    .stage { transform: none !important; width: 1280px; height: auto; }
+    .slide { position: relative; opacity: 1; visibility: visible; height: 720px; break-after: page; border-radius: 0; }
+    .chrome .nav { display: none; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="droid" viewBox="0 0 64 64">
+    <rect class="acc" x="9" y="28" width="7" height="25" rx="2"/>
+    <rect class="acc" x="48" y="28" width="7" height="25" rx="2"/>
+    <rect class="acc" x="6" y="51" width="13" height="6" rx="2"/>
+    <rect class="acc" x="45" y="51" width="13" height="6" rx="2"/>
+    <rect class="hull" x="16" y="24" width="32" height="30" rx="3"/>
+    <rect class="acc" x="20" y="33" width="24" height="6" rx="1.5"/>
+    <rect class="acc" x="20" y="43" width="10" height="6" rx="1.5"/>
+    <circle class="holo" cx="38" cy="46" r="2.5"/>
+    <path class="hull" d="M16 24a16 16 0 0 1 32 0z"/>
+    <path class="acc" d="M16.6 21.5a16 16 0 0 1 30.8 0z"/>
+    <circle class="lens" cx="32" cy="15" r="6"/>
+    <circle class="holo" cx="32" cy="15" r="3.5"/>
+  </symbol>
+</svg>
+
+<div class="viewport">
+<main class="stage" id="stage" aria-live="polite">
+
+  <!-- 1 · Portada -->
+  <section class="slide" aria-label="Portada">
+    <div style="display:grid; grid-template-columns: 1fr 300px; gap: 40px; align-items:center; height:100%;">
+      <div style="display:grid; gap:22px;">
+        <div class="kicker">Cómo construí</div>
+        <h1>DroiDesk</h1>
+        <p style="font-size:24px; max-width:720px;">Un sistema de tickets de soporte para una organización de ~800 personas, que construí con IA guiada por especificaciones: decido el qué y los agentes, el cómo.</p>
+        <div class="row">
+          <span class="chip"><i class="light holo"></i>10 fases · 10 PR</span>
+          <span class="chip"><i class="light blue"></i>11 ADL</span>
+          <span class="chip"><i class="light ok"></i>1.700+ tests</span>
+          <span class="chip"><i class="light warn"></i>1 comando de setup</span>
+        </div>
+        <p class="muted small">Claude Code · Opus 5.5 planifica · Sonnet 5.5 codifica · deckard revisa</p>
+      </div>
+      <svg viewBox="0 0 64 64" width="300" height="300" role="img" aria-label="Logo de DroiDesk"><use href="#droid"/></svg>
+    </div>
+  </section>
+
+  <!-- 2 · Prompt inicial -->
+  <section class="slide" aria-label="Análisis del prompt inicial">
+    <div class="kicker">01 · Punto de partida</div>
+    <h2>Análisis del prompt inicial</h2>
+    <div class="grid cols-2" style="flex:1;">
+      <div class="panel">
+        <h3>Qué le pedí al agente</h3>
+        <ul class="clean">
+          <li><b>Producto</b>: el MVP del enunciado (4 obligatorios + hasta 2 opcionales), con el look de un droide.</li>
+          <li><b>Método</b>: spec-driven, design logs, revisión de deckard, Clean Code, SOLID y "Less is More".</li>
+          <li><b>Proceso</b>: un bloque por user story, resumen y aprobación antes de cada commit; trunk-based, una rama y un PR por fase.</li>
+          <li><b>Técnica</b>: front y back como apps separadas, SQLite hoy y PostgreSQL al escalar, Docker en un comando, context7.</li>
+          <li><b>Modelos</b>: Opus 5.5 Max para planificar, Sonnet 5.5 xHigh para codificar.</li>
+          <li><b>Evidencia</b>: DEV-LOG por hook, DECISIONS, AI-USAGE, README con Mermaid y 3 estrategias de escala.</li>
+        </ul>
+      </div>
+      <div class="panel accent">
+        <span class="chip tag"><i class="light warn"></i>Preguntas del agente</span>
+        <h3>Las 5 preguntas iniciales</h3>
+        <div class="tl" style="gap:10px;">
+          <div class="it"><span class="ph">Stack</span><span>Python (FastAPI + SQLModel) y React (Vite + TypeScript)</span></div>
+          <div class="it"><span class="ph">Opcionales</span><span><b>SLA + Comentarios</b>: propuse Adjuntos y pedí una segunda opinión</span></div>
+          <div class="it"><span class="ph">Modularidad</span><span>Dos apps independientes, unidas solo por el contrato OpenAPI</span></div>
+          <div class="it"><span class="ph">Modelos</span><span>Opus planifica en la sesión principal; Sonnet codifica en subagentes</span></div>
+          <div class="it"><span class="ph">Caché</span><span>prompt-cache-control instalado en el repo</span></div>
+        </div>
+        <p class="muted small" style="margin-top:14px;">Rechacé el primer cuestionario: necesitaba aclarar las opcionales antes de responder, y el agente lo reformuló con más contexto.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · SDD -->
+  <section class="slide" aria-label="Spec-Driven Development">
+    <div class="kicker">02 · Metodología</div>
+    <h2>Spec-Driven Development</h2>
+    <p class="muted">Con <code>spec-driven-dev</code>, las especificaciones guían el código y no al revés: cada tarea traza a un requisito numerado (FR) y cada bloque cierra con un checkpoint.</p>
+    <div class="flow">
+      <div class="step ask"><span class="ask-badge" title="Pregunta">?</span><div class="n">0</div><div class="t">Constitution</div><div class="a">Misión, stack y roadmap, a partir de las 5 respuestas iniciales</div></div>
+      <div class="step"><div class="n">1</div><div class="t">Specify</div><div class="a"><code>spec.md</code>: 5 user stories, FR y criterios de éxito</div></div>
+      <div class="step ask"><span class="ask-badge" title="Pregunta">?</span><div class="n">2</div><div class="t">Clarify</div><div class="a">5 preguntas: prioridad, pausa del SLA, respuesta en espera, cancelación y plazos</div></div>
+      <div class="step"><div class="n">3</div><div class="t">Plan</div><div class="a">Plan, research con context7, modelo de datos, contrato REST y quickstart</div></div>
+      <div class="step"><div class="n">4</div><div class="t">Tasks</div><div class="a">63 tareas por bloque, con trazabilidad FR → tarea</div></div>
+      <div class="step ask"><span class="ask-badge" title="Aprobación">✓</span><div class="n">5</div><div class="t">Implement</div><div class="a">Un bloque por user story; lint → tests → deckard → ADL → aprobación</div></div>
+      <div class="step ask"><span class="ask-badge" title="Decisión">?</span><div class="n">6</div><div class="t">Replanning</div><div class="a">Auditoría de specs, tareas y código; elijo la estrategia de escala</div></div>
+    </div>
+    <div class="loop"><span>Cada revisión vuelve a la spec: FR-017a, FR-017b y FR-024a nacieron así</span></div>
+    <div class="row" style="margin-top:22px;">
+      <span class="chip"><i class="light warn"></i>? pregunta o decisión</span>
+      <span class="chip"><i class="light warn"></i>✓ apruebo cada commit y push</span>
+      <span class="muted small">Artefactos en <code>specs/</code> · decisiones en <code>.design-logs/</code></span>
+    </div>
+  </section>
+
+  <!-- 4 · Skills y branch model -->
+  <section class="slide" aria-label="Skills y modelo de ramas">
+    <div class="kicker">03 · Herramientas y git</div>
+    <h2>Skills y branch model</h2>
+    <div class="grid" style="grid-template-columns: 1.05fr 1fr; flex:1;">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="panel accent backbone">
+          <span class="chip tag"><i class="light warn"></i>Creadas por mí</span>
+          <h3>La columna vertebral de la metodología</h3>
+          <div class="bb-item"><span class="bb-n">1</span><div><b>spec-driven-dev</b><span>Define qué se construye y en qué orden: de la constitución al replanning, con preguntas, artefactos y checkpoints</span></div></div>
+          <div class="bb-item"><span class="bb-n">2</span><div><b>design-logger</b><span>Guarda el porqué: un ADL por decisión, con alternativas y notas para que la IA no repita debates</span></div></div>
+          <div class="bb-item"><span class="bb-n">3</span><div><b>deckard</b><span>Cuida la calidad: revisión Clean Code de cada bloque; un hallazgo ≥ 8 bloquea el commit</span></div></div>
+        </div>
+        <div class="grid cols-3" style="gap:10px;">
+          <div class="tile sm"><b><i class="light blue"></i>clean-code</b><span>Python y boy-scout</span></div>
+          <div class="tile sm"><b><i class="light blue"></i>context7</b><span>Docs vigentes</span></div>
+          <div class="tile sm"><b><i class="light blue"></i>graft</b><span>Grafo del código</span></div>
+          <div class="tile sm"><b><i class="light blue"></i>rtk</b><span>Comprime el shell</span></div>
+          <div class="tile sm" style="grid-column: span 2;"><b><i class="light blue"></i>prompt-cache-control</b><span>Vigila el caché y cuándo compactar</span></div>
+        </div>
+      </div>
+      <div class="panel" style="display:flex; flex-direction:column; gap:12px;">
+        <h3>Trunk-based con una rama por fase</h3>
+        <svg viewBox="0 0 520 190" width="100%" role="img" aria-label="main recibe un squash por cada rama de fase">
+          <line x1="20" y1="150" x2="505" y2="150" stroke="#5b8fe6" stroke-width="4" stroke-linecap="round"/>
+          <text x="20" y="180" fill="#93a3bb" font-size="14" font-family="monospace">main</text>
+          <g fill="none" stroke="#4cc3e8" stroke-width="2.5">
+            <path d="M40 150 C 50 70, 95 70, 105 150"/>
+            <path d="M120 150 C 130 70, 175 70, 185 150"/>
+            <path d="M200 150 C 210 70, 255 70, 265 150"/>
+            <path d="M360 150 C 370 70, 415 70, 425 150"/>
+            <path d="M440 150 C 450 70, 485 70, 495 150"/>
+          </g>
+          <text x="300" y="112" fill="#93a3bb" font-size="22" text-anchor="middle">···</text>
+          <g fill="#4cc3e8" font-size="12" font-family="monospace" text-anchor="middle">
+            <text x="72" y="58">01</text><text x="152" y="58">02</text><text x="232" y="58">03</text>
+            <text x="392" y="58">09</text><text x="467" y="58">10</text>
+          </g>
+          <g fill="#3fbf85">
+            <circle cx="105" cy="150" r="7"/><circle cx="185" cy="150" r="7"/><circle cx="265" cy="150" r="7"/>
+            <circle cx="425" cy="150" r="7"/><circle cx="495" cy="150" r="7"/>
+          </g>
+          <text x="262" y="24" fill="#e7edf6" font-size="13" text-anchor="middle" font-family="monospace">phase/NN-slug → PR → squash and merge</text>
+        </svg>
+        <ul class="clean">
+          <li>Cada fase parte de <code>origin/main</code> actualizado, nunca de la fase anterior.</li>
+          <li>Un PR por fase, con CI en verde; lo integro con <b>squash and merge</b>: un commit por fase.</li>
+          <li>Sin push directo a <code>main</code>. Commits Conventional en español neutro.</li>
+          <li>Ningún subagente escribe en git: commit y push solo con aprobación.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · Subagentes y hooks -->
+  <section class="slide" aria-label="Subagentes y hooks">
+    <div class="kicker">04 · Orquestación</div>
+    <h2>Subagentes y hooks</h2>
+    <div class="grid" style="grid-template-columns: 1.15fr 1fr; flex:1;">
+      <div class="panel" style="display:flex; flex-direction:column; gap:14px;">
+        <h3>Un bloque, de punta a punta</h3>
+        <svg viewBox="0 0 560 250" width="100%" role="img" aria-label="Flujo de un bloque con subagentes">
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5b8fe6"/></marker></defs>
+          <g font-family="system-ui, sans-serif" font-size="13">
+            <rect x="10" y="10" width="200" height="62" rx="10" fill="#15223a" stroke="#4cc3e8"/>
+            <text x="110" y="35" fill="#e7edf6" text-anchor="middle" font-weight="700">Opus 5.5 Max</text>
+            <text x="110" y="55" fill="#93a3bb" text-anchor="middle">planifica y orquesta</text>
+            <rect x="300" y="10" width="250" height="62" rx="10" fill="#15223a" stroke="#5b8fe6"/>
+            <text x="425" y="35" fill="#e7edf6" text-anchor="middle" font-weight="700">Sonnet 5.5 xHigh × N</text>
+            <text x="425" y="55" fill="#93a3bb" text-anchor="middle">API · web · setup, en paralelo</text>
+            <line x1="212" y1="41" x2="296" y2="41" stroke="#5b8fe6" stroke-width="2" marker-end="url(#ar)"/>
+            <text x="254" y="32" fill="#93a3bb" text-anchor="middle" font-size="11">prompt</text>
+            <text x="254" y="58" fill="#93a3bb" text-anchor="middle" font-size="11">autocontenido</text>
+            <rect x="300" y="100" width="250" height="62" rx="10" fill="#15223a" stroke="#3fbf85"/>
+            <text x="425" y="125" fill="#e7edf6" text-anchor="middle" font-weight="700">Checkpoint</text>
+            <text x="425" y="145" fill="#93a3bb" text-anchor="middle">lint → tests y cobertura → deckard</text>
+            <line x1="425" y1="74" x2="425" y2="96" stroke="#5b8fe6" stroke-width="2" marker-end="url(#ar)"/>
+            <rect x="10" y="100" width="200" height="62" rx="10" fill="#15223a" stroke="#4cc3e8"/>
+            <text x="110" y="125" fill="#e7edf6" text-anchor="middle" font-weight="700">Opus verifica</text>
+            <text x="110" y="145" fill="#93a3bb" text-anchor="middle">E2E en navegador · ADL · SDD</text>
+            <line x1="298" y1="131" x2="214" y2="131" stroke="#5b8fe6" stroke-width="2" marker-end="url(#ar)"/>
+            <rect x="10" y="185" width="540" height="56" rx="10" fill="#1f1a0b" stroke="#f0b429"/>
+            <text x="280" y="210" fill="#f0b429" text-anchor="middle" font-weight="700">Resumen → apruebo → commit · push · CI · PR</text>
+            <text x="280" y="229" fill="#93a3bb" text-anchor="middle">pruebo en local y mezclo con squash</text>
+            <line x1="110" y1="164" x2="110" y2="181" stroke="#5b8fe6" stroke-width="2" marker-end="url(#ar)"/>
+          </g>
+        </svg>
+        <p class="small muted">Cada prompt de subagente lleva las tareas, las rutas, los contratos y las reglas: prohibido escribir en git, editar docs o tocar Docker ajeno. La regla de Docker la agregué tras un incidente real: un subagente borró la caché global de build de la máquina.</p>
+      </div>
+      <div class="grid" style="align-content:start; gap:12px;">
+        <div class="panel"><h3>devlog.py · del repo</h3><p class="small">Escucha 7 eventos de Claude Code y escribe <code>DEV-LOG.md</code>: prompt, herramientas, archivos, commits, subagentes, tokens y hit de caché. Oculta secretos y respeta <code>#nolog</code>.</p></div>
+        <div class="panel"><h3>deckard · Stop</h3><p class="small">No deja cerrar un turno con código sin revisar sobre el estado actual.</p></div>
+        <div class="panel"><h3>rtk · PreToolUse</h3><p class="small">Reescribe cada comando de shell para comprimir su salida.</p></div>
+        <div class="panel"><h3>graft · SessionStart</h3><p class="small">Inyecta el mapa del repo y sugiere por dónde empezar a leer.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Documentación -->
+  <section class="slide" aria-label="Archivos de documentación">
+    <div class="kicker">05 · Memoria del proyecto</div>
+    <h2>Archivos de documentación</h2>
+    <div class="grid" style="grid-template-columns: 1fr 1.25fr; flex:1;">
+      <svg viewBox="0 0 470 430" width="100%" role="img" aria-label="Cómo se alimentan los documentos entre sí">
+        <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5b8fe6"/></marker></defs>
+        <g font-family="system-ui, sans-serif" font-size="13.5" text-anchor="middle">
+          <rect x="125" y="6" width="220" height="44" rx="10" fill="#15223a" stroke="#34496f"/>
+          <text x="235" y="33" fill="#e7edf6">REQUIREMENTS · prompt inicial</text>
+          <rect x="155" y="82" width="160" height="44" rx="10" fill="#15223a" stroke="#4cc3e8"/>
+          <text x="235" y="109" fill="#e7edf6" font-weight="700">CLAUDE.md</text>
+          <rect x="10" y="166" width="200" height="56" rx="10" fill="#15223a" stroke="#5b8fe6"/>
+          <text x="110" y="190" fill="#e7edf6" font-weight="700">specs/</text>
+          <text x="110" y="209" fill="#93a3bb" font-size="12">constitución + feature 001</text>
+          <rect x="260" y="166" width="200" height="56" rx="10" fill="#15223a" stroke="#5b8fe6"/>
+          <text x="360" y="190" fill="#e7edf6" font-weight="700">.design-logs/</text>
+          <text x="360" y="209" fill="#93a3bb" font-size="12">11 ADL</text>
+          <rect x="10" y="276" width="200" height="56" rx="10" fill="#15223a" stroke="#3fbf85"/>
+          <text x="110" y="300" fill="#e7edf6" font-weight="700">DECISIONS.md</text>
+          <text x="110" y="319" fill="#93a3bb" font-size="12">el porqué, en breve</text>
+          <rect x="260" y="276" width="200" height="56" rx="10" fill="#15223a" stroke="#3fbf85"/>
+          <text x="360" y="300" fill="#e7edf6" font-weight="700">AI-USAGE.md</text>
+          <text x="360" y="319" fill="#93a3bb" font-size="12">cómo se usó la IA</text>
+          <rect x="135" y="370" width="200" height="54" rx="10" fill="#1f1a0b" stroke="#f0b429"/>
+          <text x="235" y="393" fill="#f0b429" font-weight="700">DEV-LOG.md</text>
+          <text x="235" y="411" fill="#93a3bb" font-size="12">escrito por el hook</text>
+          <g stroke="#5b8fe6" stroke-width="2" fill="none">
+            <line x1="235" y1="52" x2="235" y2="78" marker-end="url(#ar2)"/>
+            <line x1="200" y1="128" x2="130" y2="162" marker-end="url(#ar2)"/>
+            <line x1="270" y1="128" x2="340" y2="162" marker-end="url(#ar2)"/>
+            <line x1="110" y1="224" x2="110" y2="272" marker-end="url(#ar2)"/>
+            <line x1="360" y1="224" x2="360" y2="272" marker-end="url(#ar2)"/>
+            <line x1="330" y1="224" x2="160" y2="272" marker-end="url(#ar2)"/>
+            <line x1="190" y1="368" x2="140" y2="336" marker-end="url(#ar2)"/>
+            <line x1="280" y1="368" x2="330" y2="336" marker-end="url(#ar2)"/>
+          </g>
+        </g>
+      </svg>
+      <div class="grid cols-2" style="align-content:start; gap:12px;">
+        <div class="tile"><b><i class="light blue"></i>specs/</b><span>Misión, tech-stack y roadmap; spec, plan, research, data-model, contrato REST, quickstart y tasks</span></div>
+        <div class="tile"><b><i class="light blue"></i>.design-logs/</b><span>Contexto, decisión, alternativas y notas para la IA; se extienden en vez de reescribirse</span></div>
+        <div class="tile"><b><i class="light ok"></i>DECISIONS.md</b><span>Modelo de datos, máquina de estados, opcionales, calidad, escala y deuda técnica</span></div>
+        <div class="tile"><b><i class="light ok"></i>AI-USAGE.md</b><span>Herramientas, contexto, qué se delegó, intervenciones y salidas rechazadas</span></div>
+        <div class="tile"><b><i class="light warn"></i>DEV-LOG.md</b><span>Cada interacción, sin fechas ni secretos, para auditar el proceso</span></div>
+        <div class="tile"><b><i class="light holo"></i>README · SCALABILITY</b><span>Arranque con Mermaid y las 3 estrategias con la elegida</span></div>
+        <p class="small muted" style="grid-column: 1 / -1; margin-top:4px;">Regla: DECISIONS y AI-USAGE resumen y enlazan. El detalle vive en specs y en los ADL, y la conversación que originó cada decisión, en DEV-LOG.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · Intervenciones -->
+  <section class="slide" aria-label="Intervenciones">
+    <div class="kicker">06 · Humano en el circuito</div>
+    <h2>Dónde intervine y qué preguntó el agente</h2>
+    <div class="grid" style="grid-template-columns: 1.35fr 1fr; flex:1;">
+      <div class="panel">
+        <h3>Intervenciones que cambiaron el rumbo</h3>
+        <div class="tl">
+          <div class="it"><span class="ph">Inicio</span><span>Rechacé el primer cuestionario y cambié Adjuntos por <b>Comentarios</b></span></div>
+          <div class="it"><span class="ph">Constitución</span><span>Fijé la cobertura <b>Pareto 80/20</b>: 80 % total y 90 % en el flujo crítico</span></div>
+          <div class="it"><span class="ph">Clarify</span><span>Pasé el SLA a <b>tiempo hábil</b> de lunes a viernes, en vez de horas corridas</span></div>
+          <div class="it"><span class="ph">Fase 3</span><span>Le recordé mantener SDD al día; pedí un <b>login real</b> que siempre responde OK y <b>usuarios precreados</b> con ayuda "?"</span></div>
+          <div class="it"><span class="ph">Fase 7</span><span>Pedí el <b>contador</b> de comentarios y la <b>respuesta citada</b>, y corregir los ids mayores que 2^63</span></div>
+          <div class="it"><span class="ph">Fase 8</span><span>Pedí <b>filtros y orden</b> por SLA y prioridad</span></div>
+          <div class="it"><span class="ph">Fase 9</span><span>Pedí los modos de arranque <b>Demo</b> y <b>Vacío</b></span></div>
+          <div class="it"><span class="ph">Fase 10</span><span>Pedí el detalle de la estrategia A y la elegí</span></div>
+        </div>
+      </div>
+      <div class="grid" style="align-content:start; gap:14px;">
+        <div class="panel accent">
+          <span class="chip tag"><i class="light warn"></i>Preguntas del agente</span>
+          <ul class="clean">
+            <li>Las 5 preguntas iniciales del prompt</li>
+            <li>Las 5 preguntas de Clarify</li>
+            <li>Renombrar <code>requirements.txt</code> a <code>REQUIREMENTS.md</code></li>
+            <li>Cómo contar el tiempo hábil del SLA</li>
+            <li>La estrategia de escalabilidad</li>
+            <li>Aprobación de commit y push al cerrar cada bloque</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Salidas que rechacé: 3</h3>
+          <ul class="clean small">
+            <li>El primer cuestionario</li>
+            <li>Ingreso eligiendo un usuario de una lista</li>
+            <li>Login que crea usuarios sin límite</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Features y setup -->
+  <section class="slide" aria-label="Features y setup inicial">
+    <div class="kicker">07 · Producto</div>
+    <h2>Features desarrolladas y setup inicial</h2>
+    <div class="grid" style="grid-template-columns: 1.2fr 1fr; flex:1;">
+      <div class="grid cols-2" style="align-content:start; gap:11px;">
+        <div class="tile"><b><i class="light holo"></i>Crear y seguir</b><span>Título, descripción, categoría y prioridad sugerida</span></div>
+        <div class="tile"><b><i class="light holo"></i>Cola del agente</b><span>Ordenada por urgencia; tomar es atómico, gana uno</span></div>
+        <div class="tile"><b><i class="light holo"></i>Seis estados</b><span>Abierto, En progreso, En espera, Resuelto, Cerrado y Cancelado, por rol</span></div>
+        <div class="tile"><b><i class="light holo"></i>Historial inmutable</b><span>Qué pasó, quién y cuándo; append-only</span></div>
+        <div class="tile"><b><i class="light ok"></i>SLA en tiempo hábil</b><span>Luces: en plazo, por vencer, vencido, en pausa, cumplido</span></div>
+        <div class="tile"><b><i class="light ok"></i>Comentarios</b><span>Contador, respuesta citada y retomar automático</span></div>
+        <div class="tile"><b><i class="light warn"></i>Prioridad ajustable</b><span>El agente la cambia y el vencimiento se recalcula</span></div>
+        <div class="tile"><b><i class="light warn"></i>Filtros y orden</b><span>Por prioridad y SLA, guardados en la URL</span></div>
+        <div class="tile" style="grid-column: 1 / -1;"><b><i class="light blue"></i>Ingreso simulado</b><span>7 usuarios precreados (4 solicitantes y 3 agentes), cualquier contraseña y ayuda "?"</span></div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+<div class="term"><span class="p">$</span> ./setup.sh
+<span class="h">Bip-bup.</span> Voy a configurar DroiDesk.
+Puerto de la web [8080]:
+Zona horaria [America/Santiago]:
+Jornada laboral (HH:MM-HH:MM) [09:00-18:00]:
+Modo de arranque:
+  1) Demo: usuarios y tickets de ejemplo
+  2) Vacío: solo los usuarios de demo
+Elige un modo [1]:
+<span class="d">… docker compose up -d --build --wait</span>
+DroiDesk está listo: <span class="h">http://localhost:8080</span>
+Modo: Demo (usuarios y tickets de ejemplo)</div>
+        <div class="grid cols-3" style="gap:10px;">
+          <div class="panel" style="padding:12px;"><div class="num">1119</div><span class="small muted">tests API · 99,9 %</span></div>
+          <div class="panel" style="padding:12px;"><div class="num">589</div><span class="small muted">tests web · 100 %</span></div>
+          <div class="panel" style="padding:12px;"><div class="num">~8<small>s</small></div><span class="small muted">setup desde cero, con imágenes base en caché</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · Escalabilidad -->
+  <section class="slide" aria-label="Plan de escalabilidad">
+    <div class="kicker">08 · Siguiente paso</div>
+    <h2>Plan de escalabilidad</h2>
+    <div class="row">
+      <span class="chip"><i class="light holo"></i>50.000 tickets al mes</span>
+      <span class="chip"><i class="light holo"></i>5 áreas de soporte</span>
+      <span class="chip"><i class="light ok"></i>&lt; 1 escritura por segundo</span>
+      <span class="muted small">El volumen es moderado: el cambio de fondo son las áreas.</span>
+    </div>
+    <div class="grid cols-3">
+      <div class="panel strat accent">
+        <span class="chip tag"><i class="light ok"></i>Elegida</span>
+        <div class="letter">A</div>
+        <h3>Monolito modular + PostgreSQL</h3>
+        <p class="small muted">La misma API con <code>area_id</code>, réplicas sin estado, SSO, paginación y un worker sobre la misma base.</p>
+        <div class="meter"><span>Esfuerzo</span><span class="bar"><i style="width:30%"></i></span><span>Costo</span><span class="bar"><i style="width:22%"></i></span><span>Aislamiento</span><span class="bar"><i style="width:55%"></i></span></div>
+      </div>
+      <div class="panel strat">
+        <div class="letter">B</div>
+        <h3>Celdas por área</h3>
+        <p class="small muted">Una instancia completa por área, con identidad, portal y reporting compartidos.</p>
+        <div class="meter"><span>Esfuerzo</span><span class="bar"><i style="width:60%"></i></span><span>Costo</span><span class="bar"><i style="width:95%"></i></span><span>Aislamiento</span><span class="bar"><i style="width:100%"></i></span></div>
+      </div>
+      <div class="panel strat">
+        <div class="letter">C</div>
+        <h3>Servicios con eventos</h3>
+        <p class="small muted">Tickets, SLA y notificaciones, y Reporting, unidos por un broker con outbox y CQRS.</p>
+        <div class="meter"><span>Esfuerzo</span><span class="bar"><i style="width:95%"></i></span><span>Costo</span><span class="bar"><i style="width:70%"></i></span><span>Aislamiento</span><span class="bar"><i style="width:65%"></i></span></div>
+      </div>
+    </div>
+    <div class="panel" style="padding:14px 18px;">
+      <h3 style="margin-bottom:10px;">El camino de A, paso a paso</h3>
+      <div class="steps">
+        <span class="chip">PostgreSQL y migraciones en el deploy</span>
+        <span class="chip">SSO con OIDC</span>
+        <span class="chip">Áreas y autorización por área</span>
+        <span class="chip">Paginación y filtros en la API</span>
+        <span class="chip">Transferir y reasignar</span>
+        <span class="chip">Worker: avisos y cierre</span>
+        <span class="chip">Feriados por área</span>
+        <span class="chip">Métricas en la réplica</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · Cierre -->
+  <section class="slide" aria-label="Cierre">
+    <div class="kicker">09 · Resumen</div>
+    <h2>Lo que deja el proceso</h2>
+    <div class="grid cols-4">
+      <div class="panel"><div class="num">10</div><span class="small muted">fases, cada una con su rama, su PR y CI en verde</span></div>
+      <div class="panel"><div class="num">11</div><span class="small muted">ADL con contexto, alternativas y notas para la IA</span></div>
+      <div class="panel"><div class="num">63</div><span class="small muted">tareas trazadas a requisitos funcionales</span></div>
+      <div class="panel"><div class="num">0</div><span class="small muted">hallazgos ≥ 8 de deckard sin corregir al cerrar cada bloque</span></div>
+    </div>
+    <div class="grid cols-3" style="align-items:start;">
+      <div class="panel"><h3>Decisiones humanas</h3><p class="small">Alcance, reglas de negocio, UX y estrategia. Apruebo cada commit, y cada revisión vuelve a la spec.</p></div>
+      <div class="panel"><h3>La IA ejecuta con reglas</h3><p class="small">Las tres skills que creé (spec-driven-dev, design-logger y deckard) sostienen el método. Están versionadas con <code>CLAUDE.md</code>: quien clone el repo trabaja con el mismo contexto.</p></div>
+      <div class="panel"><h3>Todo queda trazado</h3><p class="small"><a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/DEV-LOG.md" target="_blank" rel="noopener">DEV-LOG</a> registra el proceso, y <a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/DECISIONS.md" target="_blank" rel="noopener">DECISIONS</a> y <a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/AI-USAGE.md" target="_blank" rel="noopener">AI-USAGE</a> lo resumen con enlaces al detalle.</p></div>
+    </div>
+    <div class="row" style="justify-content:space-between; margin-top:auto;">
+      <span class="muted small">Para empezar: <a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/setup.sh" target="_blank" rel="noopener"><code>./setup.sh</code></a> · <a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/README.md" target="_blank" rel="noopener">README</a> · <a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/DECISIONS.md" target="_blank" rel="noopener">DECISIONS</a> · <a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/AI-USAGE.md" target="_blank" rel="noopener">AI-USAGE</a> · <a class="doc-link" href="https://github.com/sebastianms/droidesk/blob/main/SCALABILITY.md" target="_blank" rel="noopener">SCALABILITY</a></span>
+      <span class="row" style="gap:12px;"><svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true"><use href="#droid"/></svg><b style="letter-spacing:0.12em;">BIP-BUP. GRACIAS.</b></span>
+    </div>
+  </section>
+
+  <div class="chrome">
+    <span class="brand"><svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><use href="#droid"/></svg>DroiDesk</span>
+    <span id="counter">1 / 10</span>
+    <span class="row" style="gap:16px;">
+      <span class="dots" id="dots" aria-label="Diapositivas"></span>
+      <span class="nav" aria-label="Navegación">
+        <button type="button" id="prev" aria-label="Diapositiva anterior">‹</button>
+        <button type="button" id="next" aria-label="Diapositiva siguiente">›</button>
+      </span>
+    </span>
+  </div>
+</main>
+</div>
+
+
+<script>
+  const stage = document.getElementById('stage')
+  const slides = [...stage.querySelectorAll('.slide')]
+  const dots = document.getElementById('dots')
+  const counter = document.getElementById('counter')
+  let current = 0
+
+  slides.forEach((slide, index) => {
+    const dot = document.createElement('button')
+    dot.type = 'button'
+    dot.setAttribute('aria-label', `Ir a la diapositiva ${index + 1}: ${slide.getAttribute('aria-label')}`)
+    dot.addEventListener('click', () => show(index))
+    dots.append(dot)
+  })
+
+  function show(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index))
+    slides.forEach((slide, i) => slide.classList.toggle('active', i === current))
+    ;[...dots.children].forEach((dot, i) => dot.setAttribute('aria-current', String(i === current)))
+    counter.textContent = `${current + 1} / ${slides.length}`
+    history.replaceState(null, '', `#${current + 1}`)
+  }
+
+  function fit() {
+    const scale = Math.min(window.innerWidth / 1320, window.innerHeight / 760)
+    stage.style.transform = `scale(${scale})`
+  }
+
+  document.getElementById('prev').addEventListener('click', () => show(current - 1))
+  document.getElementById('next').addEventListener('click', () => show(current + 1))
+  document.addEventListener('keydown', (event) => {
+    const forward = ['ArrowRight', 'PageDown', ' ', 'Enter']
+    const back = ['ArrowLeft', 'PageUp', 'Backspace']
+    if (forward.includes(event.key)) { event.preventDefault(); show(current + 1) }
+    if (back.includes(event.key)) { event.preventDefault(); show(current - 1) }
+    if (event.key === 'Home') show(0)
+    if (event.key === 'End') show(slides.length - 1)
+  })
+  let touchX = null
+  document.addEventListener('touchstart', (event) => { touchX = event.touches[0].clientX }, { passive: true })
+  document.addEventListener('touchend', (event) => {
+    if (touchX === null) return
+    const delta = event.changedTouches[0].clientX - touchX
+    if (Math.abs(delta) > 40) show(current + (delta < 0 ? 1 : -1))
+    touchX = null
+  })
+  window.addEventListener('resize', fit)
+
+  fit()
+  show(Number.parseInt(location.hash.slice(1), 10) - 1 || 0)
+</script>
+</body>
+</html>

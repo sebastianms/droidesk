@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from pydantic import ValidationError
 
-from droidesk_api.core.config import DatabaseSettings, Settings, get_settings
+from droidesk_api.core.config import AppMode, DatabaseSettings, Settings, get_settings
 from droidesk_api.sla.calendar import BusinessHours
 
 SECRET = "s" * 32
@@ -27,8 +27,8 @@ class TestDefaults:
     def test_database_lives_in_the_docker_volume(self) -> None:
         assert Settings().database_url == "sqlite:////data/droidesk.db"
 
-    def test_demo_data_is_on(self) -> None:
-        assert Settings().seed_demo_data is True
+    def test_mode_is_demo(self) -> None:
+        assert Settings().mode is AppMode.DEMO
 
     def test_timezone_is_santiago(self) -> None:
         assert Settings().timezone == ZoneInfo("America/Santiago")
@@ -47,9 +47,9 @@ class TestEnvironment:
         monkeypatch.setenv("DROIDESK_DATABASE_URL", "sqlite:///other.db")
         assert Settings().database_url == "sqlite:///other.db"
 
-    def test_reads_the_demo_data_switch(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("DROIDESK_SEED_DEMO_DATA", "false")
-        assert Settings().seed_demo_data is False
+    def test_reads_the_mode(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("DROIDESK_MODE", "empty")
+        assert Settings().mode is AppMode.EMPTY
 
     def test_reads_the_timezone(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("DROIDESK_TIMEZONE", "Europe/Madrid")
@@ -118,6 +118,14 @@ class TestBusinessHours:
         monkeypatch.setenv("DROIDESK_BUSINESS_HOURS", raw)
         with pytest.raises(ValidationError, match="business_hours"):
             Settings()
+
+
+@pytest.mark.usefixtures("secret_in_environment")
+@pytest.mark.parametrize("raw", ["raro", "vacio", "true", ""])
+def test_rejects_an_unknown_mode(monkeypatch: pytest.MonkeyPatch, raw: str) -> None:
+    monkeypatch.setenv("DROIDESK_MODE", raw)
+    with pytest.raises(ValidationError, match="mode"):
+        Settings()
 
 
 @pytest.mark.usefixtures("secret_in_environment")

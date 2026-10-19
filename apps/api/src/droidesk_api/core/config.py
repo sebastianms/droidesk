@@ -1,5 +1,6 @@
 import re
 from datetime import time
+from enum import StrEnum
 from functools import lru_cache
 from typing import Annotated
 from zoneinfo import ZoneInfo
@@ -12,6 +13,13 @@ from droidesk_api.sla.calendar import BusinessHours
 
 MIN_JWT_SECRET_BYTES = 32
 BUSINESS_HOURS_PATTERN = re.compile(r"(\d{2}:\d{2})-(\d{2}:\d{2})")
+
+
+class AppMode(StrEnum):
+    """Cambiar de modo no borra datos: los tickets de ejemplo (demo) se cargan solo mientras no exista ningún ticket."""
+
+    DEMO = "demo"
+    EMPTY = "empty"
 
 
 def parse_business_hours(raw: object) -> object:
@@ -38,7 +46,7 @@ class DatabaseSettings(BaseSettings):
 
 class Settings(DatabaseSettings):
     jwt_secret: SecretStr
-    seed_demo_data: bool = True
+    mode: AppMode = AppMode.DEMO
     timezone: ZoneInfo = ZoneInfo("America/Santiago")
     business_hours: Annotated[
         BusinessHours, NoDecode, BeforeValidator(parse_business_hours)

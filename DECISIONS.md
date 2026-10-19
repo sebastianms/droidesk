@@ -13,6 +13,7 @@ Decisiones de producto y arquitectura del MVP, en versión breve. El detalle té
 | Ingreso | Simulado: un login de usuarios precreados por perfil que acepta cualquier contraseña, con un ícono "?" que lista los usuarios de demo; la API emite un token firmado y el rol se lee de la base de datos | [ADL-005](.design-logs/ADL-005-simulated-auth-signed-token.md) |
 | Despliegue | Docker Compose, nginx como proxy de mismo origen y `./setup.sh` como único comando | [ADL-006](.design-logs/ADL-006-docker-compose-same-origin.md) |
 | SLA en tiempo hábil | Calendario propio de funciones puras: el vencimiento se guarda para ordenar la cola y el estado se deriva al leer | [ADL-009](.design-logs/ADL-009-sla-business-time.md) |
+| Escalamiento | Monolito modular sobre PostgreSQL, con áreas, SSO, paginación y un worker, elegido entre tres estrategias ([SCALABILITY.md](SCALABILITY.md)) | [ADL-011](.design-logs/ADL-011-scale-modular-monolith-postgres.md) |
 | Smoke end-to-end | Playwright Test en un módulo `e2e/` propio: el recorrido principal con dos perfiles contra el stack Docker, también en CI | [ADL-010](.design-logs/ADL-010-playwright-e2e-smoke.md) |
 
 La visión del sistema completo está en [`specs/tech-stack.md`](specs/tech-stack.md).
@@ -137,7 +138,21 @@ La cobertura supera la meta porque los tests se escribieron junto con cada tarea
 
 ## Escalar a 50.000 tickets al mes y 5 áreas
 
-Se define en la Fase 10 del [roadmap](specs/roadmap.md). `SCALABILITY.md` va a comparar tres estrategias, todas con PostgreSQL, con sus pros, contras, riesgos y mitigaciones. Esta sección se completa con la estrategia que elija el usuario: qué se rompe, qué se rediseña y qué se conserva.
+La carga es moderada: menos de una escritura por segundo en promedio, que cabe con holgura en una instancia de PostgreSQL. Lo que cambia de fondo son las **áreas**: cada una tiene su cola, sus agentes, sus categorías, sus plazos y su calendario, y los tickets tienen que poder pasar de un área a otra. [SCALABILITY.md](SCALABILITY.md) compara tres estrategias. El usuario eligió la **A · Monolito modular sobre PostgreSQL** ([ADL-011](.design-logs/ADL-011-scale-modular-monolith-postgres.md)).
+
+| Se rompe o se rediseña | Cómo |
+|---|---|
+| SQLite y migraciones al iniciar la API | PostgreSQL administrado con réplica de lectura; las migraciones pasan a ser un paso del despliegue y la API corre con 2 o más réplicas |
+| Ingreso simulado | SSO con OIDC; el perfil y las áreas vienen de los grupos del proveedor de identidad |
+| Una cola, un SLA y un calendario globales | Entidad `Area`, con categorías, políticas de SLA, feriados y agentes propios, y autorización por rol y por área, con RLS como segunda barrera |
+| Listados completos, filtrados en la web | Paginación por cursor, con los filtros y el orden como parámetros de la API |
+| Sin reasignación | Transferir entre áreas y reasignar dentro del área, como actualizaciones condicionales con evento |
+| Nada corre en segundo plano | Worker para avisos de SLA, notificaciones y cierre automático, con la cola de trabajos en PostgreSQL |
+| Sin métricas | Cumplimiento del SLA por área y por agente, sobre la réplica de lectura |
+
+**Se conserva**: los seis estados, el calendario hábil y el cálculo del SLA como funciones puras; las transiciones condicionales sin locks; el historial append-only; el contrato OpenAPI, que crece en forma aditiva; las dos apps independientes, y los tests con sus gates.
+
+**Por qué A**: resuelve las áreas con el menor cambio y el menor costo, y transferir un ticket sigue siendo una transacción local. Además no cierra caminos: un área exigente se puede sacar a una celda, y Reporting puede ser el primer servicio con eventos.
 
 ## Deuda técnica asumida
 

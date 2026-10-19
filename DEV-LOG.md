@@ -6515,3 +6515,200 @@ Reviewing seed.py and setup.sh
 ### #43 · 🧑 Usuario
 > Si, aprobado
 
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 2m 26s
+- **Herramientas:** Bash ×6
+- **Git:** `ac5171c` docs: agrega README, ADL-010, la estrategia de calidad final y actualiza SDD, DECISIONS y AI-USAGE · PR https://github.com/sebastianms/droidesk/pull/9
+- **Tokens:** entrada 14 · cache leída 1.8M · cache escrita 4.7k · salida 4.3k · hit 100%
+
+<details><summary>Respuesta</summary>
+
+Abrí el PR #9 de la Fase 9: https://github.com/sebastianms/droidesk/pull/9
+
+- Están los 4 commits que aprobaste: la API con los modos Demo y Vacío, `setup.sh`, el smoke con Playwright y la documentación.
+- Antes de commitear marqué T058–T063 como hechas en `tasks.md` y la Fase 9 como `[DONE · PR #9]` en el roadmap.
+- El CI pasó en verde en `api` y en `e2e`, tanto por el push como por el PR. En GitHub, `./setup.sh --yes` levantó el stack y el smoke pasó. El workflow `web` no corrió porque esta fase no toca `apps/web`.
+
+Cuando lo mezcles, sigue la Fase 10 de escalabilidad: `SCALABILITY.md` con tres estrategias para 50.000 tickets al mes y 5 áreas, todas con PostgreSQL, cada una con pros, contras, riesgos y mitigaciones. Después viene la fase en que eliges una, y con esa elección completo la sección "qué romperías o rediseñarías" de DECISIONS.
+
+</details>
+
+### #44 · 🧑 Usuario
+> mezclado
+
+### #45 · 🧑 Usuario
+> Explicame mejor la propuesta 1
+
+#### 🤖 Claude · ⏱ 2s
+
+<details><summary>Respuesta</summary>
+
+Antes de que elijas, ¿qué quieres aclarar?
+
+Por si sirve de punto de partida, el borrador de `SCALABILITY.md` contiene:
+- qué implica la meta en números;
+- qué rompe el MVP y qué se conserva;
+- las tres estrategias, cada una con su diagrama y sus pros, contras, riesgos y mitigaciones;
+- una tabla comparativa y mi recomendación;
+- el destino de lo que la misión dejó diferido.
+
+Las estrategias son:
+
+- **A · Monolito modular sobre PostgreSQL** (mi recomendación): la misma API, con `area_id`, varias réplicas, SSO, paginación y un worker. Es el menor cambio y el menor costo.
+- **B · Celdas por área**: una instancia completa por área, con identidad, portal y reporting compartidos. Da aislamiento total, pero cuesta unas 5 veces la infraestructura.
+- **C · Servicios por contexto con eventos**: Tickets, SLA y notificaciones, y Reporting, unidos por un broker. Tiene el techo más alto, pero es lo más complejo para esta meta.
+
+Puedo profundizar en cualquiera, ajustar los supuestos (por ejemplo, cuántos agentes hay por área o si las áreas comparten solicitantes) o cambiar alguna estrategia antes de que decidas.
+
+</details>
+
+#### 🤖 Claude · continuación · `claude-opus-5-5` · esfuerzo high · ⏱ 12s
+- **Herramientas:** Bash ×1 · StructuredOutput ×1
+- **Subagentes:** `subagente`
+- **Tokens:** entrada 2 · cache leída 271.8k · cache escrita 1.5k · salida 471 · hit 99%
+
+<details><summary>Respuesta</summary>
+
+**A · Monolito modular sobre PostgreSQL** consiste en seguir con la misma API y la misma web. No se divide en servicios: se cambia la base, el área pasa a ser un concepto central y se agregan las piezas de operación que hoy faltan. Abajo va qué cambia en concreto.
+
+## 1. La idea en una frase
+
+DroiDesk ya es un monolito modular: `identity`, `tickets`, `sla` y `audit` son módulos con límites claros y el dominio está en funciones puras. Esta estrategia aprovecha esa estructura y le suma un módulo `areas`. Las áreas se separan **dentro** de la misma app, sin desplegar una app por área.
+
+## 2. Cómo queda la infraestructura
+
+```
+Navegador ──► Balanceador ──► web (nginx + SPA)
+                    │
+                    ├──► api réplica 1 ┐
+                    ├──► api réplica 2 ├──► PostgreSQL primario ──► réplica de lectura
+                    └──► api réplica N ┘          ▲                       ▲
+                                                  │                       │
+                                   worker (mismo código) ──┘     métricas y reportes
+```
+
+- **PostgreSQL administrado** en lugar de SQLite, con respaldos automáticos y una réplica de lectura. El código ya es portable: SQL estándar, enums como texto y fechas en UTC (ADL-003).
+- **La API sin estado y con 2 o más réplicas.** Ya lo es: el token JWT lleva la sesión y no hay nada en memoria. Si una réplica cae, el balanceador sigue con las otras.
+- **Un worker** que usa la misma imagen de la API con otro comando. Comparte los servicios y el dominio, así que no se duplica lógica.
+- **Las migraciones dejan de correr al arrancar la API** y pasan a ser un paso del despliegue (`alembic upgrade head` antes de liberar la versión nueva). Con varias réplicas, hoy competirían entre ellas.
+
+**Tamaño estimado**: 50.000 tickets al mes son menos de una escritura por segundo en promedio. Alcanza con un PostgreSQL chico o mediano (2 a 4 vCPU), 2 réplicas de API para tener alta disponibilidad, no por carga, y un worker.
+
+## 3. Qué cambia en el modelo de datos
+
+```
+Area (nueva)
+├── id, name, timezone, business_hours
+├── ── categories      (cada categoría pertenece a un área)
+├── ── sla_policies    (plazos por prioridad y por área)
+├── ── holidays        (nueva: feriados del área)
+└── ── agent_areas     (nueva: qué agentes atienden qué áreas; un agente puede estar en varias)
+
+Ticket
+└── + area_id          (se deduce de la categoría al crearlo)
+```
+
+- **Índice principal** de la cola: `(area_id, status, sla_due_at)`. La cola de un área se lee directo del índice, ya ordenada por urgencia.
+- **`ticket_events`** sigue siendo append-only. A 5 millones de filas al año, PostgreSQL no tiene problema con un índice por `(ticket_id, occurred_at)`. Si algún día pasa de decenas de millones, se particiona por mes sin tocar el código.
+- La migración desde el MVP es aditiva: se crea un área inicial, por ejemplo "TI", y se le asignan los tickets, las categorías y las políticas que ya existen.
+
+## 4. Qué cambia en el código
+
+| Módulo | Hoy | Con A |
+|---|---|---|
+| `identity` | Ingreso simulado y rol en la base | SSO con OIDC (Entra ID, Google, Keycloak). El perfil y las áreas vienen de los grupos del proveedor de identidad. El token y la autorización por rol se mantienen |
+| `identity/authorization.py` | Autoriza por rol | Autoriza por rol **y por área**: un agente solo ve y mueve tickets de sus áreas. Es la misma pieza, con una condición más, y queda en el gate del 90 % |
+| `tickets` | Cola global; listados completos | La cola filtra por las áreas del agente. Hay **paginación por cursor** (`?cursor=…&limit=50`), y los filtros y el orden que hoy aplica la web (FR-024a) pasan a ser parámetros de la API |
+| `tickets/lifecycle.py` | Seis estados y sus transiciones | No cambia. Se agregan dos acciones: **transferir** a otra área (vuelve a Abierto en la nueva cola, con evento) y **reasignar** a otro agente del área |
+| `sla/calendar.py` | Una jornada y una zona por variable de entorno | La misma función pura, pero recibe el calendario del área (jornada, zona y feriados) en vez de leerlo del entorno |
+| `areas` (nuevo) | — | Un CRUD mínimo de áreas, categorías, políticas y feriados para un perfil administrador |
+| Web | Filtra en el cliente | Usa los parámetros de la API; suma un selector de área para el agente y el administrador, y la pantalla de transferir |
+
+**Transferir entre áreas es una transacción local**: un `UPDATE` condicional (como el de tomar un ticket) más su evento en el historial, en la misma base. Este es uno de los puntos fuertes de A frente a las celdas.
+
+## 5. Qué hace el worker
+
+Toma sus trabajos de una tabla de PostgreSQL con `SELECT … FOR UPDATE SKIP LOCKED`, sin RabbitMQ ni Redis:
+
+1. **Aviso de vencimiento**: cuando un ticket pasa a "por vencer", avisa al agente asignado o a la cola del área.
+2. **Notificaciones** por correo o chat: comentario nuevo, ticket resuelto y pedido de información.
+3. **Cierre automático**: un ticket Resuelto sin respuesta en N días hábiles pasa a Cerrado, con un evento a nombre del sistema.
+
+Estos trabajos se encolan **en la misma transacción** que el cambio que los origina. Así no se pierde un aviso si la API cae justo después del commit, que es la misma idea del outbox, pero sin un broker.
+
+## 6. Métricas
+
+- "¿Cuántos hay abiertos, cuánto demoran y quién los tiene?" por área: el porcentaje de cumplimiento del SLA, el tiempo hasta tomar y hasta resolver, y la carga por agente.
+- Las consultas agregadas van **solo a la réplica de lectura**, o a vistas materializadas que se refrescan cada pocos minutos. Así un reporte pesado nunca enlentece la cola.
+
+## 7. Qué se conserva del MVP
+
+- La máquina de estados, el calendario hábil y el cálculo del SLA son funciones puras: se mueven sin cambios.
+- Las transiciones condicionales resuelven las carreras sin locks, y en PostgreSQL funcionan igual.
+- El contrato OpenAPI crece en forma aditiva (`area_id`, paginación y acciones nuevas), así que la web no se rompe.
+- Los tests y los gates (80 % y 90 %) siguen igual, y el smoke corre contra el stack con PostgreSQL.
+
+## 8. Dónde están sus límites
+
+- **Un solo despliegue para las 5 áreas**: un error en una versión afecta a todas. Se mitiga con el CI actual, el smoke y un despliegue gradual de réplicas.
+- **El aislamiento entre áreas es lógico**, no físico: depende de que el código filtre por `area_id`. Se mitiga con tests de autorización por endpoint y con Row Level Security de PostgreSQL como segunda barrera.
+- **Techo**: unas 10 veces la meta, unos 500.000 tickets al mes, antes de tener que particionar tablas en serio o separar servicios.
+
+Si algún día hace falta más, A no cierra caminos: un área con exigencias especiales se puede sacar a una celda (B), y Reporting o notificaciones se pueden separar como el primer servicio con eventos (C).
+
+## 9. Orden de implementación sugerido
+
+1. PostgreSQL y migraciones como paso de despliegue. Es la base de todo, y el MVP ya está preparado.
+2. SSO con OIDC. Elimina la mayor deuda de seguridad.
+3. Áreas: modelo, autorización y colas por área.
+4. Paginación, filtros y orden en la API.
+5. Transferencia y reasignación.
+6. Worker: avisos de SLA, notificaciones y cierre automático.
+7. Calendario por área, con feriados.
+8. Métricas por área en la réplica de lectura.
+
+Cada paso se puede entregar por separado, como las fases de este proyecto.
+
+¿Quieres que profundice en algo más (el SSO, la transferencia entre áreas, el worker o los costos), que compare A con alguna de las otras, o ya tienes una decisión?
+
+</details>
+
+<details><summary>Reporte del subagente</summary>
+
+muéstrame SCALABILITY.md
+
+</details>
+
+### #46 · 🧑 Usuario
+> voy por esa opcion
+
+#### 🤖 Claude · `claude-opus-5-5` · esfuerzo high · ⏱ 1m 17s
+- **Herramientas:** Bash ×2 · Write ×1
+- **Archivos modificados:** `.design-logs/ADL-011-scale-modular-monolith-postgres.md`
+- **Tokens:** entrada 6 · cache leída 836.4k · cache escrita 6.4k · salida 6.9k · hit 99%
+
+<details><summary>Respuesta</summary>
+
+Quedó registrada tu decisión: escalamos con la **A · Monolito modular sobre PostgreSQL**. Esta fase es solo de documentación, sin cambios de código, así que no hubo checkpoint de tests ni revisión de deckard.
+
+**Qué se escribió**
+- **`SCALABILITY.md`**:
+  - la estimación de la carga: unos 2.300 tickets por día hábil, 5 millones de eventos al año y menos de una escritura por segundo en promedio;
+  - qué rompe el MVP y qué se conserva;
+  - las tres estrategias, cada una con su diagrama Mermaid, pros, contras, riesgos y mitigaciones;
+  - la tabla comparativa y el destino de lo diferido en la misión (autenticación real, áreas, feriados y cierre automático);
+  - la sección de decisión, con los detalles de A que quedaron fijados al elegir: tamaño de partida, migración aditiva con un área inicial, transferencia y reasignación, y worker sin broker.
+- **ADL-011**: la decisión con su contexto, las alternativas descartadas (B y C) con sus razones, y el orden del plan.
+- **DECISIONS.md**: la sección "Escalar a 50.000 tickets al mes y 5 áreas" ya no está pendiente. Tiene una tabla con lo que se rompe o se rediseña y cómo, lo que se conserva y por qué A. También suma una fila en la tabla de arquitectura.
+- **AI-USAGE.md**: la fila de la Fase 10 y tu intervención, que pediste más detalle de A antes de decidir.
+- `README.md`, `mission.md` y el roadmap enlazan ahora a `SCALABILITY.md` y al ADL-011.
+
+**Commit propuesto**
+- `docs(scalability): agrega SCALABILITY.md con tres estrategias y registra la elección del monolito modular (ADL-011)`
+
+Al aprobar, marco la Fase 10 como `[DONE · PR #10]` en el roadmap, hago commit y push, espero el CI y abro el PR. Con esto se cierra el roadmap del proyecto. ¿Apruebas?
+
+</details>
+
+### #47 · 🧑 Usuario
+> si, aprobado
+

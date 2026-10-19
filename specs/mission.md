@@ -81,7 +81,7 @@ stateDiagram-v2
 | Capacidad | Destino |
 |---|---|
 | Adjuntos, notificaciones, reasignación, dashboard de métricas, búsqueda, categorización automática | Descartadas del alcance opcional ([criterio](../DECISIONS.md#alcance-opcional)). Los filtros por prioridad y estado del SLA se sumaron como complemento del SLA (FR-024a) |
-| Autenticación real, varias áreas de soporte, feriados en el calendario del SLA, cierre automático de tickets resueltos | Plan de escalabilidad ([roadmap](roadmap.md), fase 10) |
+| Autenticación real, varias áreas de soporte, feriados en el calendario del SLA, cierre automático de tickets resueltos | Plan de escalabilidad: estrategia A, monolito modular sobre PostgreSQL ([SCALABILITY.md](../SCALABILITY.md#6-destino-de-lo-diferido-en-la-misión), [ADL-011](../.design-logs/ADL-011-scale-modular-monolith-postgres.md)) |
 
 ## Success Metrics
 

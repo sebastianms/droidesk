@@ -15,6 +15,10 @@ dist/
 coverage/
 *.tsbuildinfo
 
+# Playwright (e2e)
+playwright-report/
+test-results/
+
 # Variables de entorno y secretos
 .env
 .env.*

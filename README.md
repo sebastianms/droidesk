@@ -159,6 +159,7 @@ El flujo crítico es el ciclo de vida del ticket, con sus reglas de SLA y la aut
 | Documento | Contenido |
 |---|---|
 | [DECISIONS.md](DECISIONS.md) | Modelo de datos, máquina de estados, alcance opcional, estrategia de calidad y deuda técnica |
+| [SCALABILITY.md](SCALABILITY.md) | Tres estrategias para 50.000 tickets al mes y 5 áreas, con PostgreSQL, y la elegida |
 | [AI-USAGE.md](AI-USAGE.md) | Herramientas de IA, estructura del contexto, qué se delegó, dónde intervino el humano y qué se rechazó |
 | [DEV-LOG.md](DEV-LOG.md) | Registro de cada interacción con el agente, escrito por un hook |
 | [`specs/`](specs/) | Misión, stack, roadmap, y spec, plan, tareas y contrato de la feature 001 |

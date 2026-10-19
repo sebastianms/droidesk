@@ -52,8 +52,8 @@ Las fases 4 a 8 son las user stories de la feature `001-ticketing-mvp`; sus IDs 
 - [x] Smoke test end-to-end del recorrido principal.
 - [x] Versión final de `DECISIONS.md`, `AI-USAGE.md` y de la estrategia de calidad.
 
-## Phase 10: Scalability — `phase/10-scalability`
+## Phase 10: Scalability — `phase/10-scalability` [DONE · PR #10]
 
-- [ ] `SCALABILITY.md`: tres estrategias para 50.000 tickets al mes y 5 áreas de soporte, con pros, contras, riesgos y mitigaciones. Todas contemplan PostgreSQL.
-- [ ] Fase de decisión con el usuario. La estrategia elegida alimenta la sección "qué romperías o rediseñarías" de `DECISIONS.md`.
-- [ ] Destino de lo diferido en la misión: autenticación real, varias áreas, feriados en el calendario del SLA y cierre automático.
+- [x] `SCALABILITY.md`: tres estrategias para 50.000 tickets al mes y 5 áreas de soporte, con pros, contras, riesgos y mitigaciones. Todas contemplan PostgreSQL.
+- [x] Fase de decisión con el usuario. La estrategia elegida alimenta la sección "qué romperías o rediseñarías" de `DECISIONS.md`.
+- [x] Destino de lo diferido en la misión: autenticación real, varias áreas, feriados en el calendario del SLA y cierre automático.
